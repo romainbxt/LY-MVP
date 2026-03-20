@@ -3,7 +3,7 @@
 
 {% block navbar %}
 <nav class="navbar">
-    <span class="logo">LY</span>
+    <a href="{{ url_for('index') }}" class="logo" style="text-decoration:none; color:white">LY</a>
     <div>
         <span>{{ current_user.shop_name }}</span>
         <a href="{{ url_for('scan') }}">Scan</a>

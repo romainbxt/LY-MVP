@@ -11,6 +11,12 @@
     <link rel="stylesheet" crossorigin href="/static/landing/assets/index-DZf8IRJO.css">
   </head>
   <body>
+    <!-- Quick access bar for merchants -->
+    <div id="merchant-bar" style="position:fixed; top:0; right:0; z-index:9999; padding:16px 24px; display:flex; gap:12px;">
+      <a href="/login" style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; border:1px solid rgba(255,255,255,0.2); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Log in</a>
+      <a href="/register" style="background:#00D2D3; color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; transition:background 0.2s;" onmouseover="this.style.background='#00bfbf'" onmouseout="this.style.background='#00D2D3'">Sign up</a>
+      <a href="/simulate" style="background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; border:1px solid rgba(255,255,255,0.15); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Try demo</a>
+    </div>
     <div id="root"></div>
   </body>
 </html>

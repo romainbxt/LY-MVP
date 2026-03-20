@@ -110,8 +110,6 @@ def server_error(e):
 
 @app.route('/')
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
     return render_template('landing_react.html')
 
 @app.route('/api/waitlist', methods=['POST'])
