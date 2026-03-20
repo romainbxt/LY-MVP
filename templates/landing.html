@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LY - Smart loyalty for independent businesses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* ─── Landing Page ─── */
+        .hero {
+            background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+        }
+        .hero .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        .hero .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-white {
+            background: white;
+            color: #6C5CE7;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .btn-white:hover { transform: translateY(-2px); }
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+            background: transparent;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+        /* ─── Sections ─── */
+        .section {
+            padding: 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .section .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 48px;
+            font-size: 1.05rem;
+        }
+
+        /* ─── Problem ─── */
+        .problem-section { background: #F8F9FA; }
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .problem-card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            border: 1px solid var(--border);
+        }
+        .problem-card .icon { font-size: 2rem; margin-bottom: 12px; }
+        .problem-card h3 { margin-bottom: 8px; }
+        .problem-card p { color: var(--text-light); font-size: 0.95rem; line-height: 1.6; }
+
+        /* ─── How it works ─── */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+        }
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+        .step .number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .step h3 { margin-bottom: 8px; }
+        .step p { color: var(--text-light); font-size: 0.9rem; line-height: 1.5; }
+
+        /* ─── Features ─── */
+        .features-section { background: #F8F9FA; }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .feature-item {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            border: 1px solid var(--border);
+        }
+        .feature-item h3 { color: var(--primary); margin-bottom: 8px; }
+        .feature-item p { color: var(--text-light); font-size: 0.95rem; line-height: 1.6; }
+
+        /* ─── Story ─── */
+        .story {
+            background: linear-gradient(135deg, #2D3436 0%, #636E72 100%);
+            color: white;
+            padding: 60px 20px;
+        }
+        .story blockquote {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            font-style: italic;
+            text-align: center;
+            opacity: 0.95;
+        }
+        .story .author {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        /* ─── CTA ─── */
+        .cta-section {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+        }
+        .cta-section h2 { margin-bottom: 12px; }
+        .cta-section p { color: var(--text-light); margin-bottom: 32px; }
+
+        /* ─── Footer ─── */
+        .footer {
+            background: #2D3436;
+            color: #B2BEC3;
+            padding: 40px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .footer a { color: #DFE6E9; }
+
+        /* ─── Landing Nav ─── */
+        .landing-nav {
+            background: transparent;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .landing-nav .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 3px;
+        }
+        .landing-nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav -->
+    <nav class="landing-nav">
+        <span class="logo">LY</span>
+        <div>
+            <a href="#how-it-works">How it works</a>
+            <a href="#features">Features</a>
+            <a href="{{ url_for('login') }}">Log in</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <h1>LY</h1>
+        <p class="tagline">
+            Your customers are leaving. You just don't see it yet.<br>
+            LY gives independent businesses the eyes to spot it and the tools to act.
+        </p>
+        <div class="cta-buttons">
+            <a href="{{ url_for('register') }}" class="btn-white">Get started free</a>
+            <a href="#how-it-works" class="btn-outline">See how it works</a>
+        </div>
+    </section>
+
+    <!-- Problem -->
+    <section class="problem-section">
+        <div class="section">
+            <h2>The silent revenue killer</h2>
+            <p class="subtitle">
+                Acquiring a new customer costs 5-7x more than keeping an existing one.
+                Yet most independent businesses have no idea when regulars stop coming.
+            </p>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="icon">&#128566;</div>
+                    <h3>Invisible churn</h3>
+                    <p>Your regular Marco hasn't been here in 12 days. By the time you notice, he's already someone else's regular.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">&#128176;</div>
+                    <h3>Enterprise tools, enterprise prices</h3>
+                    <p>CRMs like HubSpot and Salesforce cost thousands and require a marketing team. You're the barista, the accountant, and the manager.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">&#127915;</div>
+                    <h3>Stamp cards don't work</h3>
+                    <p>"Buy 10, get 1 free" treats every customer the same. No intelligence. No personalization. No insight into who's leaving.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section" id="how-it-works">
+        <h2>How LY works</h2>
+        <p class="subtitle">Set up in 2 minutes. No app download for your customers.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="number">1</div>
+                <h3>Display your QR code</h3>
+                <p>Print the QR code LY generates for you and put it at your counter.</p>
+            </div>
+            <div class="step">
+                <div class="number">2</div>
+                <h3>Customers sign up</h3>
+                <p>They scan the QR code, enter their first name and phone number, and get their personal loyalty QR code.</p>
+            </div>
+            <div class="step">
+                <div class="number">3</div>
+                <h3>Scan on every visit</h3>
+                <p>Your customer shows their QR code, you scan it. That's it. Every visit is tracked automatically.</p>
+            </div>
+            <div class="step">
+                <div class="number">4</div>
+                <h3>Get smart alerts</h3>
+                <p>LY watches the patterns you can't see and tells you when a regular is slipping away, before it's too late.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section" id="features">
+        <div class="section">
+            <h2>Built for businesses like yours</h2>
+            <p class="subtitle">No marketing team needed. No complex setup. Just results.</p>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h3>Churn detection</h3>
+                    <p>Our algorithm identifies customers whose visit frequency is dropping. You get an alert before they're gone for good.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Zero friction for customers</h3>
+                    <p>No app to download. No account to create. Just a QR code on their phone browser. Takes 15 seconds.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Simple dashboard</h3>
+                    <p>See all your customers, their visit history, and who's at risk. One screen. No complexity.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Works with any POS</h3>
+                    <p>LY is independent from your payment system. Whether you use SumUp, Zettle, Square, or cash, it just works.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>GDPR compliant</h3>
+                    <p>Built in Europe, for Europe. Customer data stays yours. No third-party sharing. Full data control.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Affordable</h3>
+                    <p>Designed for independent businesses, not enterprise budgets. Smart retention shouldn't cost a fortune.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story -->
+    <section class="story">
+        <blockquote>
+            "Monday morning. 7:15. Francesca opens her coffee shop in Kreuzberg.
+            Marco should be here by now. Double espresso, no sugar. Every Monday for three years.
+            But Marco didn't come last Monday either. Or the one before.
+            She remembers his birthday. She remembers his dog's name.
+            But she had no way of knowing he was leaving."
+        </blockquote>
+        <p class="author">The story behind LY</p>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to keep your regulars?</h2>
+        <p>Set up your smart loyalty program in under 2 minutes.</p>
+        <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding:16px 40px; font-size:1.1rem">
+            Get started free
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>LY &mdash; Smart loyalty for independent businesses</p>
+        <p style="margin-top:8px">
+            <a href="{{ url_for('login') }}">Log in</a> &middot;
+            <a href="{{ url_for('register') }}">Sign up</a>
+        </p>
+        <p style="margin-top:16px; opacity:0.6">&copy; 2026 LY. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

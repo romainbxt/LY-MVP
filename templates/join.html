@@ -1,30 +1,30 @@
 {% extends "base.html" %}
-{% block title %}Rejoindre {{ shop_name }}{% endblock %}
+{% block title %}Join {{ shop_name }}{% endblock %}
 
 {% block content %}
 <div class="mobile-container" style="margin-top:40px">
     <div class="logo-header" style="text-align:center; margin-bottom:30px">
         <h1 style="color: var(--primary); font-size:2rem">LY</h1>
-        <p style="font-size:1.1rem; margin-top:8px">Bienvenue chez <strong>{{ shop_name }}</strong></p>
+        <p style="font-size:1.1rem; margin-top:8px">Welcome to <strong>{{ shop_name }}</strong></p>
     </div>
 
     <div class="card">
-        <h2>Créer ma carte de fidélité</h2>
+        <h2>Create my loyalty card</h2>
         <form method="POST">
             <div class="form-group">
-                <label>Prénom</label>
+                <label>First name</label>
                 <input type="text" name="first_name" required placeholder="Marco">
             </div>
             <div class="form-group">
-                <label>Numéro de téléphone</label>
+                <label>Phone number</label>
                 <input type="tel" name="phone" required placeholder="+49 170 1234567">
             </div>
-            <button type="submit" class="btn btn-primary btn-full">Obtenir ma carte</button>
+            <button type="submit" class="btn btn-primary btn-full">Get my card</button>
         </form>
     </div>
 
     <p style="text-align:center; font-size:0.8rem; color:var(--text-light); margin-top:16px">
-        En vous inscrivant, vous acceptez de recevoir des communications de {{ shop_name }}.
+        By signing up, you agree to receive communications from {{ shop_name }}.
     </p>
 </div>
 {% endblock %}

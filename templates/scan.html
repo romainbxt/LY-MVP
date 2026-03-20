@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}LY - Scanner{% endblock %}
+{% block title %}LY - Scan{% endblock %}
 
 {% block navbar %}
 <nav class="navbar">
     <span class="logo">LY</span>
     <div>
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('logout') }}">Déconnexion</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
     </div>
 </nav>
 {% endblock %}
@@ -19,21 +19,21 @@
         {% if result.success %}
         <div class="scan-result success">
             <div class="icon">&#10003;</div>
-            <h2 style="margin:10px 0">Bonjour {{ result.name }} !</h2>
-            <p style="font-size:1.2rem">Visite n°<strong>{{ result.visit_count }}</strong> enregistrée</p>
+            <h2 style="margin:10px 0">Welcome back, {{ result.name }}!</h2>
+            <p style="font-size:1.2rem">Visit #<strong>{{ result.visit_count }}</strong> recorded</p>
         </div>
         {% else %}
         <div class="scan-result fail">
             <div class="icon">&#10007;</div>
-            <h2 style="margin:10px 0">Client non reconnu</h2>
-            <p>Ce QR code n'est pas valide pour votre commerce.</p>
+            <h2 style="margin:10px 0">Customer not found</h2>
+            <p>This QR code is not valid for your shop.</p>
         </div>
         {% endif %}
     </div>
     {% endif %}
 
     <div class="card">
-        <h2>Scanner un client</h2>
+        <h2>Scan a customer</h2>
 
         <div id="scanner-container" style="margin-bottom:20px">
             <video id="preview" playsinline></video>
@@ -41,10 +41,10 @@
 
         <form method="POST" id="scan-form">
             <div class="form-group">
-                <label>Token QR (automatique via caméra ou saisie manuelle)</label>
-                <input type="text" name="qr_token" id="qr-input" placeholder="Token du QR code client" required>
+                <label>QR token (auto-filled by camera or enter manually)</label>
+                <input type="text" name="qr_token" id="qr-input" placeholder="Customer QR token" required>
             </div>
-            <button type="submit" class="btn btn-success btn-full">Valider la visite</button>
+            <button type="submit" class="btn btn-success btn-full">Record visit</button>
         </form>
     </div>
 </div>
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             () => {}
         ).catch(() => {
             document.getElementById('scanner-container').innerHTML =
-                '<p style="text-align:center;color:var(--text-light)">Caméra non disponible. Saisissez le token manuellement.</p>';
+                '<p style="text-align:center;color:var(--text-light)">Camera not available. Enter the token manually.</p>';
         });
     }
 });

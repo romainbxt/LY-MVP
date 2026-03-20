@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}LY - Error {{ code }}{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="logo-header">
+        <h1>LY</h1>
+    </div>
+    <div class="card" style="text-align:center; padding:40px">
+        <h2 style="font-size:3rem; color:var(--text-light)">{{ code }}</h2>
+        <p style="margin:16px 0; color:var(--text-light)">{{ message }}</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Back to home</a>
+    </div>
+</div>
+{% endblock %}
