@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LY — Smart loyalty for independent businesses</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C5CE7'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='18'%3ELY%3C/text%3E%3C/svg%3E">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; color:#2D3436; line-height:1.6; }
-        h1,h2,h3 { font-family:'Space Grotesk',sans-serif; }
+        html { overflow-x:hidden; scrollbar-width:none; }
+        html::-webkit-scrollbar { display:none; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif; color:#2D3436; line-height:1.6; overflow-x:hidden; }
+        h1,h2,h3 { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif; letter-spacing:-0.02em; }
 
         /* Nav */
         .nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:16px 32px; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s; }
         .nav.scrolled { background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border-bottom:1px solid #eee; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
-        .nav-logo { font-family:'Space Grotesk',sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:3px; color:white; text-decoration:none; }
+        .nav-logo { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:3px; color:white; text-decoration:none; }
         .nav.scrolled .nav-logo { color:#6C5CE7; }
         .nav-links { display:flex; gap:8px; align-items:center; }
         .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.85rem; font-weight:500; padding:8px 14px; border-radius:8px; transition:all 0.2s; }
@@ -51,7 +51,7 @@
         .mockup-dot { width:10px; height:10px; border-radius:50%; }
         .mockup-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
         .mockup-stat { background:rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center; }
-        .mockup-stat .val { font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:white; }
+        .mockup-stat .val { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.5rem; font-weight:700; color:white; }
         .mockup-stat .lbl { font-size:0.7rem; color:rgba(255,255,255,0.5); }
         .mockup-alert { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
         .mockup-alert .text { flex:1; }
@@ -63,7 +63,7 @@
         .proof { background:#F8F9FA; padding:48px 32px; border-bottom:1px solid #eee; }
         .proof-inner { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:32px; text-align:center; }
         @media(max-width:768px) { .proof-inner { grid-template-columns:1fr; gap:20px; } }
-        .proof-val { font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700; color:#6C5CE7; }
+        .proof-val { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; color:#6C5CE7; }
         .proof-lbl { color:#636E72; font-size:0.85rem; margin-top:2px; }
 
         /* Sections */
@@ -77,9 +77,8 @@
         @media(max-width:768px) { .features { grid-template-columns:1fr; } }
         .feature { background:white; border:1px solid #eee; border-radius:14px; padding:28px; transition:all 0.25s; }
         .feature:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.06); border-color:#6C5CE7; }
-        .feature-icon { width:44px; height:44px; border-radius:12px; background:#6C5CE710; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:14px; }
-        .feature:hover .feature-icon { background:#6C5CE7; }
-        .feature:hover .feature-icon span { filter:brightness(10); }
+        .feature-icon { width:44px; height:44px; border-radius:12px; background:#6C5CE710; display:flex; align-items:center; justify-content:center; color:#6C5CE7; margin-bottom:14px; transition:all 0.25s; }
+        .feature:hover .feature-icon { background:#6C5CE7; color:white; }
         .feature h3 { font-size:1.05rem; font-weight:600; margin-bottom:6px; }
         .feature p { color:#636E72; font-size:0.88rem; line-height:1.6; }
 
@@ -87,7 +86,7 @@
         .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
         @media(max-width:768px) { .steps { grid-template-columns:1fr 1fr; } }
         .step { text-align:center; padding:16px; }
-        .step-num { width:48px; height:48px; border-radius:14px; background:#6C5CE7; color:white; display:inline-flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:14px; box-shadow:0 4px 12px rgba(108,92,231,0.3); }
+        .step-num { width:48px; height:48px; border-radius:14px; background:#6C5CE7; color:white; display:inline-flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:14px; box-shadow:0 4px 12px rgba(108,92,231,0.3); }
         .step h3 { font-size:0.95rem; font-weight:600; margin-bottom:6px; }
         .step p { color:#636E72; font-size:0.82rem; }
 
@@ -158,7 +157,7 @@
                     <div class="mockup-stat"><div class="val" style="color:#00D2D3">38</div><div class="lbl">Today</div></div>
                 </div>
                 <div class="mockup-alert">
-                    <div style="font-size:1.2rem">&#128276;</div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     <div class="text">
                         <div class="title">Marco hasn't visited in 12 days</div>
                         <div class="sub">Usually visits every 3 days</div>
@@ -186,12 +185,12 @@
         <p>No marketing team needed. No complex setup. Just results.</p>
     </div>
     <div class="features">
-        <div class="feature fade-in"><div class="feature-icon"><span>&#128200;</span></div><h3>Churn detection</h3><p>Our algorithm spots customers whose visit frequency is dropping. You get an alert before they're gone for good.</p></div>
-        <div class="feature fade-in"><div class="feature-icon"><span>&#128242;</span></div><h3>Zero friction</h3><p>No app to download. Customers scan a QR code, enter their name, and they're in. Takes 15 seconds.</p></div>
-        <div class="feature fade-in"><div class="feature-icon"><span>&#128202;</span></div><h3>Simple dashboard</h3><p>See all your customers, visit history, and who's at risk. One screen. No complexity.</p></div>
-        <div class="feature fade-in"><div class="feature-icon"><span>&#9889;</span></div><h3>Works with any setup</h3><p>LY is independent from your POS. SumUp, Zettle, Square, or cash — it just works.</p></div>
-        <div class="feature fade-in"><div class="feature-icon"><span>&#128274;</span></div><h3>GDPR compliant</h3><p>Built in Europe, for Europe. Customer data stays yours. No third-party sharing.</p></div>
-        <div class="feature fade-in"><div class="feature-icon"><span>&#9201;</span></div><h3>Set up in 2 minutes</h3><p>Register, print your QR code, stick it at the counter. No training, no onboarding.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><h3>Churn detection</h3><p>Our algorithm spots customers whose visit frequency is dropping. You get an alert before they're gone for good.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="7" x2="7" y2="7.01"/><line x1="7" y1="12" x2="7" y2="12.01"/><line x1="12" y1="7" x2="12" y2="7.01"/><line x1="17" y1="7" x2="17" y2="7.01"/><line x1="12" y1="17" x2="12" y2="17.01"/><line x1="17" y1="12" x2="17" y2="12.01"/><line x1="17" y1="17" x2="17" y2="17.01"/></svg></div><h3>Zero friction</h3><p>No app to download. Customers scan a QR code, enter their name, and they're in. Takes 15 seconds.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><h3>Simple dashboard</h3><p>See all your customers, visit history, and who's at risk. One screen. No complexity.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><h3>Works with any setup</h3><p>LY is independent from your POS. SumUp, Zettle, Square, or cash — it just works.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>GDPR compliant</h3><p>Built in Europe, for Europe. Customer data stays yours. No third-party sharing.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>Set up in 2 minutes</h3><p>Register, print your QR code, stick it at the counter. No training, no onboarding.</p></div>
     </div>
 </section>
 
@@ -217,7 +216,7 @@
         </div>
         <div class="fade-in">
             <div style="display:inline-block; background:#6C5CE710; color:#6C5CE7; padding:4px 12px; border-radius:8px; font-size:0.8rem; font-weight:600; margin-bottom:16px">The Francesca Story</div>
-            <h2 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700; line-height:1.3; margin-bottom:16px">
+            <h2 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; line-height:1.3; margin-bottom:16px">
                 "I knew all my regulars by face. But I had no idea when they stopped coming."
             </h2>
             <p style="color:#636E72; font-size:1rem; line-height:1.7; margin-bottom:20px">
@@ -237,19 +236,19 @@
 <section style="padding:60px 32px; background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); color:white; text-align:center">
     <div style="max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:32px">
         <div class="fade-in">
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:800">78%</div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">78%</div>
             <div style="opacity:0.7; font-size:0.85rem">of restaurant guests never return after first visit</div>
         </div>
         <div class="fade-in">
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:800">&euro;375K</div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">&euro;375K</div>
             <div style="opacity:0.7; font-size:0.85rem">lost per restaurant per year to customer churn</div>
         </div>
         <div class="fade-in">
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:800">6.9x</div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">6.9x</div>
             <div style="opacity:0.7; font-size:0.85rem">more visits from customers who return a 2nd time</div>
         </div>
         <div class="fade-in">
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:800">2min</div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">2min</div>
             <div style="opacity:0.7; font-size:0.85rem">to set up LY and start retaining</div>
         </div>
     </div>
@@ -263,7 +262,7 @@
         </div>
         <div class="fade-in" style="order:1">
             <div style="display:inline-block; background:#00D2D320; color:#00A3A4; padding:4px 12px; border-radius:8px; font-size:0.8rem; font-weight:600; margin-bottom:16px">Built for real owners</div>
-            <h2 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700; line-height:1.3; margin-bottom:16px">
+            <h2 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; line-height:1.3; margin-bottom:16px">
                 You're the barista, the accountant, and the manager. LY is your retention team.
             </h2>
             <p style="color:#636E72; font-size:1rem; line-height:1.7; margin-bottom:24px">
@@ -276,17 +275,17 @@
                     <div style="font-size:0.78rem; color:#636E72">Know who's leaving before they're gone</div>
                 </div>
                 <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
-                    <div style="font-size:1.5rem; margin-bottom:4px">&#127874;</div>
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                     <div style="font-size:0.85rem; font-weight:600">Birthday wishes</div>
                     <div style="font-size:0.78rem; color:#636E72">Never miss a customer's birthday</div>
                 </div>
                 <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
-                    <div style="font-size:1.5rem; margin-bottom:4px">&#127942;</div>
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
                     <div style="font-size:0.85rem; font-weight:600">Loyalty tiers</div>
                     <div style="font-size:0.78rem; color:#636E72">Bronze to Platinum, automatically</div>
                 </div>
                 <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
-                    <div style="font-size:1.5rem; margin-bottom:4px">&#128172;</div>
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
                     <div style="font-size:0.85rem; font-weight:600">1-click WhatsApp</div>
                     <div style="font-size:0.78rem; color:#636E72">Reach any customer instantly</div>
                 </div>
