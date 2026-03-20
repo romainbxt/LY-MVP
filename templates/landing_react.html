@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; color:#2D3436; line-height:1.6; }
@@ -393,6 +394,7 @@ document.getElementById('waitlist-form').addEventListener('submit', async e => {
     } catch { alert('Could not connect. Please try again.'); }
 });
 </script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 
 </body>
 </html>

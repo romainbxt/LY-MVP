@@ -13,6 +13,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 import qrcode
+from google import genai
 
 from models import (
     init_db, create_merchant, get_merchant_by_email, get_merchant_by_id,
@@ -673,6 +674,82 @@ def promote():
     customers = get_customers_for_merchant(current_user.id)
     flash(f'Promotion "{title}" published! {len(customers or [])} customers can be reached.', 'success')
     return redirect(url_for('messages_page'))
+
+
+# ─── Chatbot API (Gemini Flash) ───
+
+CHATBOT_SYSTEM_PROMPTS = {
+    'visitor': """Tu es l'assistant de LY, une plateforme de fidélité pour commerces indépendants (cafés, restaurants, boutiques).
+Tu parles en français, de manière concise et sympathique.
+Voici ce que fait LY :
+- Les commerçants créent un compte gratuit et obtiennent un QR code unique pour leur commerce.
+- Les clients scannent le QR code à chaque visite pour cumuler des points.
+- Pas besoin d'app mobile : le client reçoit une carte de fidélité digitale accessible via navigateur.
+- Le commerçant a un dashboard avec : suivi des visites, détection de clients à risque (churn), alertes anniversaires, messagerie WhatsApp, système de récompenses par paliers (Bronze, Silver, Gold, Platinum).
+- 3 plans tarifaires : Starter (gratuit, 1 commerce, 50 clients), Growth (29€/mois, 3 commerces, illimité), Pro (79€/mois, illimité + API).
+- LY est basé à Berlin et cible les commerces indépendants en Europe.
+Aide le visiteur à comprendre la plateforme et encourage-le à s'inscrire. Ne réponds qu'aux questions liées à LY.""",
+
+    'merchant': """Tu es l'assistant de LY, une plateforme de fidélité. Tu parles à un commerçant connecté à son dashboard.
+Tu parles en français, de manière concise et pratique.
+Aide-le avec :
+- Dashboard : vue d'ensemble des clients, visites, clients à risque, anniversaires.
+- Scan : les clients présentent leur QR code, le commerçant scanne pour enregistrer une visite.
+- Récompenses : configurable dans Settings > Reward Rules (ex: "1 café offert toutes les 10 visites").
+- Paliers : Bronze (0-4 visites), Silver (5-14), Gold (15-29), Platinum (30+).
+- Churn : LY détecte automatiquement les clients qui ne reviennent pas selon leur fréquence habituelle.
+- Messages : envoi WhatsApp aux clients à risque, anniversaires, promotions.
+- Produits : gérables dans Settings.
+- QR Code : partageable depuis le dashboard, lien /join/<code> pour les nouveaux clients.
+- Employés : lien de scan employé (pas besoin de connexion).
+Ne réponds qu'aux questions liées à LY et à la gestion du commerce.""",
+
+    'customer': """Tu es l'assistant de LY, une plateforme de fidélité. Tu parles à un client qui a une carte de fidélité.
+Tu parles en français, de manière concise et sympathique.
+Aide-le avec :
+- Carte de fidélité : accessible via le lien reçu, contient un QR code à présenter au commerçant.
+- Visites : chaque scan = 1 visite enregistrée. Les visites cumulent vers des paliers.
+- Paliers : Bronze (0-4 visites), Silver (5-14), Gold (15-29), Platinum (30+). Chaque palier peut donner des récompenses.
+- Récompenses : définies par le commerçant (ex: café gratuit toutes les 10 visites).
+- Multi-commerce : le client peut avoir des cartes dans plusieurs commerces, retrouvables via son numéro de téléphone sur /my-shops.
+- Astuce : ajouter la carte en favori/bookmark sur le téléphone pour un accès rapide.
+Ne réponds qu'aux questions liées à LY et à la carte de fidélité."""
+}
+
+@app.route('/api/chat', methods=['POST'])
+@csrf.exempt
+@limiter.limit("30 per minute")
+def api_chat():
+    data = request.get_json(silent=True)
+    if not data or not data.get('message'):
+        return jsonify({'reply': "Je n'ai pas compris votre message."}), 400
+
+    user_message = data['message'][:500]  # limit input length
+    user_role = data.get('role', 'visitor')
+    chat_history = data.get('history', [])
+
+    system_prompt = CHATBOT_SYSTEM_PROMPTS.get(user_role, CHATBOT_SYSTEM_PROMPTS['visitor'])
+
+    # Build conversation contents for Gemini
+    contents = [system_prompt + "\n\n"]
+    for msg in chat_history[-10:]:
+        prefix = "Utilisateur: " if msg.get('role') == 'user' else "Assistant: "
+        contents.append(prefix + msg.get('content', '') + "\n")
+    contents.append("Utilisateur: " + user_message)
+
+    try:
+        api_key = os.environ.get('GEMINI_API_KEY', '')
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents="".join(contents),
+        )
+        reply = response.text.strip()
+    except Exception as e:
+        logger.error(f"Gemini API error: {e}")
+        reply = "Désolé, je ne suis pas disponible pour le moment. Réessayez dans un instant."
+
+    return jsonify({'reply': reply})
 
 
 if __name__ == '__main__':
