@@ -148,6 +148,22 @@ def init_db():
         ''')
 
     conn.commit()
+
+    # Migration: add columns that may not exist on older databases
+    migrations = [
+        "ALTER TABLE merchants ADD COLUMN address TEXT",
+        "ALTER TABLE merchants ADD COLUMN latitude REAL",
+        "ALTER TABLE merchants ADD COLUMN longitude REAL",
+        "ALTER TABLE merchants ADD COLUMN description TEXT",
+        "ALTER TABLE customers ADD COLUMN birthday TEXT",
+    ]
+    for sql in migrations:
+        try:
+            cur.execute(sql)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
     cur.close()
     conn.close()
 

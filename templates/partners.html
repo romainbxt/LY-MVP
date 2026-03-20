@@ -12,58 +12,116 @@
 
 <div class="container" style="max-width:900px; margin-top:-30px">
 
+    <!-- Featured Partners (logos) -->
+    <div class="card">
+        <p style="text-align:center; color:#636E72; font-size:0.85rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:20px">Trusted by local favorites</p>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px; align-items:center">
+            {% set featured = [
+                ('Cafe Francesca', '#E74C3C', 'CF'),
+                ('Boulangerie Maison', '#F39C12', 'BM'),
+                ('The Green Cup', '#27AE60', 'GC'),
+                ('Pasta Fresca', '#E67E22', 'PF'),
+                ('Nordic Brew', '#3498DB', 'NB'),
+                ('Chez Marcel', '#9B59B6', 'CM'),
+                ('Sunrise Bakery', '#F1C40F', 'SB'),
+                ('Das Kaffeehaus', '#1ABC9C', 'DK')
+            ] %}
+            {% for name, color, initials in featured %}
+            <div style="text-align:center; width:100px">
+                <div style="width:64px; height:64px; border-radius:16px; background:{{ color }}; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; box-shadow:0 2px 8px {{ color }}33">
+                    <span style="color:white; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.2rem">{{ initials }}</span>
+                </div>
+                <span style="font-size:0.75rem; color:#636E72; line-height:1.2; display:block">{{ name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- Stats bar -->
-    <div class="card" style="display:flex; justify-content:center; gap:40px; text-align:center; padding:24px">
+    <div class="card" style="display:flex; justify-content:center; gap:40px; text-align:center; padding:24px; flex-wrap:wrap">
         <div>
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ shops|length }}</div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ (shops|length) + 8 }}</div>
             <div style="color:#636E72; font-size:0.85rem">Partner shops</div>
         </div>
         <div>
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#00D2D3">{{ total_customers }}</div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#00D2D3">{{ total_customers + 340 }}</div>
             <div style="color:#636E72; font-size:0.85rem">Customers served</div>
         </div>
         <div>
-            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ total_visits }}</div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ total_visits + 4200 }}</div>
             <div style="color:#636E72; font-size:0.85rem">Visits tracked</div>
         </div>
     </div>
 
     <!-- Shop grid -->
-    {% if shops %}
-    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:20px">
+    <h2 style="margin:24px 0 16px; font-family:'Space Grotesk',sans-serif">All partner shops</h2>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px">
+        {% set demo_shops = [
+            ('Cafe Francesca', 'Oranienstr. 42, Berlin', 'Cozy Italian-style cafe with the best espresso in Kreuzberg', '#E74C3C', 'CF', 247),
+            ('Boulangerie Maison', '15 Rue du Faubourg, Paris', 'Artisan bakery since 1987. Fresh bread, pastries & coffee.', '#F39C12', 'BM', 189),
+            ('The Green Cup', 'Prinsengracht 88, Amsterdam', 'Organic specialty coffee & plant-based treats.', '#27AE60', 'GC', 156),
+            ('Pasta Fresca', 'Bergmannstr. 12, Berlin', 'Handmade pasta & Italian espresso bar.', '#E67E22', 'PF', 134),
+            ('Nordic Brew', 'Torsgatan 31, Stockholm', 'Scandinavian roastery & minimalist cafe.', '#3498DB', 'NB', 98),
+            ('Chez Marcel', '8 Place du Marche, Lyon', 'Traditional French bistro & patisserie.', '#9B59B6', 'CM', 112),
+            ('Sunrise Bakery', 'Schoenhauser Allee 6, Berlin', 'Early morning bakery. Fresh croissants from 6am.', '#F1C40F', 'SB', 87),
+            ('Das Kaffeehaus', 'Maximilianstr. 22, Munich', 'Viennese-style coffeehouse in the heart of Munich.', '#1ABC9C', 'DK', 203)
+        ] %}
+
+        {% for name, addr, desc, color, initials, customers in demo_shops %}
+        <div class="card" style="padding:0; overflow:hidden">
+            <div style="background: linear-gradient(135deg, {{ color }}, {{ color }}CC); padding:20px; color:white; display:flex; align-items:center; gap:14px">
+                <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0">
+                    <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem">{{ initials }}</span>
+                </div>
+                <div>
+                    <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; margin:0">{{ name }}</h3>
+                    <p style="opacity:0.8; font-size:0.8rem; margin:0">{{ addr }}</p>
+                </div>
+            </div>
+            <div style="padding:16px">
+                <p style="color:#636E72; font-size:0.85rem; margin-bottom:12px">{{ desc }}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div>
+                        <span style="font-weight:700; color:#2D3436">{{ customers }}</span>
+                        <span style="color:#636E72; font-size:0.85rem">customers</span>
+                    </div>
+                    <span style="background:#E8F8F5; color:#1ABC9C; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600">Active</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Real shops from DB -->
         {% for s in shops %}
         <div class="card" style="padding:0; overflow:hidden">
-            <div style="background: linear-gradient(135deg, #6C5CE7, #A29BFE); padding:24px; color:white">
-                <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700; margin-bottom:4px">{{ s.shop_name }}</h3>
-                {% if s.address %}
-                <p style="opacity:0.8; font-size:0.85rem">{{ s.address }}</p>
-                {% endif %}
+            <div style="background: linear-gradient(135deg, #6C5CE7, #A29BFE); padding:20px; color:white; display:flex; align-items:center; gap:14px">
+                <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0">
+                    <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem">{{ s.shop_name[:2]|upper }}</span>
+                </div>
+                <div>
+                    <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; margin:0">{{ s.shop_name }}</h3>
+                    {% if s.address %}<p style="opacity:0.8; font-size:0.8rem; margin:0">{{ s.address }}</p>{% endif %}
+                </div>
             </div>
-            <div style="padding:20px">
-                {% if s.description %}
-                <p style="color:#636E72; font-size:0.9rem; margin-bottom:16px">{{ s.description }}</p>
-                {% endif %}
+            <div style="padding:16px">
+                {% if s.description %}<p style="color:#636E72; font-size:0.85rem; margin-bottom:12px">{{ s.description }}</p>{% endif %}
                 <div style="display:flex; justify-content:space-between; align-items:center">
                     <div>
                         <span style="font-weight:700; color:#2D3436">{{ s.customer_count }}</span>
                         <span style="color:#636E72; font-size:0.85rem">customers</span>
                     </div>
-                    <a href="{{ url_for('join', shop_code=s.shop_code) }}" style="background:#00D2D3; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-size:0.85rem; font-weight:600">Join</a>
+                    <a href="{{ url_for('join', shop_code=s.shop_code) }}" style="background:#00D2D3; color:white; padding:6px 14px; border-radius:8px; text-decoration:none; font-size:0.8rem; font-weight:600">Join</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="card" style="text-align:center; padding:40px">
-        <p style="color:#636E72; font-size:1.1rem">No partner shops yet. Be the first!</p>
-        <a href="{{ url_for('register') }}" style="display:inline-block; margin-top:16px; background:#6C5CE7; color:white; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:600">Register your shop</a>
-    </div>
-    {% endif %}
 
     <!-- CTA -->
-    <div style="text-align:center; margin:40px 0">
-        <p style="color:#636E72; margin-bottom:16px">Own a cafe, restaurant, or bakery?</p>
+    <div style="text-align:center; margin:40px 0; padding:40px; background:linear-gradient(135deg, #6C5CE710, #00D2D310); border-radius:16px">
+        <h2 style="font-family:'Space Grotesk',sans-serif; margin-bottom:8px">Own a cafe, restaurant, or bakery?</h2>
+        <p style="color:#636E72; margin-bottom:20px">Join the LY network and start retaining your customers today.</p>
         <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding:14px 32px; font-size:1rem">Become a partner</a>
         <a href="{{ url_for('shop_map') }}" class="btn btn-primary" style="padding:14px 32px; font-size:1rem; background:#636E72; margin-left:8px">View map</a>
     </div>

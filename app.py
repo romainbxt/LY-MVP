@@ -27,6 +27,9 @@ from models import (
     create_promotion, get_active_promotions
 )
 
+# ─── Init DB at import time (needed for production) ───
+init_db()
+
 # ─── App Config ───
 
 app = Flask(__name__)
@@ -466,8 +469,11 @@ def my_card(token):
 @app.route('/simulate')
 def simulate():
     """Quick link to set up demo data and log in."""
-    from seed import seed
-    seed()
+    try:
+        from seed import seed
+        seed()
+    except Exception as e:
+        logger.error(f"Seed error: {e}")
     merchant = get_merchant_by_email('demo@lyloyal.com')
     if merchant:
         login_user(MerchantUser(merchant))
@@ -481,7 +487,12 @@ def simulate():
 
 @app.route('/partners')
 def partners():
-    all_merchants = query('SELECT * FROM merchants ORDER BY created_at DESC', fetchall=True)
+    all_merchants = query('SELECT id, shop_name, shop_code FROM merchants ORDER BY created_at DESC', fetchall=True)
+    # Try to get address/description (columns may not exist on older DBs)
+    try:
+        all_merchants = query('SELECT id, shop_name, shop_code, address, description FROM merchants ORDER BY created_at DESC', fetchall=True)
+    except Exception:
+        pass
     shops = []
     total_customers = 0
     total_visits = 0
@@ -495,8 +506,8 @@ def partners():
         shops.append({
             'shop_name': m['shop_name'],
             'shop_code': m['shop_code'],
-            'address': m['address'] if 'address' in m.keys() else None,
-            'description': m['description'] if 'description' in m.keys() else None,
+            'address': m.get('address') if hasattr(m, 'get') else (m['address'] if 'address' in m.keys() else None),
+            'description': m.get('description') if hasattr(m, 'get') else (m['description'] if 'description' in m.keys() else None),
             'customer_count': nc
         })
     return render_template('partners.html', shops=shops,
@@ -507,10 +518,16 @@ def partners():
 
 @app.route('/map')
 def shop_map():
-    shops_raw = get_all_shops()
-    shops = [dict(s) for s in (shops_raw or [])]
-    promotions_raw = get_active_promotions()
-    promotions = [dict(p) for p in (promotions_raw or [])]
+    try:
+        shops_raw = get_all_shops()
+        shops = [dict(s) for s in (shops_raw or [])]
+    except Exception:
+        shops = []
+    try:
+        promotions_raw = get_active_promotions()
+        promotions = [dict(p) for p in (promotions_raw or [])]
+    except Exception:
+        promotions = []
     return render_template('map.html', shops=shops, promotions=promotions)
 
 @app.route('/api/shops')
