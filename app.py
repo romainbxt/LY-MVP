@@ -30,6 +30,15 @@ from models import (
 # ─── Init DB at import time (needed for production) ───
 init_db()
 
+# Auto-seed demo data if DB is empty (first deploy)
+try:
+    _check = query('SELECT COUNT(*) as c FROM merchants', fetchone=True)
+    if _check and _check['c'] == 0:
+        from seed import seed
+        seed()
+except Exception:
+    pass
+
 # ─── App Config ───
 
 app = Flask(__name__)

@@ -1,19 +1,14 @@
 {% extends "base.html" %}
 {% block title %}LY - Pricing{% endblock %}
 
-{% block navbar %}
-<!-- Override with empty since this page has its own header -->
-{% endblock %}
+<!-- uses default navbar from base.html -->
 
 {% block content %}
 <style>
     .pricing-hero { background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); padding:80px 20px 60px; text-align:center; color:white; }
     .pricing-hero h1 { font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:800; margin-bottom:12px; }
     .pricing-hero p { opacity:0.8; font-size:1.1rem; max-width:500px; margin:0 auto; }
-    .pricing-nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(108,92,231,0.95); backdrop-filter:blur(12px); padding:14px 32px; display:flex; justify-content:space-between; align-items:center; }
-    .pricing-nav a { color:white; text-decoration:none; font-size:0.85rem; font-weight:500; padding:8px 14px; border-radius:8px; }
-    .pricing-nav a:hover { background:rgba(255,255,255,0.15); }
-    .pricing-nav .cta { background:#00D2D3; font-weight:600; }
+    .pricing-footer { margin-top:0; }
 
     .plans { display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; max-width:1000px; margin:-40px auto 0; padding:0 20px; position:relative; z-index:1; }
     @media(max-width:768px) { .plans { grid-template-columns:1fr; } }
@@ -30,9 +25,9 @@
 
     .plan-features { list-style:none; text-align:left; margin-bottom:28px; }
     .plan-features li { padding:8px 0; font-size:0.9rem; color:#2D3436; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:8px; }
-    .plan-features li::before { content:'&#10003;'; color:#00D2D3; font-weight:700; flex-shrink:0; }
+    .plan-features li::before { content:'\2713'; color:#00D2D3; font-weight:700; flex-shrink:0; }
     .plan-features li.disabled { color:#ccc; }
-    .plan-features li.disabled::before { content:'&#10007;'; color:#ddd; }
+    .plan-features li.disabled::before { content:'\2717'; color:#ddd; }
 
     .plan-btn { display:block; width:100%; padding:14px; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; text-decoration:none; text-align:center; transition:all 0.2s; }
     .plan-btn-primary { background:#6C5CE7; color:white; }
@@ -54,18 +49,6 @@
     .pricing-footer { background:#1a1a2e; color:#636E72; padding:32px; text-align:center; font-size:0.85rem; }
     .pricing-footer a { color:#A29BFE; text-decoration:none; margin:0 10px; }
 </style>
-
-<!-- Nav -->
-<nav class="pricing-nav">
-    <a href="{{ url_for('index') }}" style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:800; letter-spacing:2px">LY</a>
-    <div>
-        <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('partners') }}">Partners</a>
-        <a href="{{ url_for('shop_map') }}">Find shops</a>
-        <a href="{{ url_for('login') }}">Log in</a>
-        <a href="{{ url_for('register') }}" class="cta">Sign up free</a>
-    </div>
-</nav>
 
 <!-- Hero -->
 <div class="pricing-hero">
