@@ -17,14 +17,14 @@
         <p style="text-align:center; color:#636E72; font-size:0.85rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:20px">Trusted by local favorites</p>
         <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px; align-items:center">
             {% set featured = [
-                ('Cafe Francesca', '#E74C3C', 'CF'),
-                ('Boulangerie Maison', '#F39C12', 'BM'),
-                ('The Green Cup', '#27AE60', 'GC'),
+                ('Café Francesca', '#E74C3C', 'CF'),
                 ('Pasta Fresca', '#E67E22', 'PF'),
-                ('Nordic Brew', '#3498DB', 'NB'),
-                ('Chez Marcel', '#9B59B6', 'CM'),
-                ('Sunrise Bakery', '#F1C40F', 'SB'),
-                ('Das Kaffeehaus', '#1ABC9C', 'DK')
+                ('Bäckerei Schäfer', '#F39C12', 'BS'),
+                ('Istanbul Café', '#1ABC9C', 'IC'),
+                ('The Green Cup', '#27AE60', 'GC'),
+                ('Röststätte Berlin', '#3498DB', 'RB'),
+                ('Café Neuf', '#9B59B6', 'CN'),
+                ('Mochi Bakery', '#E91E63', 'MB')
             ] %}
             {% for name, color, initials in featured %}
             <div style="text-align:center; width:100px">
@@ -58,14 +58,14 @@
 
     <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px">
         {% set demo_shops = [
-            ('Cafe Francesca', 'Oranienstr. 42, Berlin', 'Cozy Italian-style cafe with the best espresso in Kreuzberg', '#E74C3C', 'CF', 247),
-            ('Boulangerie Maison', '15 Rue du Faubourg, Paris', 'Artisan bakery since 1987. Fresh bread, pastries & coffee.', '#F39C12', 'BM', 189),
-            ('The Green Cup', 'Prinsengracht 88, Amsterdam', 'Organic specialty coffee & plant-based treats.', '#27AE60', 'GC', 156),
-            ('Pasta Fresca', 'Bergmannstr. 12, Berlin', 'Handmade pasta & Italian espresso bar.', '#E67E22', 'PF', 134),
-            ('Nordic Brew', 'Torsgatan 31, Stockholm', 'Scandinavian roastery & minimalist cafe.', '#3498DB', 'NB', 98),
-            ('Chez Marcel', '8 Place du Marche, Lyon', 'Traditional French bistro & patisserie.', '#9B59B6', 'CM', 112),
-            ('Sunrise Bakery', 'Schoenhauser Allee 6, Berlin', 'Early morning bakery. Fresh croissants from 6am.', '#F1C40F', 'SB', 87),
-            ('Das Kaffeehaus', 'Maximilianstr. 22, Munich', 'Viennese-style coffeehouse in the heart of Munich.', '#1ABC9C', 'DK', 203)
+            ('Café Francesca', 'Oranienstr. 42, Kreuzberg', 'Cozy Italian-style cafe with the best espresso in Kreuzberg.', '#E74C3C', 'CF', 247),
+            ('Pasta Fresca', 'Bergmannstr. 12, Kreuzberg', 'Handmade pasta & Italian espresso bar.', '#E67E22', 'PF', 134),
+            ('Bäckerei Schäfer', 'Schönhauser Allee 6, Prenzlauer Berg', 'Family bakery since 1995. Fresh Brötchen from 6am.', '#F39C12', 'BS', 189),
+            ('Istanbul Café', 'Sonnenallee 67, Neukölln', 'Turkish coffee, baklava & breakfast. A Neukölln favorite.', '#1ABC9C', 'IC', 156),
+            ('The Green Cup', 'Kastanienallee 49, Prenzlauer Berg', 'Organic specialty coffee & plant-based treats.', '#27AE60', 'GC', 112),
+            ('Röststätte Berlin', 'Ackerstr. 173, Mitte', 'Third-wave roastery. Single-origin beans roasted on-site.', '#3498DB', 'RB', 98),
+            ('Café Neuf', 'Weserstr. 42, Neukölln', 'French-inspired brunch spot. Crêpes, coffee & natural wine.', '#9B59B6', 'CN', 87),
+            ('Mochi Bakery', 'Torstr. 74, Mitte', 'Japanese-German fusion bakery. Matcha lattes & mochi donuts.', '#E91E63', 'MB', 76)
         ] %}
 
         {% for name, addr, desc, color, initials, customers in demo_shops %}
