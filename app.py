@@ -4,6 +4,7 @@ import re
 import io
 import base64
 import logging
+import urllib.parse
 from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -16,8 +17,12 @@ import qrcode
 from models import (
     init_db, create_merchant, get_merchant_by_email, get_merchant_by_id,
     get_merchant_by_shop_code, create_customer, get_customer_by_token,
-    get_customer_by_phone, log_visit, get_customers_for_merchant,
-    get_visit_history, detect_churn_risk
+    get_customer_by_phone, get_customer_by_id, log_visit, get_customers_for_merchant,
+    get_visit_history, get_visit_count, detect_churn_risk, get_upcoming_birthdays,
+    get_products, create_product, toggle_product,
+    get_reward_rules, create_reward_rule, toggle_reward_rule, check_rewards,
+    get_customer_tier, get_tier_distribution, get_visit_trend, get_top_products,
+    log_message, get_messages, query
 )
 
 # ─── App Config ───
@@ -31,17 +36,10 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)
 if os.environ.get('PRODUCTION'):
     app.config['SESSION_COOKIE_SECURE'] = True
 
-# CSRF protection
 csrf = CSRFProtect(app)
-
-# Rate limiting
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per hour"])
-
-# Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# ─── Auth ───
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -66,20 +64,17 @@ def load_user(user_id):
     return None
 
 
-# ─── Validation Helpers ───
+# ─── Helpers ───
 
 def validate_email(email):
     return re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email)
-
 
 def validate_phone(phone):
     cleaned = re.sub(r'[\s\-\(\)]', '', phone)
     return re.match(r'^\+?[0-9]{7,15}$', cleaned)
 
-
 def sanitize_string(s, max_length=100):
     return s.strip()[:max_length]
-
 
 def generate_qr_base64(data):
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
@@ -90,6 +85,10 @@ def generate_qr_base64(data):
     img.save(buffer, format='PNG')
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
+def whatsapp_url(phone, message):
+    cleaned = re.sub(r'[\s\-\(\)]', '', phone)
+    return f"https://wa.me/{cleaned}?text={urllib.parse.quote(message)}"
+
 
 # ─── Error Handlers ───
 
@@ -97,19 +96,17 @@ def generate_qr_base64(data):
 def not_found(e):
     return render_template('error.html', code=404, message="Page not found"), 404
 
-
 @app.errorhandler(429)
 def rate_limited(e):
-    return render_template('error.html', code=429, message="Too many requests. Please try again later."), 429
-
+    return render_template('error.html', code=429, message="Too many requests."), 429
 
 @app.errorhandler(500)
 def server_error(e):
     logger.error(f"Server error: {e}")
-    return render_template('error.html', code=500, message="Something went wrong. Please try again."), 500
+    return render_template('error.html', code=500, message="Something went wrong."), 500
 
 
-# ─── Auth Routes ───
+# ─── Landing & Auth ───
 
 @app.route('/')
 def index():
@@ -117,33 +114,21 @@ def index():
         return redirect(url_for('dashboard'))
     return render_template('landing_react.html')
 
-
-# ─── Waitlist API ───
-
 @app.route('/api/waitlist', methods=['POST'])
 @limiter.limit("10 per hour")
 @csrf.exempt
 def api_waitlist():
-    from models import get_db
     data = request.get_json()
     if not data or not data.get('email'):
         return jsonify({'detail': 'Email is required'}), 400
-
     email = data['email'].strip().lower()
     name = data.get('name', '').strip()
-
-    conn = get_db()
     try:
-        conn.execute("CREATE TABLE IF NOT EXISTS waitlist (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, name TEXT, signed_up_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-        conn.execute("INSERT INTO waitlist (email, name) VALUES (?, ?)", (email, name))
-        conn.commit()
-        count = conn.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
-        conn.close()
-        return jsonify({'success': True, 'message': "You're on the list!", 'position': count})
+        query('INSERT INTO waitlist (email, name) VALUES (?, ?)', (email, name), commit=True)
+        result = query('SELECT COUNT(*) as c FROM waitlist', fetchone=True)
+        return jsonify({'success': True, 'message': "You're on the list!", 'position': result['c']})
     except Exception:
-        conn.close()
         return jsonify({'detail': 'This email is already on the waitlist.'}), 409
-
 
 @app.route('/register', methods=['GET', 'POST'])
 @limiter.limit("10 per hour", methods=["POST"])
@@ -157,31 +142,23 @@ def register():
         if not name or not shop_name:
             flash('Name and shop name are required.', 'error')
             return redirect(url_for('register'))
-
         if not validate_email(email):
             flash('Please enter a valid email address.', 'error')
             return redirect(url_for('register'))
-
         if len(password) < 6:
             flash('Password must be at least 6 characters.', 'error')
             return redirect(url_for('register'))
-
         if get_merchant_by_email(email):
             flash('This email is already in use.', 'error')
             return redirect(url_for('register'))
 
         shop_code = uuid.uuid4().hex[:8]
-        password_hash = generate_password_hash(password)
-        create_merchant(name, shop_name, email, password_hash, shop_code)
-
+        create_merchant(name, shop_name, email, generate_password_hash(password), shop_code)
         merchant = get_merchant_by_email(email)
         login_user(MerchantUser(merchant))
-        logger.info(f"New merchant registered: {shop_name} ({email})")
         flash(f'Welcome {shop_name}! Your shop is ready.', 'success')
         return redirect(url_for('dashboard'))
-
     return render_template('register.html')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("15 per hour", methods=["POST"])
@@ -190,17 +167,11 @@ def login():
         email = sanitize_string(request.form.get('email', '')).lower()
         password = request.form.get('password', '')
         merchant = get_merchant_by_email(email)
-
         if merchant and check_password_hash(merchant['password_hash'], password):
             login_user(MerchantUser(merchant))
-            logger.info(f"Merchant logged in: {email}")
             return redirect(url_for('dashboard'))
-
-        logger.warning(f"Failed login attempt for: {email}")
         flash('Invalid email or password.', 'error')
-
     return render_template('login.html')
-
 
 @app.route('/logout')
 @login_required
@@ -209,83 +180,239 @@ def logout():
     return redirect(url_for('login'))
 
 
-# ─── Merchant Dashboard ───
+# ─── Dashboard ───
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     customers = get_customers_for_merchant(current_user.id)
     at_risk = detect_churn_risk(current_user.id)
+    birthdays = get_upcoming_birthdays(current_user.id)
+    tier_dist = get_tier_distribution(current_user.id)
+    visit_trend = get_visit_trend(current_user.id)
+    top_products = get_top_products(current_user.id)
     shop_url = request.host_url + 'join/' + current_user.shop_code
     shop_qr = generate_qr_base64(shop_url)
+    employee_url = request.host_url + 'e/' + current_user.shop_code
+
+    # Add tier to each customer
+    customer_list = []
+    for c in (customers or []):
+        c_dict = dict(c)
+        c_dict['tier'] = get_customer_tier(c['id'])
+        customer_list.append(c_dict)
 
     return render_template('dashboard.html',
-                           customers=customers,
+                           customers=customer_list,
                            at_risk=at_risk,
+                           birthdays=birthdays,
+                           tier_dist=tier_dist,
+                           visit_trend=visit_trend,
+                           top_products=top_products,
                            shop_qr=shop_qr,
-                           shop_url=shop_url)
+                           shop_url=shop_url,
+                           employee_url=employee_url)
 
+
+# ─── Customer Profile ───
+
+@app.route('/customer/<int:customer_id>')
+@login_required
+def customer_profile(customer_id):
+    customer = get_customer_by_id(customer_id)
+    if not customer or customer['merchant_id'] != current_user.id:
+        abort(404)
+
+    visits = get_visit_history(customer_id)
+    tier = get_customer_tier(customer_id)
+    visit_count = get_visit_count(customer_id)
+    rewards = check_rewards(customer_id, current_user.id)
+    rules = get_reward_rules(current_user.id)
+
+    # Calculate progress toward next reward for each active rule
+    reward_progress = []
+    for rule in (rules or []):
+        if not rule['active']:
+            continue
+        n = rule['every_n_visits']
+        progress = visit_count % n if n > 0 else 0
+        reward_progress.append({
+            'name': rule['name'],
+            'reward': rule['reward_description'],
+            'current': progress,
+            'target': n,
+            'percent': int((progress / n) * 100) if n > 0 else 0
+        })
+
+    return render_template('customer_profile.html',
+                           customer=customer, visits=visits, tier=tier,
+                           visit_count=visit_count, rewards=rewards,
+                           reward_progress=reward_progress)
+
+
+# ─── Scan (Owner) ───
 
 @app.route('/scan', methods=['GET', 'POST'])
 @login_required
 def scan():
+    products = get_products(current_user.id)
     result = None
     if request.method == 'POST':
         qr_token = sanitize_string(request.form.get('qr_token', ''))
+        product_id = request.form.get('product_id')
+        product_id = int(product_id) if product_id else None
 
         if not re.match(r'^[a-f0-9]{32}$', qr_token):
             result = {'success': False}
         else:
             customer = get_customer_by_token(qr_token)
-
             if customer and customer['merchant_id'] == current_user.id:
-                log_visit(customer['id'], current_user.id)
+                log_visit(customer['id'], current_user.id, product_id)
                 visits = get_visit_history(customer['id'])
+                earned = check_rewards(customer['id'], current_user.id)
                 result = {
                     'success': True,
                     'name': customer['first_name'],
-                    'visit_count': len(visits)
+                    'visit_count': len(visits),
+                    'tier': get_customer_tier(customer['id']),
+                    'rewards': earned
                 }
             else:
                 result = {'success': False}
 
-    return render_template('scan.html', result=result)
+    return render_template('scan.html', result=result, products=products)
 
 
-@app.route('/api/scan', methods=['POST'])
+# ─── Employee Scan (No login) ───
+
+@app.route('/e/<shop_code>', methods=['GET', 'POST'])
+def employee_scan(shop_code):
+    merchant = get_merchant_by_shop_code(shop_code)
+    if not merchant:
+        abort(404)
+
+    products = get_products(merchant['id'])
+    result = None
+
+    if request.method == 'POST':
+        qr_token = sanitize_string(request.form.get('qr_token', ''))
+        product_id = request.form.get('product_id')
+        product_id = int(product_id) if product_id else None
+
+        if re.match(r'^[a-f0-9]{32}$', qr_token):
+            customer = get_customer_by_token(qr_token)
+            if customer and customer['merchant_id'] == merchant['id']:
+                log_visit(customer['id'], merchant['id'], product_id)
+                visits = get_visit_history(customer['id'])
+                earned = check_rewards(customer['id'], merchant['id'])
+                result = {
+                    'success': True,
+                    'name': customer['first_name'],
+                    'visit_count': len(visits),
+                    'tier': get_customer_tier(customer['id']),
+                    'rewards': earned
+                }
+            else:
+                result = {'success': False}
+        else:
+            result = {'success': False}
+
+    return render_template('employee_scan.html',
+                           merchant=merchant, result=result, products=products)
+
+
+# ─── Messaging ───
+
+@app.route('/messages')
+@login_required
+def messages_page():
+    at_risk = detect_churn_risk(current_user.id)
+    birthdays = get_upcoming_birthdays(current_user.id)
+    sent_messages = get_messages(current_user.id)
+    return render_template('messages.html',
+                           at_risk=at_risk, birthdays=birthdays,
+                           sent_messages=sent_messages)
+
+@app.route('/send_whatsapp/<int:customer_id>', methods=['POST'])
+@login_required
+def send_whatsapp(customer_id):
+    customer = get_customer_by_id(customer_id)
+    if not customer or customer['merchant_id'] != current_user.id:
+        abort(404)
+
+    message = request.form.get('message', '')
+    if not message:
+        flash('Message cannot be empty.', 'error')
+        return redirect(url_for('messages_page'))
+
+    log_message(current_user.id, customer_id, 'whatsapp', message)
+    wa_link = whatsapp_url(customer['phone'], message)
+    return redirect(wa_link)
+
+
+# ─── Settings ───
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'add_product':
+            name = sanitize_string(request.form.get('product_name', ''))
+            price = float(request.form.get('product_price', 0) or 0)
+            if name:
+                create_product(current_user.id, name, price)
+                flash(f'Product "{name}" added.', 'success')
+
+        elif action == 'toggle_product':
+            pid = int(request.form.get('product_id', 0))
+            active = request.form.get('active') == '1'
+            toggle_product(pid, active)
+
+        elif action == 'add_rule':
+            name = sanitize_string(request.form.get('rule_name', ''))
+            every_n = int(request.form.get('every_n_visits', 10) or 10)
+            reward = sanitize_string(request.form.get('reward_description', ''))
+            if name and reward:
+                create_reward_rule(current_user.id, name, every_n, reward)
+                flash(f'Reward rule "{name}" added.', 'success')
+
+        elif action == 'toggle_rule':
+            rid = int(request.form.get('rule_id', 0))
+            active = request.form.get('active') == '1'
+            toggle_reward_rule(rid, active)
+
+        return redirect(url_for('settings'))
+
+    products = get_products(current_user.id)
+    rules = get_reward_rules(current_user.id)
+    return render_template('settings.html', products=products, rules=rules)
+
+
+# ─── Analytics API (for charts) ───
+
+@app.route('/api/analytics')
 @login_required
 @csrf.exempt
-def api_scan():
-    data = request.get_json()
-    if not data:
-        return jsonify({'success': False, 'error': 'Invalid request'}), 400
-
-    qr_token = sanitize_string(data.get('qr_token', ''))
-
-    if not re.match(r'^[a-f0-9]{32}$', qr_token):
-        return jsonify({'success': False, 'error': 'Invalid token format'}), 400
-
-    customer = get_customer_by_token(qr_token)
-
-    if customer and customer['merchant_id'] == current_user.id:
-        log_visit(customer['id'], current_user.id)
-        visits = get_visit_history(customer['id'])
-        return jsonify({
-            'success': True,
-            'name': customer['first_name'],
-            'visit_count': len(visits)
-        })
-    return jsonify({'success': False, 'error': 'Customer not found'}), 404
+def api_analytics():
+    trend = get_visit_trend(current_user.id)
+    top = get_top_products(current_user.id)
+    tier = get_tier_distribution(current_user.id)
+    return jsonify({
+        'visit_trend': [dict(r) for r in (trend or [])],
+        'top_products': [dict(r) for r in (top or [])],
+        'tier_distribution': tier
+    })
 
 
-# ─── Customer Routes ───
+# ─── Customer Join (QR flow) ───
 
 @app.route('/join/<shop_code>', methods=['GET', 'POST'])
 @limiter.limit("20 per hour", methods=["POST"])
 def join(shop_code):
-    if not re.match(r'^[a-f0-9]{8}$', shop_code):
+    if not re.match(r'^[a-z0-9]{8}$', shop_code):
         abort(404)
-
     merchant = get_merchant_by_shop_code(shop_code)
     if not merchant:
         abort(404)
@@ -293,11 +420,11 @@ def join(shop_code):
     if request.method == 'POST':
         first_name = sanitize_string(request.form.get('first_name', ''))
         phone = sanitize_string(request.form.get('phone', ''), max_length=20)
+        birthday = request.form.get('birthday', '').strip() or None
 
         if not first_name:
             flash('First name is required.', 'error')
             return redirect(url_for('join', shop_code=shop_code))
-
         if not validate_phone(phone):
             flash('Please enter a valid phone number.', 'error')
             return redirect(url_for('join', shop_code=shop_code))
@@ -307,37 +434,47 @@ def join(shop_code):
             qr_token = existing['qr_token']
         else:
             qr_token = uuid.uuid4().hex
-            create_customer(first_name, phone, qr_token, merchant['id'])
-            log_visit(
-                get_customer_by_token(qr_token)['id'],
-                merchant['id']
-            )
-            logger.info(f"New customer '{first_name}' joined '{merchant['shop_name']}'")
+            create_customer(first_name, phone, qr_token, merchant['id'], birthday)
+            log_visit(get_customer_by_token(qr_token)['id'], merchant['id'])
 
         return redirect(url_for('my_card', token=qr_token))
 
     return render_template('join.html', shop_name=merchant['shop_name'])
 
-
 @app.route('/card/<token>')
 def my_card(token):
     if not re.match(r'^[a-f0-9]{32}$', token):
         abort(404)
-
     customer = get_customer_by_token(token)
     if not customer:
         abort(404)
 
     merchant = get_merchant_by_id(customer['merchant_id'])
     visits = get_visit_history(customer['id'])
+    tier = get_customer_tier(customer['id'])
     qr_img = generate_qr_base64(token)
+    rewards = check_rewards(customer['id'], merchant['id'])
 
     return render_template('card.html',
-                           customer=customer,
-                           merchant=merchant,
-                           visits=visits,
-                           qr_img=qr_img,
-                           token=token)
+                           customer=customer, merchant=merchant,
+                           visits=visits, qr_img=qr_img, token=token,
+                           tier=tier, rewards=rewards)
+
+
+# ─── Simulation Mode ───
+
+@app.route('/simulate')
+def simulate():
+    """Quick link to set up demo data and log in."""
+    from seed import seed
+    seed()
+    merchant = get_merchant_by_email('demo@lyloyal.com')
+    if merchant:
+        login_user(MerchantUser(merchant))
+        flash('Simulation mode active! You are logged in as Café Francesca with 10 demo customers.', 'success')
+        return redirect(url_for('dashboard'))
+    flash('Could not create demo data.', 'error')
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':

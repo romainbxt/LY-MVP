@@ -309,3 +309,19 @@ body {
     background: var(--primary);
     color: white;
 }
+
+/* ─── Tier Badges ─── */
+.tier-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tier-bronze { background: #FDF2E9; color: #CD7F32; }
+.tier-silver { background: #F0F0F0; color: #6B7280; }
+.tier-gold { background: #FEF9E7; color: #B7950B; }
+.tier-platinum { background: #F4ECF7; color: #7D3C98; }

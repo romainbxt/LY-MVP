@@ -4,22 +4,28 @@
 {% block content %}
 <div class="mobile-container" style="margin-top:20px">
 
-    <!-- Loyalty Card -->
     <div class="loyalty-card">
         <h1>{{ customer.first_name }}</h1>
         <div class="shop">{{ merchant.shop_name }}</div>
         <div class="visits-count">{{ visits|length }}</div>
         <div class="visits-label">visits</div>
+        <span class="tier-badge tier-{{ tier|lower }}" style="font-size:0.9rem; margin-top:8px; display:inline-block">{{ tier }}</span>
     </div>
 
-    <!-- QR Code -->
+    {% if rewards %}
+    <div class="alert alert-success">
+        {% for r in rewards %}
+        <strong>Reward unlocked!</strong> {{ r.reward }}<br>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="qr-card">
         <h3 style="margin-bottom:12px">Your QR Code</h3>
         <img src="data:image/png;base64,{{ qr_img }}" alt="My QR Code">
         <p>Show this code at the counter on every visit</p>
     </div>
 
-    <!-- Visit History -->
     {% if visits %}
     <div class="card" style="margin-top:20px">
         <h2>History</h2>
@@ -27,7 +33,10 @@
             {% for v in visits[:10] %}
             <li class="customer-item">
                 <span>Visit #{{ visits|length - loop.index0 }}</span>
-                <span class="customer-meta">{{ v.visited_at[:16] }}</span>
+                <div style="text-align:right">
+                    {% if v.product_name %}<span class="customer-meta">{{ v.product_name }}</span><br>{% endif %}
+                    <span class="customer-meta">{{ v.visited_at[:16] if v.visited_at else '' }}</span>
+                </div>
             </li>
             {% endfor %}
         </ul>

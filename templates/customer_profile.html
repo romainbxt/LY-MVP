@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.first_name }} - LY{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <span class="logo">LY</span>
+    <div>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px">
+
+    <!-- Profile Header -->
+    <div class="loyalty-card">
+        <h1>{{ customer.first_name }}</h1>
+        <div class="shop">{{ customer.phone }}</div>
+        <div class="visits-count">{{ visit_count }}</div>
+        <div class="visits-label">visits</div>
+        <span class="tier-badge tier-{{ tier|lower }}" style="font-size:1rem; margin-top:10px; display:inline-block">{{ tier }}</span>
+    </div>
+
+    <!-- Info -->
+    <div class="card">
+        <h2>Details</h2>
+        <div class="customer-item">
+            <span>Phone</span>
+            <span>{{ customer.phone }}</span>
+        </div>
+        <div class="customer-item">
+            <span>Birthday</span>
+            <span>{{ customer.birthday or 'Not set' }}</span>
+        </div>
+        <div class="customer-item">
+            <span>Joined</span>
+            <span>{{ customer.created_at[:10] if customer.created_at else 'Unknown' }}</span>
+        </div>
+        <div class="customer-item">
+            <span>Tier</span>
+            <span class="tier-badge tier-{{ tier|lower }}">{{ tier }}</span>
+        </div>
+    </div>
+
+    <!-- Reward Progress -->
+    {% if reward_progress %}
+    <div class="card">
+        <h2>Reward progress</h2>
+        {% for rp in reward_progress %}
+        <div style="margin-bottom:16px">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px">
+                <strong>{{ rp.name }}</strong>
+                <span class="customer-meta">{{ rp.current }}/{{ rp.target }} visits</span>
+            </div>
+            <div style="background:var(--border); border-radius:8px; height:12px; overflow:hidden">
+                <div style="background:var(--primary); height:100%; width:{{ rp.percent }}%; border-radius:8px; transition:width 0.3s"></div>
+            </div>
+            <div class="customer-meta" style="margin-top:4px">{{ rp.reward }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Earned Rewards -->
+    {% if rewards %}
+    <div class="card">
+        <h2>Rewards earned now!</h2>
+        {% for r in rewards %}
+        <div class="alert alert-success">
+            <strong>{{ r.rule }}:</strong> {{ r.reward }} ({{ r.visits }} visits)
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Visit History -->
+    <div class="card">
+        <h2>Visit history</h2>
+        {% if visits %}
+        <ul class="customer-list">
+            {% for v in visits[:20] %}
+            <li class="customer-item">
+                <span>Visit #{{ visit_count - loop.index0 }}</span>
+                <div style="text-align:right">
+                    {% if v.product_name %}<span class="customer-meta">{{ v.product_name }}</span><br>{% endif %}
+                    <span class="customer-meta">{{ v.visited_at[:16] if v.visited_at else '' }}</span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color:var(--text-light); text-align:center">No visits yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

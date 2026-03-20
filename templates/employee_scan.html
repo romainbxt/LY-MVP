@@ -1,18 +1,13 @@
 {% extends "base.html" %}
-{% block title %}LY - Scan{% endblock %}
-
-{% block navbar %}
-<nav class="navbar">
-    <span class="logo">LY</span>
-    <div>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('logout') }}">Log out</a>
-    </div>
-</nav>
-{% endblock %}
+{% block title %}{{ merchant.shop_name }} - Scan{% endblock %}
 
 {% block content %}
 <div class="container" style="max-width:500px">
+
+    <div style="text-align:center; margin:20px 0">
+        <h1 style="font-size:1.5rem; color:var(--primary)">{{ merchant.shop_name }}</h1>
+        <p style="color:var(--text-light)">Employee Scanner</p>
+    </div>
 
     {% if result %}
     <div class="card">
@@ -25,7 +20,7 @@
             {% if result.rewards %}
             <div class="alert alert-success" style="margin-top:16px">
                 {% for r in result.rewards %}
-                <strong>Reward earned!</strong> {{ r.reward }}<br>
+                <strong>Reward earned!</strong> {{ r.reward }}
                 {% endfor %}
             </div>
             {% endif %}
@@ -40,7 +35,7 @@
     {% endif %}
 
     <div class="card">
-        <h2>Scan a customer</h2>
+        <h2>Scan customer</h2>
         <div id="scanner-container" style="margin-bottom:20px">
             <video id="preview" playsinline></video>
         </div>
@@ -59,8 +54,8 @@
             </div>
             {% endif %}
             <div class="form-group">
-                <label>QR token (auto-filled by camera or enter manually)</label>
-                <input type="text" name="qr_token" id="qr-input" placeholder="Customer QR token" required>
+                <label>QR token</label>
+                <input type="text" name="qr_token" id="qr-input" placeholder="Auto-filled by camera" required>
             </div>
             <button type="submit" class="btn btn-success btn-full">Record visit</button>
         </form>
@@ -87,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             () => {}
         ).catch(() => {
             document.getElementById('scanner-container').innerHTML =
-                '<p style="text-align:center;color:var(--text-light)">Camera not available. Enter the token manually.</p>';
+                '<p style="text-align:center;color:var(--text-light)">Camera not available.</p>';
         });
     }
 });
