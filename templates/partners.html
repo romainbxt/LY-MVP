@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}LY - Our Partners{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #6C5CE7 0%, #5A4BD1 100%); padding:60px 20px; text-align:center; color:white">
+    <a href="{{ url_for('index') }}" style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:white; text-decoration:none; letter-spacing:3px">LY</a>
+    <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:700; margin-top:16px">Our Partners</h1>
+    <p style="opacity:0.8; font-size:1.1rem; max-width:500px; margin:12px auto 0">
+        Independent businesses that trust LY to retain their customers.
+    </p>
+</div>
+
+<div class="container" style="max-width:900px; margin-top:-30px">
+
+    <!-- Stats bar -->
+    <div class="card" style="display:flex; justify-content:center; gap:40px; text-align:center; padding:24px">
+        <div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ shops|length }}</div>
+            <div style="color:#636E72; font-size:0.85rem">Partner shops</div>
+        </div>
+        <div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#00D2D3">{{ total_customers }}</div>
+            <div style="color:#636E72; font-size:0.85rem">Customers served</div>
+        </div>
+        <div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ total_visits }}</div>
+            <div style="color:#636E72; font-size:0.85rem">Visits tracked</div>
+        </div>
+    </div>
+
+    <!-- Shop grid -->
+    {% if shops %}
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:20px">
+        {% for s in shops %}
+        <div class="card" style="padding:0; overflow:hidden">
+            <div style="background: linear-gradient(135deg, #6C5CE7, #A29BFE); padding:24px; color:white">
+                <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700; margin-bottom:4px">{{ s.shop_name }}</h3>
+                {% if s.address %}
+                <p style="opacity:0.8; font-size:0.85rem">{{ s.address }}</p>
+                {% endif %}
+            </div>
+            <div style="padding:20px">
+                {% if s.description %}
+                <p style="color:#636E72; font-size:0.9rem; margin-bottom:16px">{{ s.description }}</p>
+                {% endif %}
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div>
+                        <span style="font-weight:700; color:#2D3436">{{ s.customer_count }}</span>
+                        <span style="color:#636E72; font-size:0.85rem">customers</span>
+                    </div>
+                    <a href="{{ url_for('join', shop_code=s.shop_code) }}" style="background:#00D2D3; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-size:0.85rem; font-weight:600">Join</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center; padding:40px">
+        <p style="color:#636E72; font-size:1.1rem">No partner shops yet. Be the first!</p>
+        <a href="{{ url_for('register') }}" style="display:inline-block; margin-top:16px; background:#6C5CE7; color:white; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:600">Register your shop</a>
+    </div>
+    {% endif %}
+
+    <!-- CTA -->
+    <div style="text-align:center; margin:40px 0">
+        <p style="color:#636E72; margin-bottom:16px">Own a cafe, restaurant, or bakery?</p>
+        <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding:14px 32px; font-size:1rem">Become a partner</a>
+        <a href="{{ url_for('shop_map') }}" class="btn btn-primary" style="padding:14px 32px; font-size:1rem; background:#636E72; margin-left:8px">View map</a>
+    </div>
+
+</div>
+{% endblock %}

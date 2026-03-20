@@ -477,6 +477,32 @@ def simulate():
     return redirect(url_for('login'))
 
 
+# ─── Partners Page (Public) ───
+
+@app.route('/partners')
+def partners():
+    all_merchants = query('SELECT * FROM merchants ORDER BY created_at DESC', fetchall=True)
+    shops = []
+    total_customers = 0
+    total_visits = 0
+    for m in (all_merchants or []):
+        c_count = query('SELECT COUNT(*) as c FROM customers WHERE merchant_id = ?', (m['id'],), fetchone=True)
+        v_count = query('SELECT COUNT(*) as c FROM visits WHERE merchant_id = ?', (m['id'],), fetchone=True)
+        nc = c_count['c'] if c_count else 0
+        nv = v_count['c'] if v_count else 0
+        total_customers += nc
+        total_visits += nv
+        shops.append({
+            'shop_name': m['shop_name'],
+            'shop_code': m['shop_code'],
+            'address': m['address'] if 'address' in m.keys() else None,
+            'description': m['description'] if 'description' in m.keys() else None,
+            'customer_count': nc
+        })
+    return render_template('partners.html', shops=shops,
+                           total_customers=total_customers, total_visits=total_visits)
+
+
 # ─── Shop Map (Public) ───
 
 @app.route('/map')

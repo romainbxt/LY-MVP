@@ -10,12 +10,10 @@
     <script type="module" crossorigin src="/static/landing/assets/index-BoxZ8ZU-.js"></script>
     <link rel="stylesheet" crossorigin href="/static/landing/assets/index-DZf8IRJO.css">
     <style>
-      /* Hide the React navbar's right side links to avoid duplication */
-      #root nav > div:last-child {
-        display: none !important;
-      }
-      /* Hide React mobile menu button */
-      #root nav > button {
+      /* Hide the entire React navbar */
+      #root header,
+      #root nav,
+      #root header + div {
         display: none !important;
       }
       /* Ensure our bar sits properly */
@@ -82,6 +80,7 @@
     <nav id="ly-nav">
       <a href="#features" class="nav-link">Features</a>
       <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="/partners" class="nav-link">Partners</a>
       <a href="/map" class="nav-link">Find shops</a>
       <a href="/login" class="nav-btn">Log in</a>
       <a href="/register" class="nav-cta">Sign up</a>
