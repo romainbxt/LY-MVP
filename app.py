@@ -551,6 +551,13 @@ def simulate():
     return redirect(url_for('login'))
 
 
+# ─── Pricing Page ───
+
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+
 # ─── Partners Page (Public) ───
 
 @app.route('/partners')

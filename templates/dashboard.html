@@ -1,18 +1,7 @@
 {% extends "base.html" %}
 {% block title %}LY - {{ current_user.shop_name }}{% endblock %}
 
-{% block navbar %}
-<nav class="navbar">
-    <a href="{{ url_for('index') }}" class="logo" style="text-decoration:none; color:white">LY</a>
-    <div>
-        <span>{{ current_user.shop_name }}</span>
-        <a href="{{ url_for('scan') }}">Scan</a>
-        <a href="{{ url_for('messages_page') }}">Messages</a>
-        <a href="{{ url_for('settings') }}">Settings</a>
-        <a href="{{ url_for('logout') }}">Log out</a>
-    </div>
-</nav>
-{% endblock %}
+<!-- uses default navbar from base.html -->
 
 {% block content %}
 <div class="container">

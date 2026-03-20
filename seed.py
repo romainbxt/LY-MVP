@@ -80,6 +80,47 @@ def seed():
     update_merchant_location(mid, 'Oranienstraße 42, 10999 Berlin', 52.5024, 13.4215,
                              'Cozy Italian-style cafe with the best espresso in Kreuzberg')
 
+    # Create additional demo shops across Europe
+    extra_shops = [
+        ('Pierre Dupont', 'Boulangerie Maison', 'boulangerie@demo.com', 'boul1234',
+         '15 Rue du Faubourg Saint-Antoine, 75011 Paris', 48.8530, 2.3735,
+         'Artisan bakery since 1987. Fresh bread, pastries & coffee.'),
+        ('Thomas Weber', 'Das Kaffeehaus', 'kaffee@demo.com', 'kaff1234',
+         'Maximilianstraße 22, 80539 Munich', 48.1405, 11.5808,
+         'Viennese-style coffeehouse in the heart of Munich.'),
+        ('Sofia van der Berg', 'The Green Cup', 'greencup@demo.com', 'grnc1234',
+         'Prinsengracht 88, 1015 Amsterdam', 52.3676, 4.8830,
+         'Organic specialty coffee & plant-based treats.'),
+        ('Marco Bianchi', 'Pasta Fresca', 'pasta@demo.com', 'past1234',
+         'Bergmannstraße 12, 10961 Berlin', 52.4891, 13.3923,
+         'Handmade pasta & Italian espresso bar.'),
+        ('Anna Lindqvist', 'Nordic Brew', 'nordic@demo.com', 'nord1234',
+         'Torsgatan 31, 113 38 Stockholm', 59.3415, 18.0489,
+         'Scandinavian roastery & minimalist cafe.'),
+        ('Marcel Moreau', 'Chez Marcel', 'marcel@demo.com', 'chez1234',
+         '8 Place du Marché, 69002 Lyon', 45.7640, 4.8357,
+         'Traditional French bistro & patisserie.'),
+        ('Elena Garcia', 'Café Sol', 'sol@demo.com', 'csol1234',
+         'Calle de Fuencarral 45, 28004 Madrid', 40.4260, -3.7013,
+         'Sunny terrace cafe with Spanish pastries & cold brew.'),
+        ('Liam O\'Brien', 'The Copper Kettle', 'copper@demo.com', 'copp1234',
+         '23 Temple Bar, Dublin 2', 53.3456, -6.2644,
+         'Traditional Irish cafe with homemade scones & specialty tea.'),
+    ]
+
+    for name, shop, email, code, addr, lat, lng, desc in extra_shops:
+        try:
+            create_merchant(name, shop, email, generate_password_hash('demo123'), code)
+            m2 = get_merchant_by_email(email)
+            if m2:
+                update_merchant_location(m2['id'], addr, lat, lng, desc)
+                # Add a few products
+                for p in ['Espresso', 'Cappuccino', 'Croissant']:
+                    create_product(m2['id'], p, round(random.uniform(2.5, 5.5), 2))
+                print(f'  Created shop: {shop} ({addr[:30]}...)')
+        except Exception:
+            pass
+
     # Add a demo promotion
     create_promotion(mid, 'Monday Special', '2-for-1 cappuccinos every Monday 8-10am!')
 

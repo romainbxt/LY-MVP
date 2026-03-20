@@ -1,16 +1,7 @@
 {% extends "base.html" %}
 {% block title %}LY - Settings{% endblock %}
 
-{% block navbar %}
-<nav class="navbar">
-    <a href="{{ url_for('index') }}" class="logo" style="text-decoration:none; color:white">LY</a>
-    <div>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('messages_page') }}">Messages</a>
-        <a href="{{ url_for('logout') }}">Log out</a>
-    </div>
-</nav>
-{% endblock %}
+<!-- uses default navbar from base.html -->
 
 {% block content %}
 <div class="container" style="max-width:700px">
