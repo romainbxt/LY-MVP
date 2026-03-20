@@ -201,13 +201,25 @@ def create_customer(first_name, phone, qr_token, merchant_id, birthday=None):
           (first_name, phone, qr_token, merchant_id, birthday), commit=True)
 
 def get_customers_for_merchant(merchant_id):
-    return query('''
-        SELECT c.*, COUNT(v.id) as visit_count, MAX(v.visited_at) as last_visit
-        FROM customers c LEFT JOIN visits v ON v.customer_id = c.id
-        WHERE c.merchant_id = ?
-        GROUP BY c.id, c.first_name, c.phone, c.birthday, c.qr_token, c.merchant_id, c.created_at
-        ORDER BY last_visit DESC
-    ''', (merchant_id,), fetchall=True)
+    try:
+        return query('''
+            SELECT c.id, c.first_name, c.phone, c.birthday, c.qr_token, c.merchant_id, c.created_at,
+                   COUNT(v.id) as visit_count, MAX(v.visited_at) as last_visit
+            FROM customers c LEFT JOIN visits v ON v.customer_id = c.id
+            WHERE c.merchant_id = ?
+            GROUP BY c.id, c.first_name, c.phone, c.birthday, c.qr_token, c.merchant_id, c.created_at
+            ORDER BY last_visit DESC
+        ''', (merchant_id,), fetchall=True)
+    except Exception:
+        # Fallback without birthday column (older DB)
+        return query('''
+            SELECT c.id, c.first_name, c.phone, c.qr_token, c.merchant_id, c.created_at,
+                   COUNT(v.id) as visit_count, MAX(v.visited_at) as last_visit
+            FROM customers c LEFT JOIN visits v ON v.customer_id = c.id
+            WHERE c.merchant_id = ?
+            GROUP BY c.id, c.first_name, c.phone, c.qr_token, c.merchant_id, c.created_at
+            ORDER BY last_visit DESC
+        ''', (merchant_id,), fetchall=True)
 
 
 # ─── Products ───
@@ -354,16 +366,19 @@ def get_top_products(merchant_id, limit=5):
 # ─── Churn Detection ───
 
 def detect_churn_risk(merchant_id):
-    rows = query('''
-        SELECT c.id, c.first_name, c.phone, c.qr_token, c.birthday,
-               COUNT(v.id) as visit_count,
-               MIN(v.visited_at) as first_visit,
-               MAX(v.visited_at) as last_visit
-        FROM customers c JOIN visits v ON v.customer_id = c.id
-        WHERE c.merchant_id = ?
-        GROUP BY c.id, c.first_name, c.phone, c.qr_token, c.birthday
-        HAVING COUNT(v.id) >= 3
-    ''', (merchant_id,), fetchall=True)
+    try:
+        rows = query('''
+            SELECT c.id, c.first_name, c.phone, c.qr_token,
+                   COUNT(v.id) as visit_count,
+                   MIN(v.visited_at) as first_visit,
+                   MAX(v.visited_at) as last_visit
+            FROM customers c JOIN visits v ON v.customer_id = c.id
+            WHERE c.merchant_id = ?
+            GROUP BY c.id, c.first_name, c.phone, c.qr_token
+            HAVING COUNT(v.id) >= 3
+        ''', (merchant_id,), fetchall=True)
+    except Exception:
+        return []
 
     at_risk = []
     now = datetime.now(timezone.utc)
@@ -395,7 +410,7 @@ def detect_churn_risk(merchant_id):
                 'phone': c['phone'], 'visit_count': count,
                 'last_visit': str(c['last_visit']),
                 'days_absent': days_absent, 'avg_interval_days': avg_days,
-                'tier': tier, 'birthday': c['birthday']
+                'tier': tier
             })
 
     return sorted(at_risk, key=lambda x: x['days_absent'], reverse=True)
@@ -404,12 +419,18 @@ def detect_churn_risk(merchant_id):
 # ─── Birthday Alerts ───
 
 def get_upcoming_birthdays(merchant_id, days_ahead=7):
-    customers = get_customers_for_merchant(merchant_id)
+    try:
+        customers = get_customers_for_merchant(merchant_id)
+    except Exception:
+        return []
     upcoming = []
     today = datetime.now().date()
 
     for c in (customers or []):
-        bday = c['birthday']
+        try:
+            bday = c['birthday']
+        except (KeyError, IndexError):
+            continue
         if not bday:
             continue
         try:
@@ -455,17 +476,20 @@ def update_merchant_location(merchant_id, address, latitude, longitude, descript
 
 def get_shops_for_phone(phone):
     """Find all shops a customer (by phone) is registered in."""
-    return query('''
-        SELECT c.id as customer_id, c.first_name, c.qr_token,
-               m.shop_name, m.shop_code, m.address,
-               COUNT(v.id) as visit_count, MAX(v.visited_at) as last_visit
-        FROM customers c
-        JOIN merchants m ON c.merchant_id = m.id
-        LEFT JOIN visits v ON v.customer_id = c.id
-        WHERE c.phone = ?
-        GROUP BY c.id, c.first_name, c.qr_token, m.shop_name, m.shop_code, m.address
-        ORDER BY last_visit DESC
-    ''', (phone,), fetchall=True)
+    try:
+        return query('''
+            SELECT c.id as customer_id, c.first_name, c.qr_token,
+                   m.shop_name, m.shop_code,
+                   COUNT(v.id) as visit_count, MAX(v.visited_at) as last_visit
+            FROM customers c
+            JOIN merchants m ON c.merchant_id = m.id
+            LEFT JOIN visits v ON v.customer_id = c.id
+            WHERE c.phone = ?
+            GROUP BY c.id, c.first_name, c.qr_token, m.shop_name, m.shop_code
+            ORDER BY last_visit DESC
+        ''', (phone,), fetchall=True)
+    except Exception:
+        return []
 
 
 # ─── Promotions ───
@@ -477,10 +501,13 @@ def create_promotion(merchant_id, title, content):
 
 def get_active_promotions():
     """Get recent promotions from all shops (for public display)."""
-    return query('''
-        SELECT m.shop_name, m.shop_code, msg.content, msg.sent_at
-        FROM messages msg
-        JOIN merchants m ON msg.merchant_id = m.id
-        WHERE msg.message_type = 'promotion'
-        ORDER BY msg.sent_at DESC LIMIT 20
-    ''', fetchall=True)
+    try:
+        return query('''
+            SELECT m.shop_name, m.shop_code, msg.content, msg.sent_at
+            FROM messages msg
+            JOIN merchants m ON msg.merchant_id = m.id
+            WHERE msg.message_type = 'promotion'
+            ORDER BY msg.sent_at DESC LIMIT 20
+        ''', fetchall=True)
+    except Exception:
+        return []

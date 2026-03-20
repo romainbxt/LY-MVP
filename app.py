@@ -188,22 +188,50 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    customers = get_customers_for_merchant(current_user.id)
-    at_risk = detect_churn_risk(current_user.id)
-    birthdays = get_upcoming_birthdays(current_user.id)
-    tier_dist = get_tier_distribution(current_user.id)
-    visit_trend = get_visit_trend(current_user.id)
-    top_products = get_top_products(current_user.id)
+    try:
+        customers_raw = get_customers_for_merchant(current_user.id)
+        customer_list = []
+        for c in (customers_raw or []):
+            try:
+                c_dict = dict(c)
+                c_dict['tier'] = get_customer_tier(c['id'])
+                customer_list.append(c_dict)
+            except Exception:
+                customer_list.append(dict(c))
+    except Exception as e:
+        logger.error(f"Dashboard customers error: {e}")
+        customer_list = []
+
+    try:
+        at_risk = detect_churn_risk(current_user.id)
+    except Exception as e:
+        logger.error(f"Dashboard churn error: {e}")
+        at_risk = []
+
+    try:
+        birthdays = get_upcoming_birthdays(current_user.id)
+    except Exception as e:
+        logger.error(f"Dashboard birthdays error: {e}")
+        birthdays = []
+
+    try:
+        tier_dist = get_tier_distribution(current_user.id)
+    except Exception:
+        tier_dist = {'Bronze': 0, 'Silver': 0, 'Gold': 0, 'Platinum': 0}
+
+    try:
+        visit_trend = get_visit_trend(current_user.id)
+    except Exception:
+        visit_trend = []
+
+    try:
+        top_products = get_top_products(current_user.id)
+    except Exception:
+        top_products = []
+
     shop_url = request.host_url + 'join/' + current_user.shop_code
     shop_qr = generate_qr_base64(shop_url)
     employee_url = request.host_url + 'e/' + current_user.shop_code
-
-    # Add tier to each customer
-    customer_list = []
-    for c in (customers or []):
-        c_dict = dict(c)
-        c_dict['tier'] = get_customer_tier(c['id'])
-        customer_list.append(c_dict)
 
     return render_template('dashboard.html',
                            customers=customer_list,
@@ -226,26 +254,43 @@ def customer_profile(customer_id):
     if not customer or customer['merchant_id'] != current_user.id:
         abort(404)
 
-    visits = get_visit_history(customer_id)
-    tier = get_customer_tier(customer_id)
-    visit_count = get_visit_count(customer_id)
-    rewards = check_rewards(customer_id, current_user.id)
-    rules = get_reward_rules(current_user.id)
+    try:
+        visits = get_visit_history(customer_id)
+    except Exception:
+        visits = []
+    try:
+        tier = get_customer_tier(customer_id)
+    except Exception:
+        tier = 'Bronze'
+    try:
+        visit_count = get_visit_count(customer_id)
+    except Exception:
+        visit_count = len(visits) if visits else 0
+    try:
+        rewards = check_rewards(customer_id, current_user.id)
+    except Exception:
+        rewards = []
+    try:
+        rules = get_reward_rules(current_user.id)
+    except Exception:
+        rules = []
 
-    # Calculate progress toward next reward for each active rule
     reward_progress = []
     for rule in (rules or []):
-        if not rule['active']:
+        try:
+            if not rule['active']:
+                continue
+            n = rule['every_n_visits']
+            progress = visit_count % n if n > 0 else 0
+            reward_progress.append({
+                'name': rule['name'],
+                'reward': rule['reward_description'],
+                'current': progress,
+                'target': n,
+                'percent': int((progress / n) * 100) if n > 0 else 0
+            })
+        except Exception:
             continue
-        n = rule['every_n_visits']
-        progress = visit_count % n if n > 0 else 0
-        reward_progress.append({
-            'name': rule['name'],
-            'reward': rule['reward_description'],
-            'current': progress,
-            'target': n,
-            'percent': int((progress / n) * 100) if n > 0 else 0
-        })
 
     return render_template('customer_profile.html',
                            customer=customer, visits=visits, tier=tier,
