@@ -1,102 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LY — Smart loyalty for independent businesses</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/static/landing/assets/index-BoxZ8ZU-.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/landing/assets/index-DZf8IRJO.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-      /* Hide the entire React navbar */
-      #root header,
-      #root nav,
-      #root header + div {
-        display: none !important;
-      }
-      /* Ensure our bar sits properly */
-      #ly-nav {
-        position: fixed;
-        top: 0;
-        right: 0;
-        z-index: 9999;
-        padding: 14px 20px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-      #ly-nav a {
-        color: white;
-        text-decoration: none;
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 500;
-        font-size: 0.85rem;
-        padding: 8px 16px;
-        border-radius: 10px;
-        transition: background 0.2s;
-      }
-      #ly-nav a.nav-link {
-        background: transparent;
-      }
-      #ly-nav a.nav-link:hover {
-        background: rgba(255,255,255,0.1);
-      }
-      #ly-nav a.nav-btn {
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.2);
-        backdrop-filter: blur(10px);
-      }
-      #ly-nav a.nav-btn:hover {
-        background: rgba(255,255,255,0.25);
-      }
-      #ly-nav a.nav-cta {
-        background: #00D2D3;
-        font-weight: 600;
-      }
-      #ly-nav a.nav-cta:hover {
-        background: #00bfbf;
-      }
-      /* Scrolled state: dark text */
-      #ly-nav.scrolled a {
-        color: #2D3436;
-      }
-      #ly-nav.scrolled a.nav-btn {
-        background: rgba(0,0,0,0.05);
-        border-color: rgba(0,0,0,0.1);
-      }
-      #ly-nav.scrolled a.nav-cta {
-        color: white;
-      }
-      @media (max-width: 768px) {
-        #ly-nav a.nav-link { display: none; }
-        #ly-nav { gap: 6px; padding: 14px 12px; }
-        #ly-nav a { padding: 6px 12px; font-size: 0.8rem; }
-      }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:#2D3436; line-height:1.6; }
+        h1,h2,h3 { font-family:'Space Grotesk',sans-serif; }
+
+        /* Nav */
+        .nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:16px 32px; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s; }
+        .nav.scrolled { background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border-bottom:1px solid #eee; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+        .nav-logo { font-family:'Space Grotesk',sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:3px; color:white; text-decoration:none; }
+        .nav.scrolled .nav-logo { color:#6C5CE7; }
+        .nav-links { display:flex; gap:8px; align-items:center; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.85rem; font-weight:500; padding:8px 14px; border-radius:8px; transition:all 0.2s; }
+        .nav-links a:hover { background:rgba(255,255,255,0.12); color:white; }
+        .nav.scrolled .nav-links a { color:#636E72; }
+        .nav.scrolled .nav-links a:hover { background:#f0f0f0; color:#2D3436; }
+        .nav-links .btn-cta { background:#00D2D3; color:white !important; font-weight:600; }
+        .nav-links .btn-cta:hover { background:#00bfbf; }
+        .nav-links .btn-outline { border:1px solid rgba(255,255,255,0.3); }
+        .nav.scrolled .nav-links .btn-outline { border-color:#ddd; }
+        @media(max-width:768px) { .nav-links .hide-mobile { display:none; } .nav { padding:12px 16px; } }
+
+        /* Hero */
+        .hero { background:linear-gradient(135deg, #6C5CE7 0%, #5A4BD1 40%, #4834D4 100%); min-height:100vh; display:flex; align-items:center; position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; background:rgba(162,155,254,0.15); border-radius:50%; filter:blur(80px); }
+        .hero::after { content:''; position:absolute; bottom:-150px; left:-50px; width:400px; height:400px; background:rgba(0,210,211,0.1); border-radius:50%; filter:blur(80px); }
+        .hero-inner { max-width:1100px; margin:0 auto; padding:120px 32px 80px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; position:relative; z-index:1; }
+        @media(max-width:768px) { .hero-inner { grid-template-columns:1fr; padding:100px 20px 60px; } .hero-visual { display:none; } }
+        .hero-badge { display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.9); padding:6px 16px; border-radius:20px; font-size:0.8rem; font-weight:500; margin-bottom:20px; backdrop-filter:blur(4px); }
+        .hero h1 { font-size:3.2rem; font-weight:800; color:white; line-height:1.15; margin-bottom:20px; }
+        .hero h1 span { color:#00D2D3; }
+        .hero p { color:rgba(255,255,255,0.8); font-size:1.1rem; line-height:1.7; max-width:480px; margin-bottom:28px; }
+        .hero-buttons { display:flex; gap:12px; flex-wrap:wrap; }
+        .hero-buttons a { padding:14px 28px; border-radius:12px; font-weight:600; font-size:1rem; text-decoration:none; transition:all 0.2s; }
+        .btn-accent { background:#00D2D3; color:white; box-shadow:0 4px 16px rgba(0,210,211,0.3); }
+        .btn-accent:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,210,211,0.4); }
+        .btn-ghost { border:2px solid rgba(255,255,255,0.3); color:white; }
+        .btn-ghost:hover { background:rgba(255,255,255,0.1); }
+
+        /* Dashboard mockup */
+        .mockup { background:rgba(255,255,255,0.08); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:20px; }
+        .mockup-header { display:flex; gap:6px; margin-bottom:14px; }
+        .mockup-dot { width:10px; height:10px; border-radius:50%; }
+        .mockup-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+        .mockup-stat { background:rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center; }
+        .mockup-stat .val { font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:white; }
+        .mockup-stat .lbl { font-size:0.7rem; color:rgba(255,255,255,0.5); }
+        .mockup-alert { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+        .mockup-alert .text { flex:1; }
+        .mockup-alert .title { color:white; font-size:0.85rem; font-weight:500; }
+        .mockup-alert .sub { color:rgba(255,255,255,0.5); font-size:0.7rem; }
+        .mockup-alert .badge { background:rgba(239,68,68,0.25); color:#FCA5A5; padding:3px 8px; border-radius:10px; font-size:0.65rem; font-weight:600; white-space:nowrap; }
+
+        /* Social proof */
+        .proof { background:#F8F9FA; padding:48px 32px; border-bottom:1px solid #eee; }
+        .proof-inner { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:32px; text-align:center; }
+        @media(max-width:768px) { .proof-inner { grid-template-columns:1fr; gap:20px; } }
+        .proof-val { font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700; color:#6C5CE7; }
+        .proof-lbl { color:#636E72; font-size:0.85rem; margin-top:2px; }
+
+        /* Sections */
+        .section { padding:80px 32px; max-width:1100px; margin:0 auto; }
+        .section-title { text-align:center; margin-bottom:48px; }
+        .section-title h2 { font-size:2.2rem; font-weight:700; margin-bottom:8px; }
+        .section-title p { color:#636E72; font-size:1.05rem; }
+
+        /* Features grid */
+        .features { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        @media(max-width:768px) { .features { grid-template-columns:1fr; } }
+        .feature { background:white; border:1px solid #eee; border-radius:14px; padding:28px; transition:all 0.25s; }
+        .feature:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.06); border-color:#6C5CE7; }
+        .feature-icon { width:44px; height:44px; border-radius:12px; background:#6C5CE710; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:14px; }
+        .feature:hover .feature-icon { background:#6C5CE7; }
+        .feature:hover .feature-icon span { filter:brightness(10); }
+        .feature h3 { font-size:1.05rem; font-weight:600; margin-bottom:6px; }
+        .feature p { color:#636E72; font-size:0.88rem; line-height:1.6; }
+
+        /* Steps */
+        .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+        @media(max-width:768px) { .steps { grid-template-columns:1fr 1fr; } }
+        .step { text-align:center; padding:16px; }
+        .step-num { width:48px; height:48px; border-radius:14px; background:#6C5CE7; color:white; display:inline-flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:14px; box-shadow:0 4px 12px rgba(108,92,231,0.3); }
+        .step h3 { font-size:0.95rem; font-weight:600; margin-bottom:6px; }
+        .step p { color:#636E72; font-size:0.82rem; }
+
+        /* Testimonials */
+        .testimonials { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        @media(max-width:768px) { .testimonials { grid-template-columns:1fr; } }
+        .testimonial { background:white; border:1px solid #eee; border-radius:14px; padding:24px; }
+        .testimonial-quote { color:#636E72; font-size:0.9rem; line-height:1.7; margin-bottom:16px; font-style:italic; }
+        .testimonial-name { font-weight:600; font-size:0.9rem; }
+        .testimonial-role { color:#636E72; font-size:0.8rem; }
+
+        /* CTA */
+        .cta { background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); padding:80px 32px; text-align:center; color:white; }
+        .cta h2 { font-size:2.2rem; font-weight:700; margin-bottom:10px; }
+        .cta p { opacity:0.8; font-size:1.05rem; margin-bottom:28px; }
+
+        /* Footer */
+        .footer { background:#1a1a2e; color:#636E72; padding:40px 32px; text-align:center; font-size:0.85rem; }
+        .footer a { color:#A29BFE; text-decoration:none; margin:0 10px; }
+        .footer-links { margin-bottom:16px; }
+
+        /* Alt bg */
+        .bg-gray { background:#F8F9FA; }
+
+        /* Animations */
+        .fade-in { opacity:0; transform:translateY(20px); transition:all 0.6s ease; }
+        .fade-in.visible { opacity:1; transform:translateY(0); }
     </style>
-  </head>
-  <body>
-    <nav id="ly-nav">
-      <a href="#features" class="nav-link">Features</a>
-      <a href="#how-it-works" class="nav-link">How it works</a>
-      <a href="/partners" class="nav-link">Partners</a>
-      <a href="/map" class="nav-link">Find shops</a>
-      <a href="/login" class="nav-btn">Log in</a>
-      <a href="/register" class="nav-cta">Sign up</a>
-      <a href="/simulate" class="nav-btn">Try demo</a>
-    </nav>
-    <div id="root"></div>
-    <script>
-      // Match nav style to scroll state
-      window.addEventListener('scroll', function() {
-        const nav = document.getElementById('ly-nav');
-        if (window.scrollY > 20) {
-          nav.classList.add('scrolled');
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+    <a href="/" class="nav-logo">LY</a>
+    <div class="nav-links">
+        <a href="#features" class="hide-mobile">Features</a>
+        <a href="#how-it-works" class="hide-mobile">How it works</a>
+        <a href="/partners" class="hide-mobile">Partners</a>
+        <a href="/map" class="hide-mobile">Find shops</a>
+        <a href="/login" class="btn-outline">Log in</a>
+        <a href="/register" class="btn-cta">Sign up</a>
+        <a href="/simulate" class="btn-outline">Demo</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-badge">AI-powered customer retention</div>
+            <h1>Your customers are leaving. <span>You just don't see it yet.</span></h1>
+            <p>LY gives independent cafes, restaurants, and bakeries the power to detect when regulars are drifting away — and act before they're gone. No marketing team required.</p>
+            <div class="hero-buttons">
+                <a href="#waitlist" class="btn-accent">Join the waitlist</a>
+                <a href="#features" class="btn-ghost">Learn more</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="mockup-dot" style="background:#EF4444"></div>
+                    <div class="mockup-dot" style="background:#F59E0B"></div>
+                    <div class="mockup-dot" style="background:#10B981"></div>
+                    <span style="color:rgba(255,255,255,0.4); font-size:0.7rem; margin-left:8px">LY Dashboard</span>
+                </div>
+                <div class="mockup-stats">
+                    <div class="mockup-stat"><div class="val">247</div><div class="lbl">Customers</div></div>
+                    <div class="mockup-stat"><div class="val" style="color:#FCA5A5">12</div><div class="lbl">At risk</div></div>
+                    <div class="mockup-stat"><div class="val" style="color:#00D2D3">38</div><div class="lbl">Today</div></div>
+                </div>
+                <div class="mockup-alert">
+                    <div style="font-size:1.2rem">&#128276;</div>
+                    <div class="text">
+                        <div class="title">Marco hasn't visited in 12 days</div>
+                        <div class="sub">Usually visits every 3 days</div>
+                    </div>
+                    <div class="badge">AT RISK</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Social Proof -->
+<section class="proof">
+    <div class="proof-inner">
+        <div><div class="proof-val">10M+</div><div class="proof-lbl">Independent F&B businesses in Europe</div></div>
+        <div><div class="proof-val">5-7x</div><div class="proof-lbl">Cost of acquiring vs. retaining</div></div>
+        <div><div class="proof-val">37%</div><div class="proof-lbl">At-risk customers recovered with AI</div></div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+    <div class="section-title fade-in">
+        <h2>Built for businesses like yours</h2>
+        <p>No marketing team needed. No complex setup. Just results.</p>
+    </div>
+    <div class="features">
+        <div class="feature fade-in"><div class="feature-icon"><span>&#128200;</span></div><h3>Churn detection</h3><p>Our algorithm spots customers whose visit frequency is dropping. You get an alert before they're gone for good.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><span>&#128242;</span></div><h3>Zero friction</h3><p>No app to download. Customers scan a QR code, enter their name, and they're in. Takes 15 seconds.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><span>&#128202;</span></div><h3>Simple dashboard</h3><p>See all your customers, visit history, and who's at risk. One screen. No complexity.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><span>&#9889;</span></div><h3>Works with any setup</h3><p>LY is independent from your POS. SumUp, Zettle, Square, or cash — it just works.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><span>&#128274;</span></div><h3>GDPR compliant</h3><p>Built in Europe, for Europe. Customer data stays yours. No third-party sharing.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><span>&#9201;</span></div><h3>Set up in 2 minutes</h3><p>Register, print your QR code, stick it at the counter. No training, no onboarding.</p></div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="section bg-gray" id="how-it-works">
+    <div class="section-title fade-in">
+        <h2>How LY works</h2>
+        <p>Set up in 2 minutes. No app download for your customers.</p>
+    </div>
+    <div class="steps">
+        <div class="step fade-in"><div class="step-num">1</div><h3>Display your QR</h3><p>Print the QR code LY generates and place it at your counter.</p></div>
+        <div class="step fade-in"><div class="step-num">2</div><h3>Customers sign up</h3><p>They scan, enter first name & phone, get their loyalty QR.</p></div>
+        <div class="step fade-in"><div class="step-num">3</div><h3>Scan every visit</h3><p>Customer shows their QR, you scan it. Visits tracked automatically.</p></div>
+        <div class="step fade-in"><div class="step-num">4</div><h3>Get smart alerts</h3><p>LY tells you when a regular is slipping away — before it's too late.</p></div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section" id="testimonials">
+    <div class="section-title fade-in">
+        <h2>What owners say</h2>
+    </div>
+    <div class="testimonials">
+        <div class="testimonial fade-in">
+            <p class="testimonial-quote">"I used to notice my regulars were gone only weeks later. Now LY tells me within days. I've already brought back 3 customers this month."</p>
+            <div class="testimonial-name">Francesca R.</div>
+            <div class="testimonial-role">Cafe owner, Berlin</div>
+        </div>
+        <div class="testimonial fade-in">
+            <p class="testimonial-quote">"We tried stamp cards — nobody cared. LY is different because it tells me who's about to leave. That's the information I need."</p>
+            <div class="testimonial-name">Thomas K.</div>
+            <div class="testimonial-role">Bakery owner, Munich</div>
+        </div>
+        <div class="testimonial fade-in">
+            <p class="testimonial-quote">"Set it up in 2 minutes. My customers love the QR system — it's faster than any loyalty app. And I finally have real data."</p>
+            <div class="testimonial-name">Sofia M.</div>
+            <div class="testimonial-role">Restaurant owner, Amsterdam</div>
+        </div>
+    </div>
+</section>
+
+<!-- Waitlist CTA -->
+<section class="cta" id="waitlist">
+    <h2>Ready to keep your regulars?</h2>
+    <p>Join the waitlist and be the first to try LY when we launch.</p>
+    <div style="max-width:420px; margin:0 auto;">
+        <form id="waitlist-form" style="display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="wl-name" placeholder="Your name (optional)" style="padding:14px 16px; border:none; border-radius:10px; font-size:1rem; background:rgba(255,255,255,0.12); color:white; outline:none; border:1px solid rgba(255,255,255,0.2);">
+            <input type="email" id="wl-email" placeholder="your@email.com" required style="padding:14px 16px; border:none; border-radius:10px; font-size:1rem; background:rgba(255,255,255,0.12); color:white; outline:none; border:1px solid rgba(255,255,255,0.2);">
+            <button type="submit" style="padding:14px; border:none; border-radius:10px; font-size:1rem; font-weight:600; background:#00D2D3; color:white; cursor:pointer; transition:background 0.2s; box-shadow:0 4px 16px rgba(0,210,211,0.3);">Join the waitlist</button>
+        </form>
+        <div id="wl-result" style="display:none; margin-top:16px; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; border:1px solid rgba(255,255,255,0.2);">
+            <div style="font-size:2rem; margin-bottom:8px;">&#10003;</div>
+            <div style="font-size:1.1rem; font-weight:600;">You're in!</div>
+            <div style="opacity:0.7; margin-top:4px;">We'll notify you when LY is ready.</div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="/partners">Partners</a>
+        <a href="/map">Find shops</a>
+        <a href="/login">Log in</a>
+        <a href="/register">Sign up</a>
+    </div>
+    <div>LY — Smart loyalty for independent businesses</div>
+    <div style="margin-top:8px; opacity:0.5;">&copy; 2026 LY. All rights reserved.</div>
+</footer>
+
+<script>
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+    });
+});
+
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 30);
+});
+
+// Fade in on scroll
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Waitlist form
+document.getElementById('waitlist-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = document.getElementById('wl-email').value;
+    const name = document.getElementById('wl-name').value;
+    try {
+        const res = await fetch('/api/waitlist', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({email, name})
+        });
+        if (res.ok) {
+            document.getElementById('waitlist-form').style.display = 'none';
+            document.getElementById('wl-result').style.display = 'block';
         } else {
-          nav.classList.remove('scrolled');
+            const data = await res.json();
+            alert(data.detail || 'Something went wrong.');
         }
-      });
-    </script>
-  </body>
+    } catch { alert('Could not connect. Please try again.'); }
+});
+</script>
+
+</body>
 </html>

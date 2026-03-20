@@ -333,12 +333,13 @@ def get_tier_distribution(merchant_id):
 
 def get_visit_trend(merchant_id, days=30):
     """Daily visit counts for the last N days."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime('%Y-%m-%d')
     return query('''
         SELECT DATE(visited_at) as day, COUNT(*) as count
         FROM visits WHERE merchant_id = ?
-        AND visited_at >= datetime('now', ?)
+        AND visited_at >= ?
         GROUP BY DATE(visited_at) ORDER BY day
-    ''', (merchant_id, f'-{days} days'), fetchall=True)
+    ''', (merchant_id, cutoff), fetchall=True)
 
 
 def get_top_products(merchant_id, limit=5):
@@ -433,15 +434,21 @@ def get_upcoming_birthdays(merchant_id, days_ahead=7):
 
 def get_all_shops():
     """Get all merchants with location data for the public map."""
-    return query('''
-        SELECT id, shop_name, shop_code, address, latitude, longitude, description
-        FROM merchants WHERE latitude IS NOT NULL AND longitude IS NOT NULL
-    ''', fetchall=True)
+    try:
+        return query('''
+            SELECT id, shop_name, shop_code, address, latitude, longitude, description
+            FROM merchants WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+        ''', fetchall=True)
+    except Exception:
+        return []
 
 
 def update_merchant_location(merchant_id, address, latitude, longitude, description=None):
-    query('UPDATE merchants SET address = ?, latitude = ?, longitude = ?, description = ? WHERE id = ?',
-          (address, latitude, longitude, description, merchant_id), commit=True)
+    try:
+        query('UPDATE merchants SET address = ?, latitude = ?, longitude = ?, description = ? WHERE id = ?',
+              (address, latitude, longitude, description, merchant_id), commit=True)
+    except Exception:
+        pass
 
 
 # ─── Multi-Shop Customer View ───
