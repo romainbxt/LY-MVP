@@ -675,6 +675,80 @@ def promote():
     return redirect(url_for('messages_page'))
 
 
+# ─── Chatbot API (Gemini Flash) ───
+
+CHATBOT_SYSTEM_PROMPTS = {
+    'visitor': """You are the LY assistant, a smart loyalty platform for independent food & beverage businesses (cafes, restaurants, bakeries).
+You speak English, concisely and friendly.
+What LY does:
+- Merchants create a free account and get a unique QR code for their shop.
+- Customers scan the QR code on each visit to earn points. No app download needed.
+- The merchant gets a dashboard with: visit tracking, at-risk customer detection (churn), birthday alerts, WhatsApp messaging, reward tiers (Bronze, Silver, Gold, Platinum).
+- 3 pricing plans: Starter (free, 50 customers), Growth (29 EUR/month, 500 customers, AI churn detection), Pro (79 EUR/month, unlimited + API).
+- LY is based in Berlin and targets independent businesses in Europe.
+Help the visitor understand the platform and encourage them to sign up. Only answer questions related to LY.""",
+
+    'merchant': """You are the LY assistant. You are talking to a merchant logged into their dashboard.
+You speak English, concisely and practically.
+Help them with:
+- Dashboard: overview of customers, visits, at-risk customers, birthdays.
+- Scan: customers show their QR code, the merchant scans to record a visit.
+- Rewards: configurable in Settings > Reward Rules (e.g. "1 free coffee every 10 visits").
+- Tiers: Bronze, Silver, Gold, Platinum — based on visit frequency and count.
+- Churn: LY automatically detects customers who stop coming based on their usual frequency.
+- Messages: send WhatsApp to at-risk customers, birthdays, promotions.
+- Products: manageable in Settings.
+- Employees: share the employee scan link (no login required).
+Only answer questions related to LY and shop management.""",
+
+    'customer': """You are the LY assistant. You are talking to a customer who has a loyalty card.
+You speak English, concisely and friendly.
+Help them with:
+- Loyalty card: accessible via the link received, contains a QR code to show at the counter.
+- Visits: each scan = 1 visit recorded. Visits accumulate toward tiers.
+- Tiers: Bronze, Silver, Gold, Platinum. Each tier can unlock rewards.
+- Rewards: set by the merchant (e.g. free coffee every 10 visits).
+- Multi-shop: customers can have cards at multiple shops, findable by phone number on /my-shops.
+- Tip: bookmark the card page for quick access.
+Only answer questions related to LY and the loyalty card."""
+}
+
+@app.route('/api/chat', methods=['POST'])
+@csrf.exempt
+@limiter.limit("30 per minute")
+def api_chat():
+    data = request.get_json(silent=True)
+    if not data or not data.get('message'):
+        return jsonify({'reply': "I didn't understand your message."}), 400
+
+    user_message = data['message'][:500]
+    user_role = data.get('role', 'visitor')
+    chat_history = data.get('history', [])
+
+    system_prompt = CHATBOT_SYSTEM_PROMPTS.get(user_role, CHATBOT_SYSTEM_PROMPTS['visitor'])
+
+    contents = [system_prompt + "\n\n"]
+    for msg in chat_history[-10:]:
+        prefix = "User: " if msg.get('role') == 'user' else "Assistant: "
+        contents.append(prefix + msg.get('content', '') + "\n")
+    contents.append("User: " + user_message)
+
+    try:
+        from google import genai
+        api_key = os.environ.get('GEMINI_API_KEY', '')
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents="".join(contents),
+        )
+        reply = response.text.strip()
+    except Exception as e:
+        logger.error(f"Gemini API error: {e}")
+        reply = "Sorry, I'm not available right now. Please try again in a moment."
+
+    return jsonify({'reply': reply})
+
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=os.environ.get('FLASK_DEBUG', 'true').lower() == 'true', port=5000)
