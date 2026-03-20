@@ -34,6 +34,29 @@ init_db()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(32).hex())
+
+# Jinja filter to format dates (handles both string and datetime objects)
+@app.template_filter('fdate')
+def format_date(value):
+    if value is None:
+        return ''
+    if isinstance(value, str):
+        return value[:10]
+    try:
+        return value.strftime('%Y-%m-%d')
+    except Exception:
+        return str(value)[:10]
+
+@app.template_filter('fdatetime')
+def format_datetime(value):
+    if value is None:
+        return ''
+    if isinstance(value, str):
+        return value[:16]
+    try:
+        return value.strftime('%Y-%m-%d %H:%M')
+    except Exception:
+        return str(value)[:16]
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=12)

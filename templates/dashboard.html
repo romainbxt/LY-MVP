@@ -133,7 +133,7 @@
                 <div style="text-align:right">
                     <strong>{{ c.visit_count }}</strong> visits
                     <div class="customer-meta">
-                        {% if c.last_visit %}Last: {{ c.last_visit[:10] }}{% else %}No visits{% endif %}
+                        {% if c.last_visit %}Last: {{ c.last_visit|fdate }}{% else %}No visits{% endif %}
                     </div>
                 </div>
             </li>

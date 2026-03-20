@@ -104,7 +104,7 @@
                 </div>
                 <div style="text-align:right">
                     <span style="font-size:0.75rem; background:var(--success); color:white; padding:2px 8px; border-radius:10px">{{ m.message_type }}</span>
-                    <div class="customer-meta">{{ m.sent_at[:16] if m.sent_at else '' }}</div>
+                    <div class="customer-meta">{{ m.sent_at|fdatetime }}</div>
                 </div>
             </li>
             {% endfor %}

@@ -52,7 +52,7 @@
                 {{ p.content }}
                 {% endif %}
             </div>
-            <div class="customer-meta" style="margin-top:4px">{{ p.sent_at[:10] if p.sent_at else '' }}</div>
+            <div class="customer-meta" style="margin-top:4px">{{ p.sent_at|fdate }}</div>
         </div>
         {% endfor %}
     </div>

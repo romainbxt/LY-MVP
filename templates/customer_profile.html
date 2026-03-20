@@ -36,7 +36,7 @@
         </div>
         <div class="customer-item">
             <span>Joined</span>
-            <span>{{ customer.created_at[:10] if customer.created_at else 'Unknown' }}</span>
+            <span>{{ customer.created_at|fdate if customer.created_at else 'Unknown' }}</span>
         </div>
         <div class="customer-item">
             <span>Tier</span>
@@ -85,7 +85,7 @@
                 <span>Visit #{{ visit_count - loop.index0 }}</span>
                 <div style="text-align:right">
                     {% if v.product_name %}<span class="customer-meta">{{ v.product_name }}</span><br>{% endif %}
-                    <span class="customer-meta">{{ v.visited_at[:16] if v.visited_at else '' }}</span>
+                    <span class="customer-meta">{{ v.visited_at|fdatetime }}</span>
                 </div>
             </li>
             {% endfor %}
