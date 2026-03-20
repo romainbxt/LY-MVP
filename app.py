@@ -115,7 +115,34 @@ def server_error(e):
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return render_template('landing.html')
+    return render_template('landing_react.html')
+
+
+# ─── Waitlist API ───
+
+@app.route('/api/waitlist', methods=['POST'])
+@limiter.limit("10 per hour")
+@csrf.exempt
+def api_waitlist():
+    from models import get_db
+    data = request.get_json()
+    if not data or not data.get('email'):
+        return jsonify({'detail': 'Email is required'}), 400
+
+    email = data['email'].strip().lower()
+    name = data.get('name', '').strip()
+
+    conn = get_db()
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS waitlist (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE NOT NULL, name TEXT, signed_up_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
+        conn.execute("INSERT INTO waitlist (email, name) VALUES (?, ?)", (email, name))
+        conn.commit()
+        count = conn.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
+        conn.close()
+        return jsonify({'success': True, 'message': "You're on the list!", 'position': count})
+    except Exception:
+        conn.close()
+        return jsonify({'detail': 'This email is already on the waitlist.'}), 409
 
 
 @app.route('/register', methods=['GET', 'POST'])
