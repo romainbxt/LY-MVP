@@ -9,15 +9,95 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/static/landing/assets/index-BoxZ8ZU-.js"></script>
     <link rel="stylesheet" crossorigin href="/static/landing/assets/index-DZf8IRJO.css">
+    <style>
+      /* Hide the React navbar's right side links to avoid duplication */
+      #root nav > div:last-child {
+        display: none !important;
+      }
+      /* Hide React mobile menu button */
+      #root nav > button {
+        display: none !important;
+      }
+      /* Ensure our bar sits properly */
+      #ly-nav {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 9999;
+        padding: 14px 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      #ly-nav a {
+        color: white;
+        text-decoration: none;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        border-radius: 10px;
+        transition: background 0.2s;
+      }
+      #ly-nav a.nav-link {
+        background: transparent;
+      }
+      #ly-nav a.nav-link:hover {
+        background: rgba(255,255,255,0.1);
+      }
+      #ly-nav a.nav-btn {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+      }
+      #ly-nav a.nav-btn:hover {
+        background: rgba(255,255,255,0.25);
+      }
+      #ly-nav a.nav-cta {
+        background: #00D2D3;
+        font-weight: 600;
+      }
+      #ly-nav a.nav-cta:hover {
+        background: #00bfbf;
+      }
+      /* Scrolled state: dark text */
+      #ly-nav.scrolled a {
+        color: #2D3436;
+      }
+      #ly-nav.scrolled a.nav-btn {
+        background: rgba(0,0,0,0.05);
+        border-color: rgba(0,0,0,0.1);
+      }
+      #ly-nav.scrolled a.nav-cta {
+        color: white;
+      }
+      @media (max-width: 768px) {
+        #ly-nav a.nav-link { display: none; }
+        #ly-nav { gap: 6px; padding: 14px 12px; }
+        #ly-nav a { padding: 6px 12px; font-size: 0.8rem; }
+      }
+    </style>
   </head>
   <body>
-    <!-- Quick access bar for merchants -->
-    <div id="merchant-bar" style="position:fixed; top:0; right:0; z-index:9999; padding:16px 24px; display:flex; gap:12px;">
-      <a href="/login" style="background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; border:1px solid rgba(255,255,255,0.2); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">Log in</a>
-      <a href="/register" style="background:#00D2D3; color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; transition:background 0.2s;" onmouseover="this.style.background='#00bfbf'" onmouseout="this.style.background='#00D2D3'">Sign up</a>
-      <a href="/map" style="background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; border:1px solid rgba(255,255,255,0.15); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Find shops</a>
-      <a href="/simulate" style="background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); color:white; padding:8px 20px; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.85rem; border:1px solid rgba(255,255,255,0.15); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">Try demo</a>
-    </div>
+    <nav id="ly-nav">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="/map" class="nav-link">Find shops</a>
+      <a href="/login" class="nav-btn">Log in</a>
+      <a href="/register" class="nav-cta">Sign up</a>
+      <a href="/simulate" class="nav-btn">Try demo</a>
+    </nav>
     <div id="root"></div>
+    <script>
+      // Match nav style to scroll state
+      window.addEventListener('scroll', function() {
+        const nav = document.getElementById('ly-nav');
+        if (window.scrollY > 20) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+      });
+    </script>
   </body>
 </html>
