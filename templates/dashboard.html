@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}LY - {{ current_user.shop_name }}{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+    <span class="logo">LY</span>
+    <div>
+        <span>{{ current_user.shop_name }}</span>
+        <a href="{{ url_for('scan') }}">Scanner</a>
+        <a href="{{ url_for('logout') }}">Déconnexion</a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-box">
+            <div class="number">{{ customers|length }}</div>
+            <div class="label">Clients</div>
+        </div>
+        <div class="stat-box">
+            <div class="number">{{ at_risk|length }}</div>
+            <div class="label" style="color: var(--danger)">A risque</div>
+        </div>
+        <div class="stat-box">
+            <div class="number">
+                {% set total_visits = customers|sum(attribute='visit_count') %}
+                {{ total_visits }}
+            </div>
+            <div class="label">Visites totales</div>
+        </div>
+    </div>
+
+    <!-- Churn Alerts -->
+    {% if at_risk %}
+    <div class="card">
+        <h2>Clients à risque</h2>
+        {% for c in at_risk %}
+        <div class="churn-alert">
+            <div>
+                <strong>{{ c.first_name }}</strong>
+                <div class="customer-meta">
+                    {{ c.visit_count }} visites &middot;
+                    Absent depuis {{ c.days_absent }} jours
+                    (moyenne : {{ c.avg_interval_days }}j)
+                </div>
+            </div>
+            <span class="risk-badge">A RISQUE</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- QR Code du commerce -->
+    <div class="card">
+        <h2>QR Code de votre commerce</h2>
+        <p style="margin-bottom:12px; color: var(--text-light); font-size:0.9rem">
+            Affichez ce QR code au comptoir. Vos nouveaux clients le scannent pour s'inscrire.
+        </p>
+        <div class="qr-container">
+            <img src="data:image/png;base64,{{ shop_qr }}" alt="QR Code commerce">
+            <p style="margin-top:10px; font-size:0.8rem; color: var(--text-light)">
+                {{ shop_url }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Customer List -->
+    <div class="card">
+        <h2>Tous les clients</h2>
+        {% if customers %}
+        <ul class="customer-list">
+            {% for c in customers %}
+            <li class="customer-item">
+                <div>
+                    <span class="customer-name">{{ c.first_name }}</span>
+                    <div class="customer-meta">{{ c.phone }}</div>
+                </div>
+                <div style="text-align:right">
+                    <strong>{{ c.visit_count }}</strong> visites
+                    <div class="customer-meta">
+                        {% if c.last_visit %}
+                        Dernière : {{ c.last_visit[:10] }}
+                        {% else %}
+                        Aucune visite
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color: var(--text-light); text-align:center; padding:20px">
+            Aucun client pour l'instant. Affichez votre QR code au comptoir !
+        </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
