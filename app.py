@@ -22,7 +22,9 @@ from models import (
     get_products, create_product, toggle_product,
     get_reward_rules, create_reward_rule, toggle_reward_rule, check_rewards,
     get_customer_tier, get_tier_distribution, get_visit_trend, get_top_products,
-    log_message, get_messages, query
+    log_message, get_messages, query,
+    get_all_shops, update_merchant_location, get_shops_for_phone,
+    create_promotion, get_active_promotions
 )
 
 # ─── App Config ───
@@ -473,6 +475,77 @@ def simulate():
         return redirect(url_for('dashboard'))
     flash('Could not create demo data.', 'error')
     return redirect(url_for('login'))
+
+
+# ─── Shop Map (Public) ───
+
+@app.route('/map')
+def shop_map():
+    shops_raw = get_all_shops()
+    shops = [dict(s) for s in (shops_raw or [])]
+    promotions_raw = get_active_promotions()
+    promotions = [dict(p) for p in (promotions_raw or [])]
+    return render_template('map.html', shops=shops, promotions=promotions)
+
+@app.route('/api/shops')
+@csrf.exempt
+def api_shops():
+    shops = get_all_shops()
+    return jsonify([dict(s) for s in (shops or [])])
+
+
+# ─── Multi-Shop Customer View ───
+
+@app.route('/my-shops', methods=['GET', 'POST'])
+def my_shops():
+    shops = None
+    phone = ''
+    if request.method == 'POST':
+        phone = sanitize_string(request.form.get('phone', ''), max_length=20)
+        if phone:
+            shops = get_shops_for_phone(phone)
+    return render_template('my_shops.html', shops=shops, phone=phone)
+
+
+# ─── Merchant Location Settings ───
+
+@app.route('/settings/location', methods=['POST'])
+@login_required
+def update_location():
+    address = sanitize_string(request.form.get('address', ''), max_length=200)
+    lat = request.form.get('latitude', '')
+    lng = request.form.get('longitude', '')
+    description = sanitize_string(request.form.get('description', ''), max_length=300)
+
+    try:
+        lat = float(lat) if lat else None
+        lng = float(lng) if lng else None
+    except ValueError:
+        lat, lng = None, None
+
+    update_merchant_location(current_user.id, address, lat, lng, description)
+    flash('Location updated.', 'success')
+    return redirect(url_for('settings'))
+
+
+# ─── Promotion Broadcast ───
+
+@app.route('/promote', methods=['POST'])
+@login_required
+def promote():
+    title = sanitize_string(request.form.get('promo_title', ''))
+    content = sanitize_string(request.form.get('promo_content', ''), max_length=300)
+
+    if not title or not content:
+        flash('Title and content are required.', 'error')
+        return redirect(url_for('messages_page'))
+
+    create_promotion(current_user.id, title, content)
+
+    # Send to all customers via WhatsApp links
+    customers = get_customers_for_merchant(current_user.id)
+    flash(f'Promotion "{title}" published! {len(customers or [])} customers can be reached.', 'success')
+    return redirect(url_for('messages_page'))
 
 
 if __name__ == '__main__':

@@ -56,7 +56,9 @@ def init_db():
         cur.execute('''CREATE TABLE IF NOT EXISTS merchants (
             id SERIAL PRIMARY KEY, name TEXT NOT NULL, shop_name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL,
-            shop_code TEXT UNIQUE NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            shop_code TEXT UNIQUE NOT NULL,
+            address TEXT, latitude REAL, longitude REAL, description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )''')
         cur.execute('''CREATE TABLE IF NOT EXISTS customers (
             id SERIAL PRIMARY KEY, first_name TEXT NOT NULL, phone TEXT NOT NULL,
@@ -97,6 +99,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
                 shop_name TEXT NOT NULL, email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL, shop_code TEXT UNIQUE NOT NULL,
+                address TEXT, latitude REAL, longitude REAL, description TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS customers (
@@ -408,3 +411,53 @@ def get_upcoming_birthdays(merchant_id, days_ahead=7):
             continue
 
     return sorted(upcoming, key=lambda x: x['days_until'])
+
+
+# ─── Shop Map ───
+
+def get_all_shops():
+    """Get all merchants with location data for the public map."""
+    return query('''
+        SELECT id, shop_name, shop_code, address, latitude, longitude, description
+        FROM merchants WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+    ''', fetchall=True)
+
+
+def update_merchant_location(merchant_id, address, latitude, longitude, description=None):
+    query('UPDATE merchants SET address = ?, latitude = ?, longitude = ?, description = ? WHERE id = ?',
+          (address, latitude, longitude, description, merchant_id), commit=True)
+
+
+# ─── Multi-Shop Customer View ───
+
+def get_shops_for_phone(phone):
+    """Find all shops a customer (by phone) is registered in."""
+    return query('''
+        SELECT c.id as customer_id, c.first_name, c.qr_token,
+               m.shop_name, m.shop_code, m.address,
+               COUNT(v.id) as visit_count, MAX(v.visited_at) as last_visit
+        FROM customers c
+        JOIN merchants m ON c.merchant_id = m.id
+        LEFT JOIN visits v ON v.customer_id = c.id
+        WHERE c.phone = ?
+        GROUP BY c.id, c.first_name, c.qr_token, m.shop_name, m.shop_code, m.address
+        ORDER BY last_visit DESC
+    ''', (phone,), fetchall=True)
+
+
+# ─── Promotions ───
+
+def create_promotion(merchant_id, title, content):
+    query('INSERT INTO messages (merchant_id, message_type, content) VALUES (?, ?, ?)',
+          (merchant_id, 'promotion', f'{title}|{content}'), commit=True)
+
+
+def get_active_promotions():
+    """Get recent promotions from all shops (for public display)."""
+    return query('''
+        SELECT m.shop_name, m.shop_code, msg.content, msg.sent_at
+        FROM messages msg
+        JOIN merchants m ON msg.merchant_id = m.id
+        WHERE msg.message_type = 'promotion'
+        ORDER BY msg.sent_at DESC LIMIT 20
+    ''', fetchall=True)

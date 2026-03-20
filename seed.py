@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash
 from models import (
     init_db, create_merchant, get_merchant_by_email, create_customer,
     get_customer_by_token, log_visit, create_product, get_products,
-    create_reward_rule, query
+    create_reward_rule, update_merchant_location, create_promotion, query
 )
 
 def seed():
@@ -75,6 +75,13 @@ def seed():
             )
 
         print(f'  {name}: {total_visits} visits (avg every {avg_interval_days}d)')
+
+    # Add location to demo shop
+    update_merchant_location(mid, 'Oranienstraße 42, 10999 Berlin', 52.5024, 13.4215,
+                             'Cozy Italian-style cafe with the best espresso in Kreuzberg')
+
+    # Add a demo promotion
+    create_promotion(mid, 'Monday Special', '2-for-1 cappuccinos every Monday 8-10am!')
 
     # Make Pierre and Carlos clearly at-risk by making their last visit long ago
     # Pierre: last visit 21 days ago (avg 7d → 3x overdue)

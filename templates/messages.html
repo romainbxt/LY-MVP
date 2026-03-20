@@ -71,6 +71,26 @@
     </div>
     {% endif %}
 
+    <!-- Broadcast Promotion -->
+    <div class="card">
+        <h2>Broadcast a promotion</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Publish a promotion visible to all customers on the LY map. Also generates WhatsApp messages.
+        </p>
+        <form action="{{ url_for('promote') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Promotion title</label>
+                <input type="text" name="promo_title" required placeholder="Happy Hour Special!">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="promo_content" required placeholder="50% off all cappuccinos this Friday 3-5pm">
+            </div>
+            <button type="submit" class="btn btn-success btn-full">Publish promotion</button>
+        </form>
+    </div>
+
     <!-- Message History -->
     <div class="card">
         <h2>Sent messages</h2>

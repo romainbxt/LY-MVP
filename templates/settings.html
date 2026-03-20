@@ -140,5 +140,51 @@
         </p>
     </div>
 
+    <!-- Location -->
+    <div class="card">
+        <h2>Shop location</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Add your location to appear on the LY map. Customers can find you nearby.
+        </p>
+        <form method="POST" action="{{ url_for('update_location') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" name="address" placeholder="123 Main St, Berlin 10115">
+            </div>
+            <div style="display:flex; gap:8px">
+                <div class="form-group" style="flex:1">
+                    <label>Latitude</label>
+                    <input type="text" name="latitude" placeholder="52.5200" id="lat-input">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Longitude</label>
+                    <input type="text" name="longitude" placeholder="13.4050" id="lng-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Short description</label>
+                <input type="text" name="description" placeholder="Cozy cafe with the best espresso in Kreuzberg">
+            </div>
+            <button type="button" onclick="getMyLocation()" class="btn btn-primary" style="margin-bottom:8px">Use my current location</button>
+            <button type="submit" class="btn btn-success btn-full">Save location</button>
+        </form>
+    </div>
+
 </div>
+
+<script>
+function getMyLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            document.getElementById('lat-input').value = pos.coords.latitude.toFixed(6);
+            document.getElementById('lng-input').value = pos.coords.longitude.toFixed(6);
+        }, function() {
+            alert('Could not get your location. Please enter it manually.');
+        });
+    } else {
+        alert('Geolocation is not supported by your browser.');
+    }
+}
+</script>
 {% endblock %}
