@@ -5,295 +5,262 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LY — Final Pitch</title>
 <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; -webkit-font-smoothing:antialiased; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif;-webkit-font-smoothing:antialiased}
 
-    .slide { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:60px 100px; opacity:0; transform:scale(0.97); transition:all 0.6s cubic-bezier(0.4,0,0.2,1); pointer-events:none; }
-    .slide.active { opacity:1; transform:scale(1); pointer-events:all; }
+    .slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;transform:scale(0.96);transition:all 0.5s cubic-bezier(0.4,0,0.2,1);pointer-events:none}
+    .slide.active{opacity:1;transform:scale(1);pointer-events:all}
 
-    .bg-purple { background:linear-gradient(135deg, #6C5CE7, #4834D4); color:white; }
-    .bg-white { background:#fff; color:#2D3436; }
-    .bg-dark { background:#0f0f1a; color:white; }
-    .bg-accent { background:linear-gradient(135deg, #00D2D3, #00A3A4); color:white; }
-    .bg-cafe { background:linear-gradient(135deg, rgba(108,92,231,0.9), rgba(72,52,212,0.85)), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&h=900&fit=crop') center/cover; color:white; }
-    .bg-story { background:linear-gradient(to right, rgba(15,15,26,0.95), rgba(15,15,26,0.8)), url('https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=1600&h=900&fit=crop') right/cover; color:white; }
-    .bg-green { background:linear-gradient(135deg, #27AE60, #1E8449); color:white; }
+    .bg-purple{background:linear-gradient(135deg,#6C5CE7,#4834D4);color:#fff}
+    .bg-white{background:#fff;color:#2D3436}
+    .bg-dark{background:#0f0f1a;color:#fff}
+    .bg-accent{background:linear-gradient(135deg,#00D2D3,#00A3A4);color:#fff}
+    .bg-cafe{background:linear-gradient(135deg,rgba(108,92,231,0.88),rgba(72,52,212,0.85)),url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&h=900&fit=crop') center/cover;color:#fff}
+    .bg-story{background:linear-gradient(to right,rgba(15,15,26,0.95),rgba(15,15,26,0.75)),url('/static/img/francesca.png') right/cover no-repeat;background-color:#0f0f1a;color:#fff}
 
-    h1 { font-size:4.5rem; font-weight:800; letter-spacing:-0.04em; line-height:1.05; }
-    h2 { font-size:3.2rem; font-weight:700; letter-spacing:-0.03em; line-height:1.1; }
-    .mega { font-size:6rem; font-weight:800; letter-spacing:-0.04em; }
-    .big { font-size:2rem; font-weight:400; opacity:0.85; line-height:1.5; }
-    .medium { font-size:1.4rem; line-height:1.6; opacity:0.8; }
-    .small { font-size:1rem; opacity:0.5; }
-    .accent { color:#00D2D3; }
-    .red { color:#FF6B6B; }
-    .center { text-align:center; }
-    .left { text-align:left; align-items:flex-start; }
+    h1{font-size:4.2rem;font-weight:800;letter-spacing:-0.04em;line-height:1.05}
+    h2{font-size:3rem;font-weight:700;letter-spacing:-0.03em;line-height:1.1}
+    .logo{font-size:7rem;font-weight:800;letter-spacing:12px}
+    .big{font-size:1.8rem;font-weight:400;opacity:0.85;line-height:1.5}
+    .medium{font-size:1.3rem;line-height:1.6;opacity:0.8}
+    .small{font-size:1rem;opacity:0.5}
+    .accent{color:#00D2D3}
+    .red{color:#FF6B6B}
+    .center{text-align:center}
 
-    .split { display:grid; grid-template-columns:1fr 1fr; gap:80px; width:100%; max-width:1100px; align-items:center; }
-    .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:32px; width:100%; max-width:1000px; }
-    .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; width:100%; max-width:1050px; }
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:64px;width:100%;max-width:1100px;align-items:center}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;width:100%;max-width:1000px}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;width:100%;max-width:1050px}
 
-    .card { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:32px; text-align:center; }
-    .card-white { background:white; border:1px solid #eee; border-radius:20px; padding:32px; color:#2D3436; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center; }
+    .card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:28px;text-align:center}
+    .card-w{background:#fff;border:1px solid #eee;border-radius:20px;padding:28px;color:#2D3436;box-shadow:0 4px 20px rgba(0,0,0,0.06);text-align:center}
 
-    .stat-num { font-size:4rem; font-weight:800; letter-spacing:-0.03em; line-height:1; }
-    .stat-label { font-size:0.95rem; opacity:0.6; margin-top:6px; }
+    .sn{font-size:4.5rem;font-weight:800;letter-spacing:-0.03em;line-height:1}
+    .sl{font-size:0.95rem;opacity:0.6;margin-top:6px}
 
-    .badge { display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); padding:8px 20px; border-radius:24px; font-size:0.9rem; font-weight:500; margin-bottom:24px; letter-spacing:0.5px; }
+    .badge{display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);padding:8px 20px;border-radius:24px;font-size:0.9rem;font-weight:500;margin-bottom:24px}
 
-    blockquote { font-size:2rem; font-style:italic; line-height:1.5; max-width:750px; border-left:4px solid #00D2D3; padding-left:28px; }
+    blockquote{font-size:2.2rem;font-style:italic;line-height:1.5;max-width:700px;border-left:4px solid #00D2D3;padding-left:28px}
 
-    .step-num { width:56px; height:56px; border-radius:16px; background:#6C5CE7; color:white; display:inline-flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; margin-bottom:12px; }
-    .step h3 { font-size:1.1rem; font-weight:600; margin-bottom:4px; }
-    .step p { font-size:0.85rem; opacity:0.6; }
+    .step-n{width:56px;height:56px;border-radius:16px;background:#6C5CE7;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;margin-bottom:12px}
+    .step h3{font-size:1.1rem;font-weight:600;margin-bottom:4px}
+    .step p{font-size:0.85rem;opacity:0.6}
 
-    .team-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:40px; }
-    .team-avatar { width:90px; height:90px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.5rem; margin:0 auto 12px; }
-    .team-name { font-weight:600; font-size:1.05rem; }
-    .team-role { font-size:0.85rem; opacity:0.5; }
-
-    .logo { font-size:7rem; font-weight:800; letter-spacing:12px; }
+    /* Team with real photos */
+    .tg{display:grid;grid-template-columns:repeat(4,1fr);gap:40px}
+    .tm{text-align:center}
+    .ta{width:110px;height:110px;border-radius:50%;margin:0 auto 12px;object-fit:cover;border:3px solid rgba(255,255,255,0.2)}
+    .tn{font-weight:600;font-size:1.05rem}
+    .tr{font-size:0.85rem;opacity:0.5}
 
     /* Animations */
-    .slide.active .a1 { animation: up 0.6s ease forwards; }
-    .slide.active .a2 { animation: up 0.6s 0.12s ease forwards; opacity:0; }
-    .slide.active .a3 { animation: up 0.6s 0.24s ease forwards; opacity:0; }
-    .slide.active .a4 { animation: up 0.6s 0.36s ease forwards; opacity:0; }
-    @keyframes up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .slide.active .a1{animation:up .6s ease forwards}
+    .slide.active .a2{animation:up .6s .12s ease forwards;opacity:0}
+    .slide.active .a3{animation:up .6s .24s ease forwards;opacity:0}
+    .slide.active .a4{animation:up .6s .36s ease forwards;opacity:0}
+    @keyframes up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
-    /* Progress */
-    .progress { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:100; }
-    .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.25); cursor:pointer; transition:all 0.3s; }
-    .dot.active { background:white; width:28px; border-radius:4px; }
-    .progress.light .dot { background:rgba(0,0,0,0.12); }
-    .progress.light .dot.active { background:#6C5CE7; }
-    .snum { position:fixed; bottom:24px; right:32px; font-size:0.8rem; opacity:0.3; z-index:100; }
+    .progress{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:100}
+    .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);cursor:pointer;transition:all .3s}
+    .dot.on{background:#fff;width:28px;border-radius:4px}
+    .progress.lt .dot{background:rgba(0,0,0,0.12)}
+    .progress.lt .dot.on{background:#6C5CE7}
+    .snum{position:fixed;bottom:24px;right:32px;font-size:.8rem;opacity:.3;z-index:100}
 </style>
 </head>
 <body>
 
-<!-- 1. TITLE -->
-<div class="slide bg-cafe active" id="s0">
-    <div class="badge a1">VALI Sustainability Bootcamp — ESMT Berlin — March 2026</div>
-    <div class="logo a2">LY</div>
-    <p class="big a3" style="margin-top:8px; text-align:center">Smart loyalty for independent businesses</p>
-</div>
-
-<!-- 2. STORY HOOK -->
-<div class="slide bg-story left" id="s1">
-    <blockquote class="a1">
-        "Marco came every Monday for three years.<br>
-        Double espresso, no sugar.<br><br>
-        Then one day, he just stopped.<br>
-        <strong style="color:#FF6B6B">And Francesca had no way of knowing.</strong>"
-    </blockquote>
-</div>
-
-<!-- 3. THE PROBLEM -->
-<div class="slide bg-dark center" id="s2">
-    <h2 class="a1">The <span class="red">silent</span> revenue killer</h2>
-    <div class="grid4 a2" style="margin-top:48px">
-        <div>
-            <div class="stat-num">10M+</div>
-            <div class="stat-label">Independent F&B<br>businesses in Europe</div>
-        </div>
-        <div>
-            <div class="stat-num red">78%</div>
-            <div class="stat-label">of guests never<br>return after 1st visit</div>
-        </div>
-        <div>
-            <div class="stat-num">5-7x</div>
-            <div class="stat-label">cheaper to retain<br>than acquire</div>
-        </div>
-        <div>
-            <div class="stat-num red">&euro;375K</div>
-            <div class="stat-label">lost per restaurant<br>per year to churn</div>
-        </div>
+<!-- 1. THIS IS FRANCESCA -->
+<div class="slide bg-story active">
+    <div class="a1" style="max-width:600px">
+        <div class="badge">VALI Bootcamp — ESMT Berlin</div>
+        <h1 style="font-size:3.5rem">This is Francesca.</h1>
+        <p class="big a2" style="margin-top:16px">She owns a coffee shop in Kreuzberg.<br>She knows all her regulars by name.</p>
+        <p class="big a3" style="margin-top:16px; color:#FF6B6B; font-weight:600">But last month, five of them just... stopped coming.</p>
     </div>
+</div>
+
+<!-- 2. THE PROBLEM -->
+<div class="slide bg-dark center">
+    <h2 class="a1">The <span class="red">silent</span> revenue killer</h2>
+    <p class="medium a2" style="margin-top:8px">SMEs are losing customers — without noticing</p>
+    <div class="grid4 a3" style="margin-top:48px">
+        <div><div class="sn">10M+</div><div class="sl">Independent F&B<br>businesses in Europe</div></div>
+        <div><div class="sn red">78%</div><div class="sl">of guests never return<br>after 1st visit</div></div>
+        <div><div class="sn">5-25x</div><div class="sl">cheaper to retain<br>than acquire</div></div>
+        <div><div class="sn accent">+95%</div><div class="sl">profit boost from just<br>5% more retention</div></div>
+    </div>
+    <p class="a4 small" style="margin-top:24px">Sources: FiveStars, HBR, Restroworks</p>
+</div>
+
+<!-- 3. INVISIBLE CHURN -->
+<div class="slide bg-purple center">
+    <h1 class="a1">Invisible churn.</h1>
+    <p class="big a2" style="margin-top:16px; max-width:700px">No data on who's coming less often.<br>No tools to bring them back.<br>No time to figure it out.</p>
+    <p class="big a3" style="margin-top:24px; font-weight:600">By the time you notice a regular is gone —<br><span class="accent">it's too late.</span></p>
 </div>
 
 <!-- 4. WHY SOLUTIONS FAIL -->
-<div class="slide bg-white center" id="s3">
+<div class="slide bg-white center">
     <h2 class="a1">Today's tools <span style="color:#E74C3C">don't work</span></h2>
     <div class="split a2" style="margin-top:48px">
-        <div class="card-white" style="border-left:4px solid #E74C3C">
-            <h2 style="font-size:1.8rem; color:#E74C3C">Stamp cards</h2>
-            <p class="medium" style="margin-top:12px">"Buy 10, get 1 free"<br><br>No intelligence.<br>Can't detect who's leaving.</p>
+        <div class="card-w" style="border-left:4px solid #E74C3C">
+            <h2 style="font-size:1.8rem;color:#E74C3C">Stamp cards</h2>
+            <p class="medium" style="margin-top:12px">"Buy 10, get 1 free"<br><br>No intelligence.<br><strong>Can't detect who's leaving.</strong></p>
         </div>
-        <div class="card-white" style="border-left:4px solid #636E72">
-            <h2 style="font-size:1.8rem; color:#636E72">Enterprise CRMs</h2>
-            <p class="medium" style="margin-top:12px">HubSpot. Salesforce.<br><br>€1000+/month.<br>Not built for a 5-person cafe.</p>
+        <div class="card-w" style="border-left:4px solid #636E72">
+            <h2 style="font-size:1.8rem;color:#636E72">Enterprise CRMs</h2>
+            <p class="medium" style="margin-top:12px">HubSpot. Salesforce.<br><br>€1,000+/month.<br><strong>Not built for a 5-person cafe.</strong></p>
         </div>
     </div>
 </div>
 
-<!-- 5. THE GAP -->
-<div class="slide bg-purple center" id="s4">
-    <div class="badge a1">The opportunity</div>
-    <h1 class="a2">No one offers<br><span class="accent">affordable AI retention</span><br>for independent F&B.</h1>
-    <p class="big a3" style="margin-top:24px">Until now.</p>
-</div>
-
-<!-- 6. OUR SOLUTION -->
-<div class="slide bg-dark center" id="s5">
-    <h2 class="a1" style="font-size:2rem; opacity:0.6; font-weight:400">Introducing</h2>
+<!-- 5. OUR SOLUTION -->
+<div class="slide bg-dark center">
+    <h2 class="a1" style="font-size:1.8rem;opacity:0.5;font-weight:400">Introducing</h2>
     <div class="logo a2" style="margin:16px 0">LY</div>
     <h2 class="a3">Your <span class="accent">retention co-pilot.</span></h2>
-    <p class="medium a4" style="margin-top:20px; max-width:650px">We don't track points. We watch patterns.<br>We tell you <strong>who's leaving</strong> and <strong>what to do about it.</strong></p>
+    <p class="medium a4" style="margin-top:16px;max-width:650px">We don't track points. We detect <strong>who's leaving</strong><br>and tell you <strong>what to do about it.</strong></p>
 </div>
 
-<!-- 7. HOW IT WORKS -->
-<div class="slide bg-white center" id="s6">
+<!-- 6. HOW IT WORKS -->
+<div class="slide bg-white center">
     <h2 class="a1">How it works</h2>
     <div class="grid4 a2" style="margin-top:48px">
-        <div class="step">
-            <div class="step-num">1</div>
-            <h3>Display QR</h3>
-            <p>Print it. Counter. Done.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">2</div>
-            <h3>Customers scan</h3>
-            <p>Name + phone. 15 seconds.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">3</div>
-            <h3>Track visits</h3>
-            <p>Employee scans. Automatic.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">4</div>
-            <h3>Get alerts</h3>
-            <p>"Marco: 12 days absent."</p>
-        </div>
+        <div class="step"><div class="step-n">1</div><h3>Display QR</h3><p>Print it. Counter. Done.</p></div>
+        <div class="step"><div class="step-n">2</div><h3>Customers scan</h3><p>Name + phone. 15 sec.<br>No app download.</p></div>
+        <div class="step"><div class="step-n">3</div><h3>Track visits</h3><p>Employee scans.<br>Automatic.</p></div>
+        <div class="step"><div class="step-n">4</div><h3>Get alerts</h3><p>"Marco: absent 12 days."<br>1-click WhatsApp.</p></div>
     </div>
-    <p class="a3" style="margin-top:32px; font-size:1.2rem; color:#636E72">No app download. No POS integration. Set up in 2 minutes.</p>
 </div>
 
-<!-- 8. WHAT WE BUILT -->
-<div class="slide bg-purple center" id="s7">
+<!-- 7. PRODUCT (LIVE) -->
+<div class="slide bg-purple center">
     <h2 class="a1">We built it. <span class="accent">It's live.</span></h2>
     <div class="grid3 a2" style="margin-top:40px">
-        <div class="card">
-            <h3 style="font-size:1.3rem"><span class="accent">AI</span> Churn Detection</h3>
-            <p class="small" style="opacity:0.7; margin-top:6px">Alerts when frequency drops</p>
-        </div>
-        <div class="card">
-            <h3 style="font-size:1.3rem">Loyalty <span class="accent">Tiers</span></h3>
-            <p class="small" style="opacity:0.7; margin-top:6px">Bronze → Platinum, automatic</p>
-        </div>
-        <div class="card">
-            <h3 style="font-size:1.3rem">1-Click <span class="accent">WhatsApp</span></h3>
-            <p class="small" style="opacity:0.7; margin-top:6px">Reach at-risk customers instantly</p>
-        </div>
-        <div class="card">
-            <h3 style="font-size:1.3rem">Custom <span class="accent">Rewards</span></h3>
-            <p class="small" style="opacity:0.7; margin-top:6px">Each shop sets its own rules</p>
-        </div>
-        <div class="card">
-            <h3 style="font-size:1.3rem">Shop <span class="accent">Map</span></h3>
-            <p class="small" style="opacity:0.7; margin-top:6px">Customers find LY shops nearby</p>
-        </div>
-        <div class="card">
-            <h3 style="font-size:1.3rem">AI <span class="accent">Chatbot</span></h3>
-            <p class="small" style="opacity:0.7; margin-top:6px">Powered by Gemini Flash</p>
-        </div>
+        <div class="card"><h3 style="font-size:1.3rem"><span class="accent">AI</span> Churn Detection</h3><p style="opacity:0.7;margin-top:6px;font-size:.9rem">Alerts when frequency drops</p></div>
+        <div class="card"><h3 style="font-size:1.3rem">Loyalty <span class="accent">Tiers</span></h3><p style="opacity:0.7;margin-top:6px;font-size:.9rem">Bronze → Platinum, automatic</p></div>
+        <div class="card"><h3 style="font-size:1.3rem">1-Click <span class="accent">WhatsApp</span></h3><p style="opacity:0.7;margin-top:6px;font-size:.9rem">Reach at-risk customers</p></div>
+        <div class="card"><h3 style="font-size:1.3rem">Custom <span class="accent">Rewards</span></h3><p style="opacity:0.7;margin-top:6px;font-size:.9rem">Each shop sets its rules</p></div>
+        <div class="card"><h3 style="font-size:1.3rem">Shop <span class="accent">Map</span></h3><p style="opacity:0.7;margin-top:6px;font-size:.9rem">Network effect built in</p></div>
+        <div class="card"><h3 style="font-size:1.3rem">Employee <span class="accent">Scanner</span></h3><p style="opacity:0.7;margin-top:6px;font-size:.9rem">No-login, mobile-first</p></div>
     </div>
-    <p class="a3" style="margin-top:28px; font-size:1.3rem; font-weight:600">lyloyal.com</p>
+    <p class="a3" style="margin-top:28px;font-size:1.3rem;font-weight:600">lyloyal.com</p>
 </div>
 
-<!-- 9. VALIDATION + BUSINESS MODEL -->
-<div class="slide bg-white center" id="s9">
+<!-- 8. VALIDATION + BUSINESS MODEL -->
+<div class="slide bg-white">
     <div class="split a1">
         <div style="text-align:left">
-            <h2 style="font-size:2rem; margin-bottom:24px">What owners told us</h2>
-            <div style="padding:16px; background:#F8F9FA; border-radius:12px; border-left:4px solid #6C5CE7; margin-bottom:14px">
-                <p style="font-size:1.1rem">"We don't know when regulars stop coming.<br><strong>They just disappear.</strong>"</p>
+            <h2 style="font-size:1.8rem;margin-bottom:24px">What owners told us</h2>
+            <div style="padding:16px;background:#F8F9FA;border-radius:12px;border-left:4px solid #6C5CE7;margin-bottom:14px">
+                <p style="font-size:1.05rem">"How do you know when regulars leave?"<br><strong>"We don't. They just disappear."</strong></p>
             </div>
-            <div style="padding:16px; background:#F8F9FA; border-radius:12px; border-left:4px solid #6C5CE7; margin-bottom:14px">
-                <p style="font-size:1.1rem">"We use <strong>zero digital tools</strong> for retention."</p>
+            <div style="padding:16px;background:#F8F9FA;border-radius:12px;border-left:4px solid #6C5CE7;margin-bottom:14px">
+                <p style="font-size:1.05rem">"Digital tools for retention?"<br><strong>"None. We can't afford them."</strong></p>
             </div>
-            <div style="padding:16px; background:#F8F9FA; border-radius:12px; border-left:4px solid #00D2D3">
-                <p style="font-size:1.1rem">"If you told me who's leaving?<br><strong>I'd call them immediately.</strong>"</p>
+            <div style="padding:16px;background:#F8F9FA;border-radius:12px;border-left:4px solid #00D2D3">
+                <p style="font-size:1.05rem">"If we told you who's leaving?"<br><strong>"I'd call them immediately."</strong></p>
             </div>
         </div>
         <div style="text-align:center">
-            <h2 style="font-size:2rem; margin-bottom:24px">Business model</h2>
-            <div class="card-white" style="margin-bottom:12px; padding:20px">
-                <div style="font-size:1.1rem; font-weight:600">Starter</div>
-                <div style="font-size:2.5rem; font-weight:800; color:#6C5CE7">Free</div>
-                <div style="font-size:0.85rem; color:#636E72">50 customers</div>
+            <h2 style="font-size:1.8rem;margin-bottom:24px">Business model</h2>
+            <div class="card-w" style="margin-bottom:12px;padding:16px">
+                <div style="font-weight:600">Starter</div>
+                <div style="font-size:2.5rem;font-weight:800;color:#6C5CE7">Free</div>
+                <div style="font-size:.82rem;color:#636E72">50 customers · Basic loyalty</div>
             </div>
-            <div class="card-white" style="margin-bottom:12px; padding:20px; border-color:#00D2D3; border-width:2px">
-                <div style="font-size:0.7rem; background:#00D2D3; color:white; display:inline-block; padding:2px 10px; border-radius:10px; margin-bottom:4px">POPULAR</div>
-                <div style="font-size:1.1rem; font-weight:600">Growth</div>
-                <div style="font-size:2.5rem; font-weight:800; color:#00D2D3">&euro;29<span style="font-size:1rem; color:#636E72">/mo</span></div>
-                <div style="font-size:0.85rem; color:#636E72">AI churn + WhatsApp</div>
+            <div class="card-w" style="margin-bottom:12px;padding:16px;border-color:#00D2D3;border-width:2px">
+                <div style="font-size:.65rem;background:#00D2D3;color:#fff;display:inline-block;padding:2px 10px;border-radius:10px;margin-bottom:2px">POPULAR</div>
+                <div style="font-weight:600">Growth</div>
+                <div style="font-size:2.5rem;font-weight:800;color:#00D2D3">€29<span style="font-size:1rem;color:#636E72">/mo</span></div>
+                <div style="font-size:.82rem;color:#636E72">AI churn · WhatsApp · Tiers</div>
             </div>
-            <div class="card-white" style="padding:20px">
-                <div style="font-size:1.1rem; font-weight:600">Pro</div>
-                <div style="font-size:2.5rem; font-weight:800; color:#6C5CE7">&euro;79<span style="font-size:1rem; color:#636E72">/mo</span></div>
-                <div style="font-size:0.85rem; color:#636E72">Multi-location + API</div>
+            <div class="card-w" style="padding:16px">
+                <div style="font-weight:600">Pro</div>
+                <div style="font-size:2.5rem;font-weight:800;color:#6C5CE7">€79<span style="font-size:1rem;color:#636E72">/mo</span></div>
+                <div style="font-size:.82rem;color:#636E72">Multi-location · API</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 11. TEAM -->
-<div class="slide bg-dark center" id="s10">
-    <h2 class="a1">The team</h2>
-    <div class="team-grid a2" style="margin-top:40px">
-        <div>
-            <div class="team-avatar" style="background:#6C5CE7">RB</div>
-            <div class="team-name">Romain Bouxirot</div>
-            <div class="team-role">Product & Tech</div>
+<!-- 9. MARKET SIZE -->
+<div class="slide bg-dark center">
+    <h2 class="a1">Market opportunity</h2>
+    <div class="grid3 a2" style="margin-top:48px">
+        <div class="card">
+            <div style="font-size:.8rem;opacity:.5;margin-bottom:8px">TAM</div>
+            <div class="sn" style="font-size:3.5rem">$6.6B</div>
+            <div class="sl">Global loyalty &<br>retention software</div>
         </div>
-        <div>
-            <div class="team-avatar" style="background:#00D2D3">AB</div>
-            <div class="team-name">Alexander Berner</div>
-            <div class="team-role">Business Dev</div>
+        <div class="card">
+            <div style="font-size:.8rem;opacity:.5;margin-bottom:8px">SAM</div>
+            <div class="sn" style="font-size:3.5rem;color:#00D2D3">5.5M</div>
+            <div class="sl">Independent F&B<br>in EU + UK</div>
         </div>
-        <div>
-            <div class="team-avatar" style="background:#E74C3C">AM</div>
-            <div class="team-name">Athanasios Manios</div>
-            <div class="team-role">Market Research</div>
-        </div>
-        <div>
-            <div class="team-avatar" style="background:#F39C12">GZ</div>
-            <div class="team-name">Georgios Zelenitsas</div>
-            <div class="team-role">Strategy & Ops</div>
+        <div class="card">
+            <div style="font-size:.8rem;opacity:.5;margin-bottom:8px">SOM</div>
+            <div class="sn" style="font-size:3.5rem;color:#00D2D3">275K</div>
+            <div class="sl">5% penetration<br>Berlin first → Europe</div>
         </div>
     </div>
-    <p class="a3 small" style="margin-top:32px">Built at ESMT Berlin — VALI Sustainability Bootcamp</p>
+    <p class="a3" style="margin-top:24px;font-size:1.2rem;opacity:.7">+17.3% CAGR · $17.9B by 2026</p>
 </div>
 
-<!-- 12. CLOSING -->
-<div class="slide bg-cafe center" id="s11">
-    <p class="big a1" style="opacity:0.7; font-size:1.3rem">Because Francesca already has the heart for loyalty.</p>
+<!-- 10. TEAM -->
+<div class="slide bg-dark center">
+    <h2 class="a1">Our Team</h2>
+    <div class="tg a2" style="margin-top:40px">
+        <div class="tm">
+            <img src="/static/img/alexander.png" class="ta" alt="Alexander">
+            <div class="tn">Alexander Berner</div>
+            <div class="tr">Business Development</div>
+        </div>
+        <div class="tm">
+            <img src="/static/img/georgios.png" class="ta" alt="Georgios">
+            <div class="tn">Georgios Zelenitsas</div>
+            <div class="tr">Strategy & Operations</div>
+        </div>
+        <div class="tm">
+            <img src="/static/img/athanasios.png" class="ta" alt="Athanasios">
+            <div class="tn">Athanasios Manios</div>
+            <div class="tr">Market Research</div>
+        </div>
+        <div class="tm">
+            <img src="/static/img/romain.png" class="ta" alt="Romain">
+            <div class="tn">Romain Bouxirot</div>
+            <div class="tr">Product & Tech</div>
+        </div>
+    </div>
+</div>
+
+<!-- 11. CLOSING -->
+<div class="slide bg-cafe center">
+    <p class="big a1" style="opacity:.7;font-size:1.3rem">Because Francesca already has the heart for loyalty.</p>
     <div class="logo a2" style="margin:20px 0">LY</div>
     <h2 class="a3" style="font-weight:400">just gives her the eyes.</h2>
-    <div class="a4" style="margin-top:48px; display:flex; gap:16px">
-        <div style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); padding:14px 28px; border-radius:14px">
-            <div style="font-size:0.75rem; opacity:0.5">Live product</div>
-            <div style="font-weight:700; font-size:1.1rem">lyloyal.com</div>
+    <div class="a4" style="margin-top:48px;display:flex;gap:16px">
+        <div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:14px 28px;border-radius:14px">
+            <div style="font-size:.75rem;opacity:.5">Try it live</div>
+            <div style="font-weight:700;font-size:1.1rem">lyloyal.com</div>
         </div>
     </div>
+    <p class="small" style="margin-top:32px">Join us in changing the SME ecosystem<br>in Berlin and beyond.</p>
 </div>
 
-<!-- Nav -->
-<div class="progress" id="prog"></div>
-<div class="snum" id="snum"></div>
+<div class="progress" id="P"></div>
+<div class="snum" id="N"></div>
 
 <script>
-const S=document.querySelectorAll('.slide'), T=S.length;
-let C=0;
-const P=document.getElementById('prog');
-for(let i=0;i<T;i++){const d=document.createElement('div');d.className='dot'+(i?'':' active');d.onclick=()=>go(i);P.appendChild(d)}
-function upd(){P.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===C));
-const bg=S[C].classList.contains('bg-white');P.classList.toggle('light',bg);
-document.getElementById('snum').style.color=bg?'#ccc':'rgba(255,255,255,0.3)';
-document.getElementById('snum').textContent=`${C+1} / ${T}`}
+const S=document.querySelectorAll('.slide'),T=S.length;let C=0;
+const P=document.getElementById('P');
+for(let i=0;i<T;i++){const d=document.createElement('div');d.className='dot'+(i?'':' on');d.onclick=()=>go(i);P.appendChild(d)}
+function upd(){P.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===C));
+const lt=['bg-white'].some(c=>S[C].classList.contains(c));
+P.classList.toggle('lt',lt);
+document.getElementById('N').style.color=lt?'#ccc':'rgba(255,255,255,.3)';
+document.getElementById('N').textContent=`${C+1} / ${T}`}
 function go(n){if(n<0||n>=T||n===C)return;S[C].classList.remove('active');C=n;S[C].classList.add('active');upd()}
 document.onkeydown=e=>{if(['ArrowRight','Space','Enter'].includes(e.code)){e.preventDefault();go(C+1)}if(['ArrowLeft','Backspace'].includes(e.code)){e.preventDefault();go(C-1)}};
 let tx=0;document.ontouchstart=e=>{tx=e.changedTouches[0].screenX};
