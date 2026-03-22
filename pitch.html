@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LY — Final Pitch</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; -webkit-font-smoothing:antialiased; }
+
+    .slide { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:60px 80px; opacity:0; transform:translateX(40px); transition:all 0.5s cubic-bezier(0.4,0,0.2,1); pointer-events:none; }
+    .slide.active { opacity:1; transform:translateX(0); pointer-events:all; }
+    .slide.prev { opacity:0; transform:translateX(-40px); }
+
+    /* Color themes */
+    .bg-purple { background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); color:white; }
+    .bg-white { background:#FAFAFA; color:#2D3436; }
+    .bg-dark { background:#1a1a2e; color:white; }
+    .bg-accent { background:linear-gradient(135deg, #00D2D3 0%, #00A3A4 100%); color:white; }
+    .bg-image { background:linear-gradient(135deg, rgba(108,92,231,0.88), rgba(72,52,212,0.88)), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&h=900&fit=crop') center/cover; color:white; }
+    .bg-story { background:linear-gradient(135deg, rgba(26,26,46,0.92), rgba(26,26,46,0.92)), url('https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=1600&h=900&fit=crop') center/cover; color:white; }
+
+    h1 { font-size:3.5rem; font-weight:800; letter-spacing:-0.03em; line-height:1.1; margin-bottom:20px; }
+    h2 { font-size:2.6rem; font-weight:700; letter-spacing:-0.02em; line-height:1.2; margin-bottom:16px; }
+    h3 { font-size:1.8rem; font-weight:600; margin-bottom:12px; }
+    p { font-size:1.3rem; line-height:1.6; max-width:800px; }
+    .subtitle { opacity:0.8; font-size:1.2rem; font-weight:400; }
+    .small { font-size:1rem; opacity:0.7; }
+    .highlight { color:#00D2D3; }
+    .highlight-red { color:#FF6B6B; }
+
+    /* Layout helpers */
+    .center { text-align:center; }
+    .left { text-align:left; align-items:flex-start; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:60px; width:100%; max-width:1100px; align-items:center; }
+    .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; width:100%; max-width:1000px; margin-top:32px; }
+    .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; width:100%; max-width:1000px; margin-top:32px; }
+
+    /* Cards */
+    .card { background:rgba(255,255,255,0.1); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:28px; }
+    .card-white { background:white; border:1px solid #eee; border-radius:16px; padding:28px; color:#2D3436; box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+    .card h3 { font-size:1.2rem; margin-bottom:8px; }
+    .card p { font-size:0.95rem; opacity:0.8; line-height:1.5; }
+
+    /* Stat */
+    .stat { text-align:center; }
+    .stat .num { font-size:3rem; font-weight:800; letter-spacing:-0.02em; }
+    .stat .label { font-size:0.9rem; opacity:0.7; margin-top:4px; }
+
+    /* Badge */
+    .badge { display:inline-block; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); padding:6px 18px; border-radius:20px; font-size:0.85rem; font-weight:500; margin-bottom:20px; }
+    .badge-accent { background:rgba(0,210,211,0.15); border-color:rgba(0,210,211,0.3); color:#00D2D3; }
+
+    /* Progress indicator */
+    .progress { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:100; }
+    .progress .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.3); transition:all 0.3s; }
+    .progress .dot.active { background:white; width:24px; border-radius:4px; }
+    .progress.dark .dot { background:rgba(0,0,0,0.15); }
+    .progress.dark .dot.active { background:#6C5CE7; }
+
+    /* Slide number */
+    .slide-num { position:fixed; bottom:20px; right:30px; font-size:0.8rem; opacity:0.4; z-index:100; }
+
+    /* Logo */
+    .logo { font-size:2rem; font-weight:800; letter-spacing:4px; }
+    .logo-large { font-size:5rem; font-weight:800; letter-spacing:8px; }
+
+    /* Quote */
+    blockquote { font-size:1.6rem; font-style:italic; line-height:1.6; max-width:750px; position:relative; padding-left:24px; border-left:3px solid #00D2D3; }
+
+    /* Mockup */
+    .mockup-box { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:14px; padding:18px; width:100%; }
+    .mockup-alert { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px 16px; margin-top:12px; display:flex; align-items:center; gap:10px; }
+
+    /* Pricing table */
+    .price-card { text-align:center; }
+    .price-card .price { font-size:2.2rem; font-weight:800; color:#6C5CE7; }
+    .price-card .name { font-size:1rem; font-weight:600; margin-bottom:4px; }
+    .price-card .desc { font-size:0.8rem; color:#636E72; }
+
+    /* Animated entrance */
+    .slide.active .fade-up { animation: fadeUp 0.6s ease forwards; }
+    .slide.active .fade-up-d1 { animation: fadeUp 0.6s 0.1s ease forwards; opacity:0; }
+    .slide.active .fade-up-d2 { animation: fadeUp 0.6s 0.2s ease forwards; opacity:0; }
+    .slide.active .fade-up-d3 { animation: fadeUp 0.6s 0.3s ease forwards; opacity:0; }
+    .slide.active .fade-up-d4 { animation: fadeUp 0.6s 0.4s ease forwards; opacity:0; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Team photos placeholder */
+    .team-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:32px; }
+    .team-member { text-align:center; }
+    .team-avatar { width:80px; height:80px; border-radius:50%; background:#6C5CE7; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.3rem; margin:0 auto 10px; }
+    .team-name { font-weight:600; font-size:0.95rem; }
+    .team-role { font-size:0.8rem; opacity:0.6; }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Title -->
+<div class="slide bg-image active" data-bg="dark">
+    <div class="badge fade-up">VALI Bootcamp — ESMT Berlin — March 2026</div>
+    <div class="logo-large fade-up-d1">LY</div>
+    <h2 class="fade-up-d2" style="font-weight:400; opacity:0.9; margin-top:8px">Smart loyalty for independent businesses</h2>
+    <p class="small fade-up-d3" style="margin-top:32px">Romain Bouxirot &middot; Alexander Berner &middot; Athanasios Manios &middot; Georgios Zelenitsas</p>
+</div>
+
+<!-- SLIDE 2: The Story Hook -->
+<div class="slide bg-story" data-bg="dark">
+    <div class="fade-up" style="max-width:800px">
+        <blockquote class="fade-up-d1">
+            "Monday morning. 7:15. Francesca opens her coffee shop in Kreuzberg. Marco should be here by now. Double espresso, no sugar. Every Monday for three years. But Marco didn't come last Monday either. Or the one before."
+        </blockquote>
+        <p class="fade-up-d2" style="margin-top:24px; opacity:0.7; font-size:1.1rem">
+            Francesca knows Marco's birthday. His dog's name. The day he switched from cappuccino to espresso.<br>
+            <strong style="color:#FF6B6B">But she had no way of knowing he was leaving.</strong>
+        </p>
+    </div>
+</div>
+
+<!-- SLIDE 3: The Problem (Numbers) -->
+<div class="slide bg-purple" data-bg="dark">
+    <h2 class="fade-up center">The silent revenue killer</h2>
+    <p class="subtitle fade-up-d1 center">Independent businesses lose customers every week — without knowing it</p>
+    <div class="grid4 fade-up-d2">
+        <div class="stat">
+            <div class="num">10M+</div>
+            <div class="label">Independent F&B businesses in Europe</div>
+        </div>
+        <div class="stat">
+            <div class="num highlight-red">78%</div>
+            <div class="label">of guests never return after first visit</div>
+        </div>
+        <div class="stat">
+            <div class="num">5-7x</div>
+            <div class="label">more expensive to acquire than retain</div>
+        </div>
+        <div class="stat">
+            <div class="num highlight-red">&euro;375K</div>
+            <div class="label">lost per restaurant per year to churn</div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 4: Why Existing Solutions Fail -->
+<div class="slide bg-white" data-bg="light">
+    <h2 class="fade-up center">Why existing solutions fail</h2>
+    <div class="split fade-up-d1" style="margin-top:32px">
+        <div class="card-white" style="text-align:center; border-color:#FFE0E0">
+            <h3 style="color:#E74C3C">Stamp cards & basic apps</h3>
+            <p style="font-size:1rem">"Buy 10, get 1 free"<br><br>No intelligence. No personalization.<br>Treats every customer the same.<br><strong>Can't detect who's leaving.</strong></p>
+        </div>
+        <div class="card-white" style="text-align:center; border-color:#E0E0FF">
+            <h3 style="color:#6C5CE7">Enterprise CRMs</h3>
+            <p style="font-size:1rem">HubSpot, Salesforce, Punchh<br><br>Cost thousands per month.<br>Require a marketing team.<br><strong>Not built for a 5-person cafe.</strong></p>
+        </div>
+    </div>
+    <p class="fade-up-d2 center" style="margin-top:32px; font-size:1.3rem; font-weight:600; color:#6C5CE7">The gap: no affordable AI-powered retention for independent F&B.</p>
+</div>
+
+<!-- SLIDE 5: Our Solution -->
+<div class="slide bg-purple" data-bg="dark">
+    <div class="badge fade-up">Our solution</div>
+    <h1 class="fade-up-d1 center">LY is a <span class="highlight">retention co-pilot</span><br>for independent businesses</h1>
+    <p class="fade-up-d2 center subtitle" style="max-width:700px">
+        We don't just track loyalty points. We watch the patterns you can't see — and tell you exactly who's leaving, when, and what to do about it.
+    </p>
+</div>
+
+<!-- SLIDE 6: How It Works -->
+<div class="slide bg-white" data-bg="light">
+    <h2 class="fade-up center">How it works</h2>
+    <p class="subtitle fade-up-d1 center">Set up in 2 minutes. No app download for customers.</p>
+    <div class="grid4 fade-up-d2">
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:2rem; margin-bottom:8px; color:#6C5CE7; font-weight:800">1</div>
+            <h3 style="font-size:1rem">Display QR code</h3>
+            <p style="font-size:0.85rem; color:#636E72">Print it, place it at the counter</p>
+        </div>
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:2rem; margin-bottom:8px; color:#6C5CE7; font-weight:800">2</div>
+            <h3 style="font-size:1rem">Customers scan</h3>
+            <p style="font-size:0.85rem; color:#636E72">Name + phone, get their loyalty QR</p>
+        </div>
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:2rem; margin-bottom:8px; color:#6C5CE7; font-weight:800">3</div>
+            <h3 style="font-size:1rem">Scan every visit</h3>
+            <p style="font-size:0.85rem; color:#636E72">Employee scans, visit tracked</p>
+        </div>
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:2rem; margin-bottom:8px; color:#6C5CE7; font-weight:800">4</div>
+            <h3 style="font-size:1rem">Get smart alerts</h3>
+            <p style="font-size:0.85rem; color:#636E72">"Marco hasn't been here in 12 days"</p>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 7: Product Demo / Features -->
+<div class="slide bg-dark" data-bg="dark">
+    <h2 class="fade-up center">What we built</h2>
+    <div class="grid3 fade-up-d1">
+        <div class="card">
+            <h3><span class="highlight">AI</span> Churn Detection</h3>
+            <p>Alerts when a regular's frequency drops below their pattern</p>
+        </div>
+        <div class="card">
+            <h3>Loyalty <span class="highlight">Tiers</span></h3>
+            <p>Bronze to Platinum — automatic, based on engagement score</p>
+        </div>
+        <div class="card">
+            <h3>WhatsApp <span class="highlight">Messaging</span></h3>
+            <p>1-click outreach to at-risk customers and birthday wishes</p>
+        </div>
+        <div class="card">
+            <h3>Employee <span class="highlight">Scanner</span></h3>
+            <p>No-login QR scanner for staff — mobile-first, zero training</p>
+        </div>
+        <div class="card">
+            <h3>Custom <span class="highlight">Rewards</span></h3>
+            <p>Each shop defines its own rules: "every 10th coffee free"</p>
+        </div>
+        <div class="card">
+            <h3>Shop <span class="highlight">Map</span></h3>
+            <p>Customers find LY shops nearby — network effect built in</p>
+        </div>
+    </div>
+    <p class="fade-up-d2 small center" style="margin-top:24px">Live demo: <strong style="color:#00D2D3">lyloyal.com</strong></p>
+</div>
+
+<!-- SLIDE 8: Market Validation -->
+<div class="slide bg-white" data-bg="light">
+    <h2 class="fade-up center">Market validation</h2>
+    <div class="split fade-up-d1" style="margin-top:24px">
+        <div>
+            <h3 style="color:#6C5CE7; margin-bottom:16px">What we learned from interviews</h3>
+            <div style="margin-bottom:16px; padding:14px; background:#F8F9FA; border-radius:10px; border-left:3px solid #6C5CE7">
+                <p style="font-size:0.95rem; margin:0"><strong>"How do you know when a regular stops coming?"</strong><br><span style="color:#636E72">→ "We don't. They just disappear."</span></p>
+            </div>
+            <div style="margin-bottom:16px; padding:14px; background:#F8F9FA; border-radius:10px; border-left:3px solid #6C5CE7">
+                <p style="font-size:0.95rem; margin:0"><strong>"What digital tools do you use?"</strong><br><span style="color:#636E72">→ "None. We can't afford them."</span></p>
+            </div>
+            <div style="padding:14px; background:#F8F9FA; border-radius:10px; border-left:3px solid #6C5CE7">
+                <p style="font-size:0.95rem; margin:0"><strong>"If we told you who's about to leave?"</strong><br><span style="color:#636E72">→ "I'd call them immediately."</span></p>
+            </div>
+        </div>
+        <div>
+            <h3 style="color:#6C5CE7; margin-bottom:16px">Market opportunity</h3>
+            <div style="margin-bottom:12px">
+                <div style="font-size:2rem; font-weight:800; color:#6C5CE7">$17.9B</div>
+                <div style="font-size:0.85rem; color:#636E72">Loyalty software market (2026)</div>
+            </div>
+            <div style="margin-bottom:12px">
+                <div style="font-size:2rem; font-weight:800; color:#6C5CE7">16.8%</div>
+                <div style="font-size:0.85rem; color:#636E72">Annual growth rate (CAGR)</div>
+            </div>
+            <div>
+                <div style="font-size:2rem; font-weight:800; color:#00D2D3">0</div>
+                <div style="font-size:0.85rem; color:#636E72">Competitors offering affordable AI churn detection for independent European F&B</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 9: Business Model -->
+<div class="slide bg-purple" data-bg="dark">
+    <h2 class="fade-up center">Business model</h2>
+    <p class="subtitle fade-up-d1 center">Freemium SaaS — start free, upgrade when you grow</p>
+    <div class="grid3 fade-up-d2" style="margin-top:32px">
+        <div class="card" style="text-align:center">
+            <div class="price-card">
+                <div class="name" style="color:white">Starter</div>
+                <div class="price" style="color:white; font-size:2.5rem">Free</div>
+                <div class="desc" style="color:rgba(255,255,255,0.6)">50 customers<br>Basic loyalty<br>1 reward rule</div>
+            </div>
+        </div>
+        <div class="card" style="text-align:center; border-color:#00D2D3; border-width:2px">
+            <div style="background:#00D2D3; color:white; padding:3px 12px; border-radius:12px; font-size:0.7rem; font-weight:600; display:inline-block; margin-bottom:8px">MOST POPULAR</div>
+            <div class="price-card">
+                <div class="name" style="color:white">Growth</div>
+                <div class="price" style="color:#00D2D3; font-size:2.5rem">&euro;29<span style="font-size:1rem; opacity:0.6">/mo</span></div>
+                <div class="desc" style="color:rgba(255,255,255,0.6)">500 customers<br>AI churn detection<br>WhatsApp messaging</div>
+            </div>
+        </div>
+        <div class="card" style="text-align:center">
+            <div class="price-card">
+                <div class="name" style="color:white">Pro</div>
+                <div class="price" style="color:white; font-size:2.5rem">&euro;79<span style="font-size:1rem; opacity:0.6">/mo</span></div>
+                <div class="desc" style="color:rgba(255,255,255,0.6)">Unlimited<br>5 locations<br>API access</div>
+            </div>
+        </div>
+    </div>
+    <p class="fade-up-d3 center small" style="margin-top:24px">Recovering just <strong>2 lost regulars/month</strong> pays for LY Growth.</p>
+</div>
+
+<!-- SLIDE 10: Go-To-Market -->
+<div class="slide bg-white" data-bg="light">
+    <h2 class="fade-up center">Go-to-market: Berlin first</h2>
+    <div class="grid4 fade-up-d1" style="margin-top:32px">
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:1.5rem; font-weight:800; color:#6C5CE7">Q2 2026</div>
+            <h3 style="font-size:0.95rem; margin-top:8px">Validate</h3>
+            <p style="font-size:0.82rem; color:#636E72">20+ Berlin cafes<br>Concierge MVP<br>Manual insights</p>
+        </div>
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:1.5rem; font-weight:800; color:#6C5CE7">Q3 2026</div>
+            <h3 style="font-size:0.95rem; margin-top:8px">Launch</h3>
+            <p style="font-size:0.82rem; color:#636E72">Automated MVP<br>SumUp + Zettle<br>Beta in Berlin</p>
+        </div>
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:1.5rem; font-weight:800; color:#6C5CE7">Q4 2026</div>
+            <h3 style="font-size:0.95rem; margin-top:8px">Grow</h3>
+            <p style="font-size:0.82rem; color:#636E72">3+ German cities<br>WhatsApp API<br>100 shops</p>
+        </div>
+        <div class="card-white" style="text-align:center">
+            <div style="font-size:1.5rem; font-weight:800; color:#00D2D3">2027</div>
+            <h3 style="font-size:0.95rem; margin-top:8px">Scale</h3>
+            <p style="font-size:0.82rem; color:#636E72">France, Netherlands<br>Network effects<br>Series A</p>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 11: Team -->
+<div class="slide bg-dark" data-bg="dark">
+    <h2 class="fade-up center">The team</h2>
+    <div class="team-grid fade-up-d1">
+        <div class="team-member">
+            <div class="team-avatar">RB</div>
+            <div class="team-name">Romain Bouxirot</div>
+            <div class="team-role">Product & Tech</div>
+        </div>
+        <div class="team-member">
+            <div class="team-avatar" style="background:#00D2D3">AB</div>
+            <div class="team-name">Alexander Berner</div>
+            <div class="team-role">Business Development</div>
+        </div>
+        <div class="team-member">
+            <div class="team-avatar" style="background:#E74C3C">AM</div>
+            <div class="team-name">Athanasios Manios</div>
+            <div class="team-role">Market Research</div>
+        </div>
+        <div class="team-member">
+            <div class="team-avatar" style="background:#F39C12">GZ</div>
+            <div class="team-name">Georgios Zelenitsas</div>
+            <div class="team-role">Strategy & Operations</div>
+        </div>
+    </div>
+</div>
+
+<!-- SLIDE 12: Closing -->
+<div class="slide bg-image" data-bg="dark">
+    <div class="fade-up center">
+        <p class="subtitle" style="margin-bottom:16px; font-size:1.1rem; opacity:0.7">Because Francesca already has the heart for loyalty.</p>
+        <div class="logo-large fade-up-d1">LY</div>
+        <h2 class="fade-up-d2" style="font-weight:400; margin-top:8px">just gives her the eyes.</h2>
+        <div class="fade-up-d3" style="margin-top:40px; display:flex; gap:16px; justify-content:center">
+            <div style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2); padding:12px 24px; border-radius:12px;">
+                <div style="font-size:0.8rem; opacity:0.6">Try it live</div>
+                <div style="font-weight:600">lyloyal.com</div>
+            </div>
+            <div style="background:#00D2D3; padding:12px 24px; border-radius:12px;">
+                <div style="font-size:0.8rem; opacity:0.8">Contact us</div>
+                <div style="font-weight:600">team@lyloyal.com</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress dots -->
+<div class="progress" id="progress"></div>
+<div class="slide-num" id="slide-num">1 / 12</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const total = slides.length;
+
+// Create progress dots
+const progress = document.getElementById('progress');
+for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    progress.appendChild(dot);
+}
+
+function updateProgress() {
+    const dots = progress.querySelectorAll('.dot');
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+
+    // Dark/light progress
+    const bg = slides[current].dataset.bg;
+    progress.classList.toggle('dark', bg === 'light');
+    document.getElementById('slide-num').style.color = bg === 'light' ? '#999' : 'rgba(255,255,255,0.4)';
+    document.getElementById('slide-num').textContent = `${current + 1} / ${total}`;
+}
+
+function goTo(n) {
+    if (n < 0 || n >= total || n === current) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add(n > current ? 'prev' : '');
+    current = n;
+    slides[current].classList.remove('prev');
+    slides[current].classList.add('active');
+    updateProgress();
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'Backspace') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End') goTo(total - 1);
+});
+
+// Swipe support
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) { diff > 0 ? goTo(current + 1) : goTo(current - 1); }
+});
+
+updateProgress();
+</script>
+
+</body>
+</html>
