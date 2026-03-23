@@ -12,6 +12,7 @@
     <div class="card">
         <h2>Find my cards</h2>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label>Phone number</label>
                 <input type="tel" name="phone" value="{{ phone }}" required placeholder="+49 170 1234567">

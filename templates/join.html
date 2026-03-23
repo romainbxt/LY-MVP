@@ -11,6 +11,7 @@
     <div class="card">
         <h2>Create my loyalty card</h2>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label>First name</label>
                 <input type="text" name="first_name" required placeholder="Marco">

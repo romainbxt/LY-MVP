@@ -84,6 +84,12 @@ login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
 
 
+@csrf.error_handler
+def csrf_error(reason):
+    flash('Your session expired. Please try again.', 'warning')
+    return redirect(request.referrer or url_for('landing'))
+
+
 class MerchantUser(UserMixin):
     def __init__(self, merchant):
         self.id = merchant['id']
