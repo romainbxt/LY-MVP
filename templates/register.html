@@ -11,6 +11,7 @@
     <div class="card">
         <h2>Sign Up</h2>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label>Your name</label>
                 <input type="text" name="name" required placeholder="Francesca Rossi">

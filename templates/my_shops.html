@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}LY - My loyalty cards{% endblock %}
+
+{% block content %}
+<div class="mobile-container" style="margin-top:30px">
+
+    <div style="text-align:center; margin-bottom:30px">
+        <h1 style="font-size:2rem; color:var(--primary)">LY</h1>
+        <p style="color:var(--text-light)">My loyalty cards</p>
+    </div>
+
+    <div class="card">
+        <h2>Find my cards</h2>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Phone number</label>
+                <input type="tel" name="phone" value="{{ phone }}" required placeholder="+49 170 1234567">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Find my cards</button>
+        </form>
+    </div>
+
+    {% if shops is not none %}
+        {% if shops %}
+        <div class="card">
+            <h2>Your shops ({{ shops|length }})</h2>
+            {% for s in shops %}
+            <a href="{{ url_for('my_card', token=s.qr_token) }}" style="text-decoration:none; color:inherit; display:block">
+                <div style="padding:16px; background:linear-gradient(135deg, var(--primary), #A29BFE); border-radius:12px; color:white; margin-bottom:12px">
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <div>
+                            <strong style="font-size:1.1rem">{{ s.shop_name }}</strong>
+                            {% if s.address %}<div style="opacity:0.8; font-size:0.8rem">{{ s.address }}</div>{% endif %}
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-size:1.8rem; font-weight:800">{{ s.visit_count }}</div>
+                            <div style="font-size:0.75rem; opacity:0.8">visits</div>
+                        </div>
+                    </div>
+                    {% if s.last_visit %}
+                    <div style="opacity:0.6; font-size:0.75rem; margin-top:8px">Last visit: {{ s.last_visit|fdate }}</div>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card" style="text-align:center; padding:30px">
+            <p style="color:var(--text-light)">No loyalty cards found for this number.</p>
+            <p style="color:var(--text-light); margin-top:8px">
+                <a href="{{ url_for('shop_map') }}" style="color:var(--primary)">Find shops near you</a>
+            </p>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    <div style="text-align:center; margin:20px 0">
+        <a href="{{ url_for('shop_map') }}" style="color:var(--primary); font-size:0.9rem">Find shops near me</a>
+        &middot;
+        <a href="{{ url_for('index') }}" style="color:var(--primary); font-size:0.9rem">Home</a>
+    </div>
+</div>
+{% endblock %}

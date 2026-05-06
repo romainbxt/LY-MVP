@@ -1,13 +1,35 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}LY{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C5CE7'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='18'%3ELY%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
 </head>
 <body>
-    {% block navbar %}{% endblock %}
+    {% block navbar %}
+    <!-- Default navbar for all internal pages -->
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration:none; color:white">LY</a>
+        <div>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('scan') }}">Scan</a>
+            <a href="{{ url_for('messages_page') }}">Messages</a>
+            <a href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Log out</a>
+            {% else %}
+            <a href="{{ url_for('partners') }}">Partners</a>
+            <a href="{{ url_for('shop_map') }}">Find shops</a>
+            <a href="{{ url_for('pricing') }}">Pricing</a>
+            <a href="{{ url_for('login') }}">Log in</a>
+            <a href="{{ url_for('register') }}" style="background:#00D2D3; padding:6px 14px; border-radius:8px">Sign up</a>
+            {% endif %}
+        </div>
+    </nav>
+    {% endblock %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -22,5 +44,6 @@
     {% block content %}{% endblock %}
 
     {% block scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </body>
 </html>

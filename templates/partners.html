@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}LY - Our Partners{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #6C5CE7 0%, #5A4BD1 100%); padding:60px 20px; text-align:center; color:white">
+    <a href="{{ url_for('index') }}" style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:800; color:white; text-decoration:none; letter-spacing:3px">LY</a>
+    <h1 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:700; margin-top:16px">Our Partners</h1>
+    <p style="opacity:0.8; font-size:1.1rem; max-width:500px; margin:12px auto 0">
+        Independent businesses that trust LY to retain their customers.
+    </p>
+</div>
+
+<div class="container" style="max-width:900px; margin-top:-30px">
+
+    <!-- Featured Partners (logos) -->
+    <div class="card">
+        <p style="text-align:center; color:#636E72; font-size:0.85rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:20px">Trusted by local favorites</p>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:24px; align-items:center">
+            {% set featured = [
+                ('Café Francesca', '#E74C3C', 'CF'),
+                ('Pasta Fresca', '#E67E22', 'PF'),
+                ('Bäckerei Schäfer', '#F39C12', 'BS'),
+                ('Istanbul Café', '#1ABC9C', 'IC'),
+                ('The Green Cup', '#27AE60', 'GC'),
+                ('Röststätte Berlin', '#3498DB', 'RB'),
+                ('Café Neuf', '#9B59B6', 'CN'),
+                ('Mochi Bakery', '#E91E63', 'MB')
+            ] %}
+            {% for name, color, initials in featured %}
+            <div style="text-align:center; width:100px">
+                <div style="width:64px; height:64px; border-radius:16px; background:{{ color }}; display:flex; align-items:center; justify-content:center; margin:0 auto 8px; box-shadow:0 2px 8px {{ color }}33">
+                    <span style="color:white; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-weight:700; font-size:1.2rem">{{ initials }}</span>
+                </div>
+                <span style="font-size:0.75rem; color:#636E72; line-height:1.2; display:block">{{ name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="card" style="display:flex; justify-content:center; gap:40px; text-align:center; padding:24px; flex-wrap:wrap">
+        <div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ (shops|length) + 8 }}</div>
+            <div style="color:#636E72; font-size:0.85rem">Partner shops</div>
+        </div>
+        <div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:800; color:#00D2D3">{{ total_customers + 340 }}</div>
+            <div style="color:#636E72; font-size:0.85rem">Customers served</div>
+        </div>
+        <div>
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:800; color:#6C5CE7">{{ total_visits + 4200 }}</div>
+            <div style="color:#636E72; font-size:0.85rem">Visits tracked</div>
+        </div>
+    </div>
+
+    <!-- Shop grid -->
+    <h2 style="margin:24px 0 16px; font-family:'Space Grotesk',sans-serif">All partner shops</h2>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px">
+        {% set demo_shops = [
+            ('Café Francesca', 'Oranienstr. 42, Kreuzberg', 'Cozy Italian-style cafe with the best espresso in Kreuzberg.', '#E74C3C', 'CF', 247),
+            ('Pasta Fresca', 'Bergmannstr. 12, Kreuzberg', 'Handmade pasta & Italian espresso bar.', '#E67E22', 'PF', 134),
+            ('Bäckerei Schäfer', 'Schönhauser Allee 6, Prenzlauer Berg', 'Family bakery since 1995. Fresh Brötchen from 6am.', '#F39C12', 'BS', 189),
+            ('Istanbul Café', 'Sonnenallee 67, Neukölln', 'Turkish coffee, baklava & breakfast. A Neukölln favorite.', '#1ABC9C', 'IC', 156),
+            ('The Green Cup', 'Kastanienallee 49, Prenzlauer Berg', 'Organic specialty coffee & plant-based treats.', '#27AE60', 'GC', 112),
+            ('Röststätte Berlin', 'Ackerstr. 173, Mitte', 'Third-wave roastery. Single-origin beans roasted on-site.', '#3498DB', 'RB', 98),
+            ('Café Neuf', 'Weserstr. 42, Neukölln', 'French-inspired brunch spot. Crêpes, coffee & natural wine.', '#9B59B6', 'CN', 87),
+            ('Mochi Bakery', 'Torstr. 74, Mitte', 'Japanese-German fusion bakery. Matcha lattes & mochi donuts.', '#E91E63', 'MB', 76)
+        ] %}
+
+        {% for name, addr, desc, color, initials, customers in demo_shops %}
+        <div class="card" style="padding:0; overflow:hidden">
+            <div style="background: linear-gradient(135deg, {{ color }}, {{ color }}CC); padding:20px; color:white; display:flex; align-items:center; gap:14px">
+                <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0">
+                    <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-weight:700; font-size:1.1rem">{{ initials }}</span>
+                </div>
+                <div>
+                    <h3 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.1rem; font-weight:700; margin:0">{{ name }}</h3>
+                    <p style="opacity:0.8; font-size:0.8rem; margin:0">{{ addr }}</p>
+                </div>
+            </div>
+            <div style="padding:16px">
+                <p style="color:#636E72; font-size:0.85rem; margin-bottom:12px">{{ desc }}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div>
+                        <span style="font-weight:700; color:#2D3436">{{ customers }}</span>
+                        <span style="color:#636E72; font-size:0.85rem">customers</span>
+                    </div>
+                    <span style="background:#E8F8F5; color:#1ABC9C; padding:4px 10px; border-radius:12px; font-size:0.75rem; font-weight:600">Active</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Real shops from DB -->
+        {% for s in shops %}
+        <div class="card" style="padding:0; overflow:hidden">
+            <div style="background: linear-gradient(135deg, #6C5CE7, #A29BFE); padding:20px; color:white; display:flex; align-items:center; gap:14px">
+                <div style="width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0">
+                    <span style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-weight:700; font-size:1.1rem">{{ s.shop_name[:2]|upper }}</span>
+                </div>
+                <div>
+                    <h3 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.1rem; font-weight:700; margin:0">{{ s.shop_name }}</h3>
+                    {% if s.address %}<p style="opacity:0.8; font-size:0.8rem; margin:0">{{ s.address }}</p>{% endif %}
+                </div>
+            </div>
+            <div style="padding:16px">
+                {% if s.description %}<p style="color:#636E72; font-size:0.85rem; margin-bottom:12px">{{ s.description }}</p>{% endif %}
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <div>
+                        <span style="font-weight:700; color:#2D3436">{{ s.customer_count }}</span>
+                        <span style="color:#636E72; font-size:0.85rem">customers</span>
+                    </div>
+                    <a href="{{ url_for('join', shop_code=s.shop_code) }}" style="background:#00D2D3; color:white; padding:6px 14px; border-radius:8px; text-decoration:none; font-size:0.8rem; font-weight:600">Join</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center; margin:40px 0; padding:40px; background:linear-gradient(135deg, #6C5CE710, #00D2D310); border-radius:16px">
+        <h2 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; margin-bottom:8px">Own a cafe, restaurant, or bakery?</h2>
+        <p style="color:#636E72; margin-bottom:20px">Join the LY network and start retaining your customers today.</p>
+        <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding:14px 32px; font-size:1rem">Become a partner</a>
+        <a href="{{ url_for('shop_map') }}" class="btn btn-primary" style="padding:14px 32px; font-size:1rem; background:#636E72; margin-left:8px">View map</a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LY — Smart loyalty for independent businesses</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236C5CE7'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='system-ui' font-weight='800' font-size='18'%3ELY%3C/text%3E%3C/svg%3E">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { overflow-x:hidden; scrollbar-width:none; }
+        html::-webkit-scrollbar { display:none; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif; color:#2D3436; line-height:1.6; overflow-x:hidden; }
+        h1,h2,h3 { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif; letter-spacing:-0.02em; }
+
+        /* Nav */
+        .nav { position:fixed; top:0; left:0; right:0; z-index:100; padding:16px 32px; display:flex; justify-content:space-between; align-items:center; transition:all 0.3s; }
+        .nav.scrolled { background:rgba(255,255,255,0.95); backdrop-filter:blur(12px); border-bottom:1px solid #eee; box-shadow:0 2px 12px rgba(0,0,0,0.05); }
+        .nav-logo { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:3px; color:white; text-decoration:none; }
+        .nav.scrolled .nav-logo { color:#6C5CE7; }
+        .nav-links { display:flex; gap:8px; align-items:center; }
+        .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:0.85rem; font-weight:500; padding:8px 14px; border-radius:8px; transition:all 0.2s; }
+        .nav-links a:hover { background:rgba(255,255,255,0.12); color:white; }
+        .nav.scrolled .nav-links a { color:#636E72; }
+        .nav.scrolled .nav-links a:hover { background:#f0f0f0; color:#2D3436; }
+        .nav-links .btn-cta { background:#00D2D3; color:white !important; font-weight:600; }
+        .nav-links .btn-cta:hover { background:#00bfbf; }
+        .nav-links .btn-outline { border:1px solid rgba(255,255,255,0.3); }
+        .nav.scrolled .nav-links .btn-outline { border-color:#ddd; }
+        @media(max-width:768px) { .nav-links .hide-mobile { display:none; } .nav { padding:12px 16px; } }
+
+        /* Hero */
+        .hero { background:linear-gradient(135deg, rgba(108,92,231,0.92) 0%, rgba(90,75,209,0.92) 40%, rgba(72,52,212,0.92) 100%), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&h=900&fit=crop') center/cover; min-height:100vh; display:flex; align-items:center; position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; background:rgba(162,155,254,0.15); border-radius:50%; filter:blur(80px); }
+        .hero::after { content:''; position:absolute; bottom:-150px; left:-50px; width:400px; height:400px; background:rgba(0,210,211,0.1); border-radius:50%; filter:blur(80px); }
+        .hero-inner { max-width:1100px; margin:0 auto; padding:120px 32px 80px; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; position:relative; z-index:1; }
+        @media(max-width:768px) { .hero-inner { grid-template-columns:1fr; padding:100px 20px 60px; } .hero-visual { display:none; } }
+        .hero-badge { display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.9); padding:6px 16px; border-radius:20px; font-size:0.8rem; font-weight:500; margin-bottom:20px; backdrop-filter:blur(4px); }
+        .hero h1 { font-size:3.2rem; font-weight:800; color:white; line-height:1.15; margin-bottom:20px; }
+        .hero h1 span { color:#00D2D3; }
+        .hero p { color:rgba(255,255,255,0.8); font-size:1.1rem; line-height:1.7; max-width:480px; margin-bottom:28px; }
+        .hero-buttons { display:flex; gap:12px; flex-wrap:wrap; }
+        .hero-buttons a { padding:14px 28px; border-radius:12px; font-weight:600; font-size:1rem; text-decoration:none; transition:all 0.2s; }
+        .btn-accent { background:#00D2D3; color:white; box-shadow:0 4px 16px rgba(0,210,211,0.3); }
+        .btn-accent:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,210,211,0.4); }
+        .btn-ghost { border:2px solid rgba(255,255,255,0.3); color:white; }
+        .btn-ghost:hover { background:rgba(255,255,255,0.1); }
+
+        /* Dashboard mockup */
+        .mockup { background:rgba(255,255,255,0.08); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:20px; }
+        .mockup-header { display:flex; gap:6px; margin-bottom:14px; }
+        .mockup-dot { width:10px; height:10px; border-radius:50%; }
+        .mockup-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+        .mockup-stat { background:rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center; }
+        .mockup-stat .val { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.5rem; font-weight:700; color:white; }
+        .mockup-stat .lbl { font-size:0.7rem; color:rgba(255,255,255,0.5); }
+        .mockup-alert { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
+        .mockup-alert .text { flex:1; }
+        .mockup-alert .title { color:white; font-size:0.85rem; font-weight:500; }
+        .mockup-alert .sub { color:rgba(255,255,255,0.5); font-size:0.7rem; }
+        .mockup-alert .badge { background:rgba(239,68,68,0.25); color:#FCA5A5; padding:3px 8px; border-radius:10px; font-size:0.65rem; font-weight:600; white-space:nowrap; }
+
+        /* Social proof */
+        .proof { background:#F8F9FA; padding:48px 32px; border-bottom:1px solid #eee; }
+        .proof-inner { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:32px; text-align:center; }
+        @media(max-width:768px) { .proof-inner { grid-template-columns:1fr; gap:20px; } }
+        .proof-val { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; color:#6C5CE7; }
+        .proof-lbl { color:#636E72; font-size:0.85rem; margin-top:2px; }
+
+        /* Sections */
+        .section { padding:80px 32px; max-width:1100px; margin:0 auto; }
+        .section-title { text-align:center; margin-bottom:48px; }
+        .section-title h2 { font-size:2.2rem; font-weight:700; margin-bottom:8px; }
+        .section-title p { color:#636E72; font-size:1.05rem; }
+
+        /* Features grid */
+        .features { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        @media(max-width:768px) { .features { grid-template-columns:1fr; } }
+        .feature { background:white; border:1px solid #eee; border-radius:14px; padding:28px; transition:all 0.25s; }
+        .feature:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.06); border-color:#6C5CE7; }
+        .feature-icon { width:44px; height:44px; border-radius:12px; background:#6C5CE710; display:flex; align-items:center; justify-content:center; color:#6C5CE7; margin-bottom:14px; transition:all 0.25s; }
+        .feature:hover .feature-icon { background:#6C5CE7; color:white; }
+        .feature h3 { font-size:1.05rem; font-weight:600; margin-bottom:6px; }
+        .feature p { color:#636E72; font-size:0.88rem; line-height:1.6; }
+
+        /* Steps */
+        .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+        @media(max-width:768px) { .steps { grid-template-columns:1fr 1fr; } }
+        .step { text-align:center; padding:16px; }
+        .step-num { width:48px; height:48px; border-radius:14px; background:#6C5CE7; color:white; display:inline-flex; align-items:center; justify-content:center; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:14px; box-shadow:0 4px 12px rgba(108,92,231,0.3); }
+        .step h3 { font-size:0.95rem; font-weight:600; margin-bottom:6px; }
+        .step p { color:#636E72; font-size:0.82rem; }
+
+        /* Testimonials */
+        .testimonials { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+        @media(max-width:768px) { .testimonials { grid-template-columns:1fr; } }
+        .testimonial { background:white; border:1px solid #eee; border-radius:14px; padding:24px; }
+        .testimonial-quote { color:#636E72; font-size:0.9rem; line-height:1.7; margin-bottom:16px; font-style:italic; }
+        .testimonial-name { font-weight:600; font-size:0.9rem; }
+        .testimonial-role { color:#636E72; font-size:0.8rem; }
+
+        /* CTA */
+        .cta { background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); padding:80px 32px; text-align:center; color:white; }
+        .cta h2 { font-size:2.2rem; font-weight:700; margin-bottom:10px; }
+        .cta p { opacity:0.8; font-size:1.05rem; margin-bottom:28px; }
+
+        /* Footer */
+        .footer { background:#1a1a2e; color:#636E72; padding:40px 32px; text-align:center; font-size:0.85rem; }
+        .footer a { color:#A29BFE; text-decoration:none; margin:0 10px; }
+        .footer-links { margin-bottom:16px; }
+
+        /* Alt bg */
+        .bg-gray { background:#F8F9FA; }
+
+        /* Animations */
+        .fade-in { opacity:0; transform:translateY(20px); transition:all 0.6s ease; }
+        .fade-in.visible { opacity:1; transform:translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
+    <a href="/" class="nav-logo">LY</a>
+    <div class="nav-links">
+        <a href="/partners" class="hide-mobile">Partners</a>
+        <a href="/map" class="hide-mobile">Find shops</a>
+        <a href="/pricing" class="hide-mobile">Pricing</a>
+        <a href="/login" class="btn-outline">Log in</a>
+        <a href="/register" class="btn-cta">Sign up</a>
+        <a href="/simulate" class="btn-outline">Demo</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-badge">AI-powered customer retention</div>
+            <h1>Your customers are leaving. <span>You just don't see it yet.</span></h1>
+            <p>LY gives independent cafes, restaurants, and bakeries the power to detect when regulars are drifting away — and act before they're gone. No marketing team required.</p>
+            <div class="hero-buttons">
+                <a href="#waitlist" class="btn-accent">Join the waitlist</a>
+                <a href="#features" class="btn-ghost">Learn more</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="mockup-dot" style="background:#EF4444"></div>
+                    <div class="mockup-dot" style="background:#F59E0B"></div>
+                    <div class="mockup-dot" style="background:#10B981"></div>
+                    <span style="color:rgba(255,255,255,0.4); font-size:0.7rem; margin-left:8px">LY Dashboard</span>
+                </div>
+                <div class="mockup-stats">
+                    <div class="mockup-stat"><div class="val">247</div><div class="lbl">Customers</div></div>
+                    <div class="mockup-stat"><div class="val" style="color:#FCA5A5">12</div><div class="lbl">At risk</div></div>
+                    <div class="mockup-stat"><div class="val" style="color:#00D2D3">38</div><div class="lbl">Today</div></div>
+                </div>
+                <div class="mockup-alert">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <div class="text">
+                        <div class="title">Marco hasn't visited in 12 days</div>
+                        <div class="sub">Usually visits every 3 days</div>
+                    </div>
+                    <div class="badge">AT RISK</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Social Proof -->
+<section class="proof">
+    <div class="proof-inner">
+        <div><div class="proof-val">10M+</div><div class="proof-lbl">Independent F&B businesses in Europe</div></div>
+        <div><div class="proof-val">5-7x</div><div class="proof-lbl">Cost of acquiring vs. retaining</div></div>
+        <div><div class="proof-val">37%</div><div class="proof-lbl">At-risk customers recovered with AI</div></div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+    <div class="section-title fade-in">
+        <h2>Built for businesses like yours</h2>
+        <p>No marketing team needed. No complex setup. Just results.</p>
+    </div>
+    <div class="features">
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div><h3>Churn detection</h3><p>Our algorithm spots customers whose visit frequency is dropping. You get an alert before they're gone for good.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="7" x2="7" y2="7.01"/><line x1="7" y1="12" x2="7" y2="12.01"/><line x1="12" y1="7" x2="12" y2="7.01"/><line x1="17" y1="7" x2="17" y2="7.01"/><line x1="12" y1="17" x2="12" y2="17.01"/><line x1="17" y1="12" x2="17" y2="12.01"/><line x1="17" y1="17" x2="17" y2="17.01"/></svg></div><h3>Zero friction</h3><p>No app to download. Customers scan a QR code, enter their name, and they're in. Takes 15 seconds.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><h3>Simple dashboard</h3><p>See all your customers, visit history, and who's at risk. One screen. No complexity.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><h3>Works with any setup</h3><p>LY is independent from your POS. SumUp, Zettle, Square, or cash — it just works.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>GDPR compliant</h3><p>Built in Europe, for Europe. Customer data stays yours. No third-party sharing.</p></div>
+        <div class="feature fade-in"><div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>Set up in 2 minutes</h3><p>Register, print your QR code, stick it at the counter. No training, no onboarding.</p></div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="section bg-gray" id="how-it-works">
+    <div class="section-title fade-in">
+        <h2>How LY works</h2>
+        <p>Set up in 2 minutes. No app download for your customers.</p>
+    </div>
+    <div class="steps">
+        <div class="step fade-in"><div class="step-num">1</div><h3>Display your QR</h3><p>Print the QR code LY generates and place it at your counter.</p></div>
+        <div class="step fade-in"><div class="step-num">2</div><h3>Customers sign up</h3><p>They scan, enter first name & phone, get their loyalty QR.</p></div>
+        <div class="step fade-in"><div class="step-num">3</div><h3>Scan every visit</h3><p>Customer shows their QR, you scan it. Visits tracked automatically.</p></div>
+        <div class="step fade-in"><div class="step-num">4</div><h3>Get smart alerts</h3><p>LY tells you when a regular is slipping away — before it's too late.</p></div>
+    </div>
+</section>
+
+<!-- Image + Story Section -->
+<section style="padding:80px 32px; background:white">
+    <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center">
+        <div class="fade-in">
+            <img src="https://images.unsplash.com/photo-1559305616-3f99cd43e353?w=600&h=400&fit=crop" alt="Barista serving coffee" style="width:100%; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.1); object-fit:cover; height:400px">
+        </div>
+        <div class="fade-in">
+            <div style="display:inline-block; background:#6C5CE710; color:#6C5CE7; padding:4px 12px; border-radius:8px; font-size:0.8rem; font-weight:600; margin-bottom:16px">The Francesca Story</div>
+            <h2 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; line-height:1.3; margin-bottom:16px">
+                "I knew all my regulars by face. But I had no idea when they stopped coming."
+            </h2>
+            <p style="color:#636E72; font-size:1rem; line-height:1.7; margin-bottom:20px">
+                Francesca owns a coffee shop in Kreuzberg, Berlin. Marco came every Monday for 3 years — double espresso, no sugar. One day, he just stopped. She didn't notice for weeks. By then, he was someone else's regular.
+            </p>
+            <p style="color:#636E72; font-size:1rem; line-height:1.7; margin-bottom:24px">
+                With LY, Francesca would have known within days. A simple alert: <em>"Marco hasn't visited in 12 days."</em> One WhatsApp message later, Marco is back.
+            </p>
+            <a href="/pricing" style="display:inline-flex; align-items:center; gap:8px; color:#6C5CE7; font-weight:600; text-decoration:none; font-size:0.95rem">
+                See our plans <span style="font-size:1.2rem">&rarr;</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Numbers Section -->
+<section style="padding:60px 32px; background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); color:white; text-align:center">
+    <div style="max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:32px">
+        <div class="fade-in">
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">78%</div>
+            <div style="opacity:0.7; font-size:0.85rem">of restaurant guests never return after first visit</div>
+        </div>
+        <div class="fade-in">
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">&euro;375K</div>
+            <div style="opacity:0.7; font-size:0.85rem">lost per restaurant per year to customer churn</div>
+        </div>
+        <div class="fade-in">
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">6.9x</div>
+            <div style="opacity:0.7; font-size:0.85rem">more visits from customers who return a 2nd time</div>
+        </div>
+        <div class="fade-in">
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800">2min</div>
+            <div style="opacity:0.7; font-size:0.85rem">to set up LY and start retaining</div>
+        </div>
+    </div>
+</section>
+
+<!-- Second Image Section -->
+<section style="padding:80px 32px; background:#F8F9FA">
+    <div style="max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center">
+        <div class="fade-in" style="order:2">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop" alt="Shop owner checking phone" style="width:100%; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.1); object-fit:cover; height:400px">
+        </div>
+        <div class="fade-in" style="order:1">
+            <div style="display:inline-block; background:#00D2D320; color:#00A3A4; padding:4px 12px; border-radius:8px; font-size:0.8rem; font-weight:600; margin-bottom:16px">Built for real owners</div>
+            <h2 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; line-height:1.3; margin-bottom:16px">
+                You're the barista, the accountant, and the manager. LY is your retention team.
+            </h2>
+            <p style="color:#636E72; font-size:1rem; line-height:1.7; margin-bottom:24px">
+                No marketing degree needed. No complex dashboards to learn. LY watches the patterns you can't see and tells you exactly what to do — send a birthday message, reach out to an at-risk regular, or celebrate a loyal customer's milestone.
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+                <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                    <div style="font-size:0.85rem; font-weight:600">Smart alerts</div>
+                    <div style="font-size:0.78rem; color:#636E72">Know who's leaving before they're gone</div>
+                </div>
+                <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                    <div style="font-size:0.85rem; font-weight:600">Birthday wishes</div>
+                    <div style="font-size:0.78rem; color:#636E72">Never miss a customer's birthday</div>
+                </div>
+                <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                    <div style="font-size:0.85rem; font-weight:600">Loyalty tiers</div>
+                    <div style="font-size:0.78rem; color:#636E72">Bronze to Platinum, automatically</div>
+                </div>
+                <div style="background:white; padding:16px; border-radius:12px; border:1px solid #eee">
+                    <div style="margin-bottom:4px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                    <div style="font-size:0.85rem; font-weight:600">1-click WhatsApp</div>
+                    <div style="font-size:0.78rem; color:#636E72">Reach any customer instantly</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section" id="testimonials">
+    <div class="section-title fade-in">
+        <h2>What owners say</h2>
+    </div>
+    <div class="testimonials">
+        <div class="testimonial fade-in">
+            <p class="testimonial-quote">"I used to notice my regulars were gone only weeks later. Now LY tells me within days. I've already brought back 3 customers this month."</p>
+            <div class="testimonial-name">Francesca R.</div>
+            <div class="testimonial-role">Cafe owner, Berlin</div>
+        </div>
+        <div class="testimonial fade-in">
+            <p class="testimonial-quote">"We tried stamp cards — nobody cared. LY is different because it tells me who's about to leave. That's the information I need."</p>
+            <div class="testimonial-name">Thomas K.</div>
+            <div class="testimonial-role">Bakery owner, Munich</div>
+        </div>
+        <div class="testimonial fade-in">
+            <p class="testimonial-quote">"Set it up in 2 minutes. My customers love the QR system — it's faster than any loyalty app. And I finally have real data."</p>
+            <div class="testimonial-name">Sofia M.</div>
+            <div class="testimonial-role">Restaurant owner, Amsterdam</div>
+        </div>
+    </div>
+</section>
+
+<!-- Waitlist CTA -->
+<section class="cta" id="waitlist">
+    <h2>Ready to keep your regulars?</h2>
+    <p>Join the waitlist and be the first to try LY when we launch.</p>
+    <div style="max-width:420px; margin:0 auto;">
+        <form id="waitlist-form" style="display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="wl-name" placeholder="Your name (optional)" style="padding:14px 16px; border:none; border-radius:10px; font-size:1rem; background:rgba(255,255,255,0.95); color:#2D3436; outline:none; border:1px solid rgba(255,255,255,0.3);">
+            <input type="email" id="wl-email" placeholder="your@email.com" required style="padding:14px 16px; border:none; border-radius:10px; font-size:1rem; background:rgba(255,255,255,0.95); color:#2D3436; outline:none; border:1px solid rgba(255,255,255,0.3);">
+            <button type="submit" style="padding:14px; border:none; border-radius:10px; font-size:1rem; font-weight:600; background:#00D2D3; color:white; cursor:pointer; transition:background 0.2s; box-shadow:0 4px 16px rgba(0,210,211,0.3);">Join the waitlist</button>
+        </form>
+        <div id="wl-result" style="display:none; margin-top:16px; padding:20px; background:rgba(255,255,255,0.1); border-radius:10px; border:1px solid rgba(255,255,255,0.2);">
+            <div style="font-size:2rem; margin-bottom:8px;">&#10003;</div>
+            <div style="font-size:1.1rem; font-weight:600;">You're in!</div>
+            <div style="opacity:0.7; margin-top:4px;">We'll notify you when LY is ready.</div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="/partners">Partners</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/map">Find shops</a>
+        <a href="/login">Log in</a>
+        <a href="/register">Sign up</a>
+    </div>
+    <div>LY — Smart loyalty for independent businesses</div>
+    <div style="margin-top:8px; opacity:0.5;">&copy; 2026 LY. All rights reserved.</div>
+</footer>
+
+<script>
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+    });
+});
+
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 30);
+});
+
+// Fade in on scroll
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Waitlist form
+document.getElementById('waitlist-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = document.getElementById('wl-email').value;
+    const name = document.getElementById('wl-name').value;
+    try {
+        const res = await fetch('/api/waitlist', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({email, name})
+        });
+        if (res.ok) {
+            document.getElementById('waitlist-form').style.display = 'none';
+            document.getElementById('wl-result').style.display = 'block';
+        } else {
+            const data = await res.json();
+            alert(data.detail || 'Something went wrong.');
+        }
+    } catch { alert('Could not connect. Please try again.'); }
+});
+</script>
+<link rel="stylesheet" href="/static/css/chatbot.css">
+<script src="/static/js/chatbot.js"></script>
+</body>
+</html>

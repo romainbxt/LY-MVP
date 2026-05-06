@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}LY - Pricing{% endblock %}
+
+<!-- uses default navbar from base.html -->
+
+{% block content %}
+<style>
+    .pricing-hero { background:linear-gradient(135deg, #6C5CE7 0%, #4834D4 100%); padding:80px 20px 60px; text-align:center; color:white; }
+    .pricing-hero h1 { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2.5rem; font-weight:800; margin-bottom:12px; }
+    .pricing-hero p { opacity:0.8; font-size:1.1rem; max-width:500px; margin:0 auto; }
+    .pricing-footer { margin-top:0; }
+
+    .plans { display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; max-width:1000px; margin:-40px auto 0; padding:0 20px; position:relative; z-index:1; }
+    @media(max-width:768px) { .plans { grid-template-columns:1fr; } }
+
+    .plan { background:white; border-radius:16px; padding:32px; border:2px solid #eee; text-align:center; transition:all 0.3s; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+    .plan:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(0,0,0,0.1); }
+    .plan.featured { border-color:#6C5CE7; position:relative; }
+    .plan.featured::before { content:'Most popular'; position:absolute; top:-14px; left:50%; transform:translateX(-50%); background:#6C5CE7; color:white; padding:4px 16px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+
+    .plan-name { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.2rem; font-weight:700; color:#2D3436; margin-bottom:4px; }
+    .plan-price { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:3rem; font-weight:800; color:#6C5CE7; margin:16px 0 4px; }
+    .plan-price span { font-size:1rem; font-weight:400; color:#636E72; }
+    .plan-desc { color:#636E72; font-size:0.85rem; margin-bottom:24px; }
+
+    .plan-features { list-style:none; text-align:left; margin-bottom:28px; }
+    .plan-features li { padding:8px 0; font-size:0.9rem; color:#2D3436; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:8px; }
+    .plan-features li::before { content:'\2713'; color:#00D2D3; font-weight:700; flex-shrink:0; }
+    .plan-features li.disabled { color:#ccc; }
+    .plan-features li.disabled::before { content:'\2717'; color:#ddd; }
+
+    .plan-btn { display:block; width:100%; padding:14px; border:none; border-radius:12px; font-size:1rem; font-weight:600; cursor:pointer; text-decoration:none; text-align:center; transition:all 0.2s; }
+    .plan-btn-primary { background:#6C5CE7; color:white; }
+    .plan-btn-primary:hover { background:#5A4BD1; }
+    .plan-btn-accent { background:#00D2D3; color:white; box-shadow:0 4px 16px rgba(0,210,211,0.3); }
+    .plan-btn-accent:hover { background:#00bfbf; }
+    .plan-btn-outline { background:white; color:#6C5CE7; border:2px solid #6C5CE7; }
+    .plan-btn-outline:hover { background:#6C5CE710; }
+
+    .faq { max-width:700px; margin:60px auto; padding:0 20px; }
+    .faq h2 { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; text-align:center; margin-bottom:32px; font-size:2rem; }
+    .faq-item { border-bottom:1px solid #eee; padding:20px 0; }
+    .faq-q { font-weight:600; font-size:1rem; margin-bottom:8px; color:#2D3436; cursor:pointer; }
+    .faq-a { color:#636E72; font-size:0.9rem; line-height:1.7; }
+
+    .guarantee { background:#F8F9FA; padding:48px 20px; text-align:center; margin-top:40px; }
+    .guarantee h3 { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.3rem; margin-bottom:8px; }
+
+    .pricing-footer { background:#1a1a2e; color:#636E72; padding:32px; text-align:center; font-size:0.85rem; }
+    .pricing-footer a { color:#A29BFE; text-decoration:none; margin:0 10px; }
+</style>
+
+<!-- Hero -->
+<div class="pricing-hero">
+    <h1>Simple, transparent pricing</h1>
+    <p>Start free. Upgrade when you grow. No hidden fees, no long contracts.</p>
+</div>
+
+<!-- Plans -->
+<div class="plans">
+    <!-- Starter -->
+    <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">Free<span></span></div>
+        <div class="plan-desc">Perfect to try LY with no commitment</div>
+        <ul class="plan-features">
+            <li>Up to 50 customers</li>
+            <li>QR code loyalty system</li>
+            <li>Basic dashboard</li>
+            <li>Visit tracking</li>
+            <li>1 reward rule</li>
+            <li class="disabled">Churn detection alerts</li>
+            <li class="disabled">WhatsApp messaging</li>
+            <li class="disabled">Analytics & reports</li>
+            <li class="disabled">Employee scan page</li>
+        </ul>
+        <a href="{{ url_for('register') }}" class="plan-btn plan-btn-outline">Get started free</a>
+    </div>
+
+    <!-- Growth (featured) -->
+    <div class="plan featured">
+        <div class="plan-name">Growth</div>
+        <div class="plan-price">&euro;29<span>/month</span></div>
+        <div class="plan-desc">Everything you need to retain customers</div>
+        <ul class="plan-features">
+            <li>Up to 500 customers</li>
+            <li>QR code loyalty system</li>
+            <li>Full dashboard & analytics</li>
+            <li>Visit & product tracking</li>
+            <li>Unlimited reward rules</li>
+            <li>AI churn detection alerts</li>
+            <li>WhatsApp messaging</li>
+            <li>Employee scan page</li>
+            <li>Loyalty tiers (Bronze to Platinum)</li>
+        </ul>
+        <a href="{{ url_for('register') }}" class="plan-btn plan-btn-accent">Start 14-day free trial</a>
+    </div>
+
+    <!-- Pro -->
+    <div class="plan">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">&euro;79<span>/month</span></div>
+        <div class="plan-desc">For multi-location businesses</div>
+        <ul class="plan-features">
+            <li>Unlimited customers</li>
+            <li>Everything in Growth</li>
+            <li>Up to 5 locations</li>
+            <li>Promotion broadcasts</li>
+            <li>Customer segmentation</li>
+            <li>Priority support</li>
+            <li>Custom reward strategies</li>
+            <li>API access</li>
+            <li>Dedicated account manager</li>
+        </ul>
+        <a href="{{ url_for('register') }}" class="plan-btn plan-btn-primary">Contact sales</a>
+    </div>
+</div>
+
+<!-- Guarantee -->
+<div class="guarantee">
+    <div style="font-size:2.5rem; margin-bottom:12px">&#128170;</div>
+    <h3>30-day money-back guarantee</h3>
+    <p style="color:#636E72; max-width:500px; margin:0 auto">Not happy? Get a full refund within 30 days. No questions asked. We're confident LY pays for itself in the first week.</p>
+</div>
+
+<!-- ROI Calculator -->
+<div style="max-width:700px; margin:40px auto; padding:0 20px;">
+    <div style="background:linear-gradient(135deg, #6C5CE710, #00D2D310); border:1px solid #6C5CE730; border-radius:16px; padding:32px; text-align:center">
+        <h3 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:1.3rem; margin-bottom:16px">The math is simple</h3>
+        <div style="display:flex; justify-content:center; gap:40px; flex-wrap:wrap; margin-bottom:16px">
+            <div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:800; color:#E74C3C">5-7x</div>
+                <div style="font-size:0.8rem; color:#636E72">Cost to acquire a<br>new customer</div>
+            </div>
+            <div style="font-size:2rem; color:#636E72; align-self:center">vs</div>
+            <div>
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:800; color:#27AE60">&euro;29</div>
+                <div style="font-size:0.8rem; color:#636E72">Per month to keep<br>your existing ones</div>
+            </div>
+        </div>
+        <p style="color:#636E72; font-size:0.9rem">Recovering just <strong>2 lost regulars per month</strong> pays for LY Growth. The average cafe loses 5+ every week.</p>
+    </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+    <h2>Frequently asked questions</h2>
+
+    <div class="faq-item">
+        <div class="faq-q">Do my customers need to download an app?</div>
+        <div class="faq-a">No. Customers scan a QR code and access their loyalty card via their web browser. No app download needed — it takes 15 seconds.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q">Do I need to change my POS system?</div>
+        <div class="faq-a">No. LY works independently from any POS. Whether you use SumUp, Zettle, Square, or even just cash — LY works alongside your existing setup.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q">How does churn detection work?</div>
+        <div class="faq-a">LY learns each customer's visit pattern. If someone who usually comes every 3 days hasn't been back in 7 days, you get an alert with a suggested action (like sending a WhatsApp message).</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q">Can I cancel anytime?</div>
+        <div class="faq-a">Yes. No long-term contracts. Cancel anytime from your settings. Your data remains accessible for 30 days after cancellation.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q">Is my data safe? What about GDPR?</div>
+        <div class="faq-a">LY is built in Europe, for Europe. All data is stored on EU servers. We are fully GDPR compliant. Your customer data belongs to you — we never share or sell it.</div>
+    </div>
+    <div class="faq-item">
+        <div class="faq-q">How long does setup take?</div>
+        <div class="faq-a">About 2 minutes. Register, add your products, print your QR code, and you're live. No training needed.</div>
+    </div>
+</div>
+
+<!-- Final CTA -->
+<div style="background:linear-gradient(135deg, #6C5CE7, #4834D4); padding:60px 20px; text-align:center; color:white;">
+    <h2 style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; font-size:2rem; font-weight:700; margin-bottom:10px">Ready to stop losing customers?</h2>
+    <p style="opacity:0.8; margin-bottom:24px">Start free. See results in your first week.</p>
+    <a href="{{ url_for('register') }}" style="display:inline-block; background:#00D2D3; color:white; padding:16px 36px; border-radius:12px; font-size:1.1rem; font-weight:600; text-decoration:none; box-shadow:0 4px 16px rgba(0,210,211,0.3);">Start your free trial</a>
+</div>
+
+<!-- Footer -->
+<footer class="pricing-footer">
+    <div style="margin-bottom:12px">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('partners') }}">Partners</a>
+        <a href="{{ url_for('shop_map') }}">Find shops</a>
+        <a href="{{ url_for('login') }}">Log in</a>
+    </div>
+    <div>&copy; 2026 LY. All rights reserved.</div>
+</footer>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}LY - Settings{% endblock %}
+
+<!-- uses default navbar from base.html -->
+
+{% block content %}
+<div class="container" style="max-width:700px">
+
+    <h1 style="font-size:1.5rem; margin-bottom:20px">Settings</h1>
+
+    <!-- Products -->
+    <div class="card">
+        <h2>Products</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Products your employees can select when scanning a customer.
+        </p>
+
+        {% if products %}
+        <ul class="customer-list" style="margin-bottom:16px">
+            {% for p in products %}
+            <li class="customer-item">
+                <div>
+                    <span class="customer-name">{{ p.name }}</span>
+                    {% if p.price %}<span class="customer-meta">&middot; {{ "%.2f"|format(p.price) }}€</span>{% endif %}
+                </div>
+                <form method="POST" style="display:inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle_product">
+                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                    <input type="hidden" name="active" value="{{ 0 if p.active else 1 }}">
+                    <button type="submit" class="btn {{ 'btn-danger' if p.active else 'btn-success' }}" style="padding:4px 12px; font-size:0.8rem">
+                        {{ 'Disable' if p.active else 'Enable' }}
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="POST" style="display:flex; gap:8px; align-items:end; flex-wrap:wrap">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="add_product">
+            <div class="form-group" style="flex:1; margin:0; min-width:150px">
+                <label>Product name</label>
+                <input type="text" name="product_name" required placeholder="Cappuccino">
+            </div>
+            <div class="form-group" style="width:100px; margin:0">
+                <label>Price (€)</label>
+                <input type="number" name="product_price" step="0.01" placeholder="3.50">
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding:12px 16px; height:fit-content">Add</button>
+        </form>
+    </div>
+
+    <!-- Reward Rules -->
+    <div class="card">
+        <h2>Reward rules</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Set up automatic rewards for your loyal customers.
+        </p>
+
+        {% if rules %}
+        <ul class="customer-list" style="margin-bottom:16px">
+            {% for r in rules %}
+            <li class="customer-item">
+                <div>
+                    <span class="customer-name">{{ r.name }}</span>
+                    <div class="customer-meta">Every {{ r.every_n_visits }} visits: {{ r.reward_description }}</div>
+                </div>
+                <form method="POST" style="display:inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle_rule">
+                    <input type="hidden" name="rule_id" value="{{ r.id }}">
+                    <input type="hidden" name="active" value="{{ 0 if r.active else 1 }}">
+                    <button type="submit" class="btn {{ 'btn-danger' if r.active else 'btn-success' }}" style="padding:4px 12px; font-size:0.8rem">
+                        {{ 'Disable' if r.active else 'Enable' }}
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="add_rule">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:end">
+                <div class="form-group" style="flex:1; margin:0; min-width:120px">
+                    <label>Rule name</label>
+                    <input type="text" name="rule_name" required placeholder="Free Coffee">
+                </div>
+                <div class="form-group" style="width:80px; margin:0">
+                    <label>Every N</label>
+                    <input type="number" name="every_n_visits" value="10" min="1" required>
+                </div>
+                <div class="form-group" style="flex:1; margin:0; min-width:150px">
+                    <label>Reward</label>
+                    <input type="text" name="reward_description" required placeholder="Free espresso">
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding:12px 16px; height:fit-content">Add</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tier Explanation -->
+    <div class="card">
+        <h2>Loyalty tiers explained</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Tiers are calculated automatically based on visit count and frequency.
+        </p>
+        <ul class="customer-list">
+            <li class="customer-item">
+                <span class="tier-badge tier-bronze">Bronze</span>
+                <span class="customer-meta">New customers, score &lt; 20</span>
+            </li>
+            <li class="customer-item">
+                <span class="tier-badge tier-silver">Silver</span>
+                <span class="customer-meta">Regular visitors, score 20-49</span>
+            </li>
+            <li class="customer-item">
+                <span class="tier-badge tier-gold">Gold</span>
+                <span class="customer-meta">Loyal customers, score 50-99</span>
+            </li>
+            <li class="customer-item">
+                <span class="tier-badge tier-platinum">Platinum</span>
+                <span class="customer-meta">VIP customers, score 100+</span>
+            </li>
+        </ul>
+        <p style="color:var(--text-light); font-size:0.8rem; margin-top:12px">
+            Score = total visits × (1 + visits per week). Customers who visit more often level up faster.
+        </p>
+    </div>
+
+    <!-- Location -->
+    <div class="card">
+        <h2>Shop location</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Add your location to appear on the LY map. Customers can find you nearby.
+        </p>
+        <form method="POST" action="{{ url_for('update_location') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" name="address" placeholder="123 Main St, Berlin 10115">
+            </div>
+            <div style="display:flex; gap:8px">
+                <div class="form-group" style="flex:1">
+                    <label>Latitude</label>
+                    <input type="text" name="latitude" placeholder="52.5200" id="lat-input">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Longitude</label>
+                    <input type="text" name="longitude" placeholder="13.4050" id="lng-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Short description</label>
+                <input type="text" name="description" placeholder="Cozy cafe with the best espresso in Kreuzberg">
+            </div>
+            <button type="button" onclick="getMyLocation()" class="btn btn-primary" style="margin-bottom:8px">Use my current location</button>
+            <button type="submit" class="btn btn-success btn-full">Save location</button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+function getMyLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            document.getElementById('lat-input').value = pos.coords.latitude.toFixed(6);
+            document.getElementById('lng-input').value = pos.coords.longitude.toFixed(6);
+        }, function() {
+            alert('Could not get your location. Please enter it manually.');
+        });
+    } else {
+        alert('Geolocation is not supported by your browser.');
+    }
+}
+</script>
+{% endblock %}

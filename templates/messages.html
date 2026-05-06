@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}LY - Messages{% endblock %}
+
+<!-- uses default navbar from base.html -->
+
+{% block content %}
+<div class="container">
+
+    <h1 style="font-size:1.5rem; margin-bottom:20px">Messages</h1>
+
+    <!-- At-Risk Customers -->
+    {% if at_risk %}
+    <div class="card">
+        <h2>Win back at-risk customers</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Send a WhatsApp message to bring them back.
+        </p>
+        {% for c in at_risk %}
+        <div style="padding:16px; background:#FFF5F5; border:1px solid #FED7D7; border-radius:8px; margin-bottom:12px">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                <div>
+                    <strong>{{ c.first_name }}</strong>
+                    <span class="risk-badge" style="margin-left:8px">AT RISK</span>
+                    <div class="customer-meta">Absent {{ c.days_absent }} days (avg: {{ c.avg_interval_days }}d)</div>
+                </div>
+            </div>
+            <form action="{{ url_for('send_whatsapp', customer_id=c.id) }}" method="POST" style="display:flex; gap:8px">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="message" value="Hi {{ c.first_name }}! We miss you at {{ current_user.shop_name }}. Come back this week and get a treat on us! ☕"
+                       style="flex:1; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem">
+                <button type="submit" class="btn btn-success" style="white-space:nowrap; padding:10px 16px">
+                    Send WhatsApp
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Birthday Messages -->
+    {% if birthdays %}
+    <div class="card">
+        <h2>Birthday wishes</h2>
+        {% for b in birthdays %}
+        <div style="padding:16px; background:#FEFCE8; border:1px solid #FEF08A; border-radius:8px; margin-bottom:12px">
+            <div style="margin-bottom:12px">
+                <strong>{{ b.first_name }}</strong>
+                <span style="color:var(--warning); font-size:0.8rem; margin-left:8px">
+                    {% if b.days_until == 0 %}Birthday TODAY!{% elif b.days_until == 1 %}Tomorrow{% else %}In {{ b.days_until }} days{% endif %}
+                </span>
+            </div>
+            <form action="{{ url_for('send_whatsapp', customer_id=b.id) }}" method="POST" style="display:flex; gap:8px">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="message" value="Happy Birthday {{ b.first_name }}! 🎂 Come celebrate at {{ current_user.shop_name }} — your coffee is on us today!"
+                       style="flex:1; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem">
+                <button type="submit" class="btn btn-primary" style="white-space:nowrap; padding:10px 16px">
+                    Send WhatsApp
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Broadcast Promotion -->
+    <div class="card">
+        <h2>Broadcast a promotion</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:16px">
+            Publish a promotion visible to all customers on the LY map. Also generates WhatsApp messages.
+        </p>
+        <form action="{{ url_for('promote') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Promotion title</label>
+                <input type="text" name="promo_title" required placeholder="Happy Hour Special!">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="promo_content" required placeholder="50% off all cappuccinos this Friday 3-5pm">
+            </div>
+            <button type="submit" class="btn btn-success btn-full">Publish promotion</button>
+        </form>
+    </div>
+
+    <!-- Message History -->
+    <div class="card">
+        <h2>Sent messages</h2>
+        {% if sent_messages %}
+        <ul class="customer-list">
+            {% for m in sent_messages %}
+            <li class="customer-item">
+                <div>
+                    <strong>{{ m.customer_name or 'Unknown' }}</strong>
+                    <div class="customer-meta">{{ m.content[:80] }}{% if m.content|length > 80 %}...{% endif %}</div>
+                </div>
+                <div style="text-align:right">
+                    <span style="font-size:0.75rem; background:var(--success); color:white; padding:2px 8px; border-radius:10px">{{ m.message_type }}</span>
+                    <div class="customer-meta">{{ m.sent_at|fdatetime }}</div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color:var(--text-light); text-align:center; padding:20px">No messages sent yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

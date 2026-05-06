@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}LY - Find shops near you{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div style="text-align:center; margin:30px 0">
+        <h1 style="font-size:2rem; color:var(--primary)">LY</h1>
+        <p style="color:var(--text-light)">Find loyalty shops near you</p>
+    </div>
+
+    <!-- Map -->
+    <div class="card" style="padding:0; overflow:hidden">
+        <div id="map" style="height:450px; width:100%"></div>
+    </div>
+
+    <!-- Shop List -->
+    <div class="card">
+        <h2>All LY shops</h2>
+        {% if shops %}
+        <ul class="customer-list">
+            {% for s in shops %}
+            <li class="customer-item">
+                <div>
+                    <strong>{{ s.shop_name }}</strong>
+                    {% if s.address %}<div class="customer-meta">{{ s.address }}</div>{% endif %}
+                    {% if s.description %}<div class="customer-meta" style="margin-top:4px">{{ s.description }}</div>{% endif %}
+                </div>
+                <a href="{{ url_for('join', shop_code=s.shop_code) }}" class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem">Join</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="color:var(--text-light); text-align:center; padding:20px">
+            No shops with location data yet. Shops can add their location in Settings.
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Current Promotions -->
+    {% if promotions %}
+    <div class="card">
+        <h2>Current promotions</h2>
+        {% for p in promotions %}
+        {% set parts = p.content.split('|', 1) %}
+        <div style="padding:12px; background:#F0FFF4; border:1px solid #C6F6D5; border-radius:8px; margin-bottom:8px">
+            <strong>{{ p.shop_name }}</strong>
+            <div style="font-size:0.95rem; margin-top:4px">
+                {% if parts|length > 1 %}
+                <strong>{{ parts[0] }}</strong> — {{ parts[1] }}
+                {% else %}
+                {{ p.content }}
+                {% endif %}
+            </div>
+            <div class="customer-meta" style="margin-top:4px">{{ p.sent_at|fdate }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="text-align:center; margin:20px 0">
+        <a href="{{ url_for('my_shops') }}" class="btn btn-primary">View my loyalty cards</a>
+        <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-left:8px; background:var(--text-light)">Back to home</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const shops = {{ shops | tojson }};
+
+    // Default to Berlin center
+    let center = [52.52, 13.405];
+    let zoom = 12;
+
+    if (shops.length > 0) {
+        center = [shops[0].latitude, shops[0].longitude];
+    }
+
+    const map = L.map('map').setView(center, zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    shops.forEach(shop => {
+        if (shop.latitude && shop.longitude) {
+            const marker = L.marker([shop.latitude, shop.longitude]).addTo(map);
+            marker.bindPopup(`
+                <strong>${shop.shop_name}</strong><br>
+                ${shop.address || ''}<br>
+                ${shop.description || ''}<br>
+                <a href="/join/${shop.shop_code}">Join this shop</a>
+            `);
+        }
+    });
+
+    // Try to get user's location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            map.setView([pos.coords.latitude, pos.coords.longitude], 14);
+            L.marker([pos.coords.latitude, pos.coords.longitude], {
+                icon: L.divIcon({
+                    html: '<div style="background:#6C5CE7;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
+                    iconSize: [14, 14],
+                    className: ''
+                })
+            }).addTo(map).bindPopup('You are here');
+        });
+    }
+});
+</script>
+{% endblock %}

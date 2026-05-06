@@ -11,6 +11,7 @@
     <div class="card">
         <h2>Create my loyalty card</h2>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label>First name</label>
                 <input type="text" name="first_name" required placeholder="Marco">
@@ -18,6 +19,10 @@
             <div class="form-group">
                 <label>Phone number</label>
                 <input type="tel" name="phone" required placeholder="+49 170 1234567">
+            </div>
+            <div class="form-group">
+                <label>Birthday (optional)</label>
+                <input type="date" name="birthday">
             </div>
             <button type="submit" class="btn btn-primary btn-full">Get my card</button>
         </form>
