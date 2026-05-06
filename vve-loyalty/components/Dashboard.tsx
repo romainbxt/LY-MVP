@@ -15,7 +15,7 @@ export default async function Dashboard() {
 
       {/* Header */}
       <div className="border-b border-stone-800 px-5 py-4 flex items-center gap-3">
-        <img src="/vve-logo.png" alt="VVE" width={38} height={38} style={{ borderRadius: '12px', objectFit: 'cover' }} />
+        <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve%20cafe%20logo.jpg" alt="VVE" width={38} height={38} style={{ borderRadius: '12px', objectFit: 'cover' }} />
         <div>
           <h1 className="font-bold text-base leading-tight">VVE Back Office</h1>
           <p className="text-stone-500 text-xs">Loyalty Dashboard</p>

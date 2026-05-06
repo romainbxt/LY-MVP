@@ -8,7 +8,7 @@ export default function HomePage() {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <img
-            src="/vve-logo.png"
+            src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve%20cafe%20logo.jpg"
             alt="VVE Cafe"
             width={110}
             height={110}

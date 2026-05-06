@@ -13,7 +13,7 @@ export default async function CashierPage() {
       <div className="w-full max-w-xs">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src="/vve-logo.png" alt="VVE Cafe" width={80} height={80} style={{ borderRadius: '16px', objectFit: 'cover' }} />
+            <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve%20cafe%20logo.jpg" alt="VVE Cafe" width={80} height={80} style={{ borderRadius: '16px', objectFit: 'cover' }} />
           </div>
           <h1 className="text-white text-2xl font-bold mb-1">Staff Login</h1>
           <p className="text-stone-400 text-sm">VVE Cafe Back Office</p>
