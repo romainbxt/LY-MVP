@@ -83,9 +83,7 @@ export default async function Dashboard() {
                     ))}
                   </div>
 
-                  {isInactive && (
-                    <ReengageButton uniqueId={c.unique_id} name={c.name} daysSince={daysSince!} />
-                  )}
+                  <ReengageButton uniqueId={c.unique_id} name={c.name} daysSince={daysSince ?? 0} />
                   <DeleteButton uniqueId={c.unique_id} name={c.name} />
                 </div>
               )

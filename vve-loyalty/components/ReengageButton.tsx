@@ -27,7 +27,7 @@ export default function ReengageButton({
         onClick={() => setExpanded(true)}
         className="mt-2 text-xs font-semibold text-amber-400 border border-amber-500/50 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 active:scale-95 transition-all"
       >
-        Send "We miss you" ({daysSince}d inactive)
+        {daysSince >= 15 ? `Send "We miss you" (${daysSince}d inactive)` : 'Send re-engagement email'}
       </button>
     )
   }
