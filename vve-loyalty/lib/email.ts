@@ -96,17 +96,28 @@ function buildReengagementHtml({
   qrDataUrl,
   logoUrl,
   daysSince,
+  offer,
 }: {
   name: string
   stampCount: number
   qrDataUrl: string
   logoUrl: string
   daysSince?: number
+  offer?: string
 }): string {
   const row1 = [1, 2, 3, 4, 5].map(n => buildStampCell(n, stampCount)).join('')
   const row2 = [6, 7, 8, 9, 10].map(n => buildStampCell(n, stampCount)).join('')
   const stampsLeft = 10 - stampCount
   const missYouLine = daysSince ? `It's been ${daysSince} days since your last visit.` : `We haven't seen you in a while.`
+  const offerBlock = offer ? `
+      <tr><td align="center" style="padding-bottom:28px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#C9A227;border-radius:16px;padding:24px 20px;">
+          <tr><td align="center">
+            <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.85);font-weight:600;">Special Offer For You</p>
+            <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">${offer}</p>
+          </td></tr>
+        </table>
+      </td></tr>` : ''
 
   return `<!DOCTYPE html>
 <html>
@@ -127,6 +138,8 @@ function buildReengagementHtml({
           Your stamp card has <span style="color:#C9A227;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — only <strong>${stampsLeft}</strong> more to your next reward!
         </p>
       </td></tr>
+
+      ${offerBlock}
 
       <tr><td align="center" style="padding-bottom:28px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-radius:16px;padding:24px 16px;">
@@ -181,6 +194,7 @@ export async function sendReengagementEmail({
   scanUrl,
   logoUrl,
   daysSince,
+  offer,
 }: {
   name: string
   email: string
@@ -188,14 +202,15 @@ export async function sendReengagementEmail({
   scanUrl: string
   logoUrl: string
   daysSince?: number
+  offer?: string
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
   const transporter = createTransporter()
   await transporter.sendMail({
     from: `VVE Cafe Rewards <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: `We miss you at VVE Cafe, ${name}! ☕`,
-    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, daysSince }),
+    subject: offer ? `A special offer for you at VVE Cafe ☕` : `We miss you at VVE Cafe, ${name}! ☕`,
+    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, daysSince, offer }),
   })
 }
 

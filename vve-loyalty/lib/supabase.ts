@@ -63,6 +63,14 @@ export async function updateStampCount(uniqueId: string, newCount: number): Prom
   return res2.ok
 }
 
+export async function deleteCustomer(uniqueId: string): Promise<boolean> {
+  const res = await fetch(`${BASE()}?unique_id=eq.${uniqueId}`, {
+    method: 'DELETE',
+    headers: supabaseHeaders(),
+  })
+  return res.ok
+}
+
 export async function getAllCustomers(): Promise<Customer[]> {
   const res = await fetch(`${BASE()}?order=last_visit_at.desc.nullslast`, {
     headers: supabaseHeaders(),

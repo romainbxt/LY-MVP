@@ -5,10 +5,12 @@ import {
   createCustomer,
   getCustomerByUniqueId,
   updateStampCount,
+  deleteCustomer,
 } from '@/lib/supabase'
 import { sendStampCardEmail, sendReengagementEmail } from '@/lib/email'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 const REWARDS: Record<number, string> = {
   3: 'Free Cookie 🍪',
@@ -105,6 +107,21 @@ export async function stampCustomer(
   return { success: true, name: customer.name, newCount, reward }
 }
 
+// ── Delete Customer ───────────────────────────────────────────────────────────
+
+export type DeleteState = { success?: boolean; error?: string } | null
+
+export async function deleteCustomerAction(
+  uniqueId: string,
+  prevState: DeleteState,
+  formData: FormData
+): Promise<DeleteState> {
+  const ok = await deleteCustomer(uniqueId)
+  if (!ok) return { error: 'Failed to delete.' }
+  revalidatePath('/cashier')
+  return { success: true }
+}
+
 // ── Re-engagement ─────────────────────────────────────────────────────────────
 
 export type ReengageState = { success?: boolean; error?: string } | null
@@ -124,6 +141,8 @@ export async function reengageCustomer(
     ? Math.floor((Date.now() - new Date(customer.last_visit_at).getTime()) / 86_400_000)
     : undefined
 
+  const offer = (formData.get('offer') as string)?.trim() || undefined
+
   try {
     await sendReengagementEmail({
       name: customer.name,
@@ -132,6 +151,7 @@ export async function reengageCustomer(
       scanUrl,
       logoUrl: `${baseUrl}/vve-logo.png`,
       daysSince,
+      offer,
     })
     return { success: true }
   } catch (e) {

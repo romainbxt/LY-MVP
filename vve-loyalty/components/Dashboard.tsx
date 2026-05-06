@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getAllCustomers } from '@/lib/supabase'
 import ShopQR from '@/components/ShopQR'
 import ReengageButton from '@/components/ReengageButton'
+import DeleteButton from '@/components/DeleteButton'
 
 export default async function Dashboard() {
   const customers = await getAllCustomers()
@@ -85,6 +86,7 @@ export default async function Dashboard() {
                   {isInactive && (
                     <ReengageButton uniqueId={c.unique_id} name={c.name} daysSince={daysSince!} />
                   )}
+                  <DeleteButton uniqueId={c.unique_id} name={c.name} />
                 </div>
               )
             })}
