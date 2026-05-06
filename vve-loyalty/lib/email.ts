@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer'
-import path from 'path'
 
 const REWARDS: Record<number, string> = {
   3: 'Free Cookie 🍪',
@@ -196,8 +195,7 @@ export async function sendReengagementEmail({
     from: `VVE Cafe Rewards <${process.env.GMAIL_USER}>`,
     to: email,
     subject: `We miss you at VVE Cafe, ${name}! ☕`,
-    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl: 'cid:vve-logo', daysSince }),
-    attachments: [{ filename: 'vve-logo.png', path: path.join(process.cwd(), 'public', 'vve-logo.png'), cid: 'vve-logo' }],
+    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, daysSince }),
   })
 }
 
@@ -220,7 +218,6 @@ export async function sendStampCardEmail({
     from: `VVE Cafe Rewards <${process.env.GMAIL_USER}>`,
     to: email,
     subject: 'Your VVE Cafe Stamp Card ☕',
-    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl: 'cid:vve-logo' }),
-    attachments: [{ filename: 'vve-logo.png', path: path.join(process.cwd(), 'public', 'vve-logo.png'), cid: 'vve-logo' }],
+    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl }),
   })
 }
