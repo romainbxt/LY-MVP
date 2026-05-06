@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import RegisterForm from '@/components/RegisterForm'
 
 export default function HomePage() {
@@ -8,12 +7,12 @@ export default function HomePage() {
 
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <Image
+          <img
             src="/vve-logo.png"
             alt="VVE Cafe"
             width={110}
             height={110}
-            className="rounded-3xl shadow-lg object-cover"
+            style={{ borderRadius: '24px', boxShadow: '0 4px 14px rgba(0,0,0,0.15)', objectFit: 'cover' }}
           />
         </div>
 

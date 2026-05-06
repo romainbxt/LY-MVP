@@ -44,7 +44,7 @@ function buildEmailHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       <tr><td align="center" style="padding-bottom:20px;">
-        <img src="${logoUrl}" alt="VVE Cafe" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
+        <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve-logo.png" alt="VVE Cafe" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
@@ -117,7 +117,7 @@ function buildReengagementHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       <tr><td align="center" style="padding-bottom:20px;">
-        <img src="${logoUrl}" alt="VVE Cafe" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
+        <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve-logo.png" alt="VVE Cafe" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
