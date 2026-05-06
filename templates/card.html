@@ -4,28 +4,62 @@
 {% block content %}
 <div class="mobile-container" style="margin-top:20px">
 
-    <div class="loyalty-card">
+    <!-- Loyalty card with tier -->
+    <div class="loyalty-card" style="position:relative">
         <h1>{{ customer.first_name }}</h1>
         <div class="shop">{{ merchant.shop_name }}</div>
         <div class="visits-count">{{ visits|length }}</div>
         <div class="visits-label">visits</div>
-        <span class="tier-badge tier-{{ tier|lower }}" style="font-size:0.9rem; margin-top:8px; display:inline-block">{{ tier }}</span>
+        <div style="position:absolute;top:16px;right:16px">
+            <span style="background:rgba(255,255,255,0.25);color:#fff;
+                         font-size:0.7rem;font-weight:700;padding:3px 10px;
+                         border-radius:20px;backdrop-filter:blur(4px)">
+                {{ tier.name }}
+            </span>
+        </div>
     </div>
 
-    {% if rewards %}
-    <div class="alert alert-success">
-        {% for r in rewards %}
-        <strong>Reward unlocked!</strong> {{ r.reward }}<br>
+    <!-- Reward progress -->
+    {% if progress %}
+    <div class="card" style="margin-top:16px">
+        <h2 style="font-size:1rem;margin-bottom:12px">Your rewards</h2>
+        {% for p in progress %}
+        <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                <span style="font-size:0.85rem;font-weight:600">{{ p.name }}</span>
+                {% if p.ready %}
+                <span style="background:#e6f9f0;color:#1a7a4a;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:12px">
+                    READY!
+                </span>
+                {% else %}
+                <span style="font-size:0.75rem;color:var(--text-light)">{{ p.visits_done }}/{{ p.visits_required }}</span>
+                {% endif %}
+            </div>
+            <div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden">
+                <div style="height:100%;width:{{ p.pct }}%;background:var(--primary);border-radius:4px;transition:width 0.4s"></div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-light);margin-top:3px">
+                {% if p.ready %}
+                Show this to the barista to claim: <strong>{{ p.reward_description }}</strong>
+                {% else %}
+                {{ p.visits_required - p.visits_done }} more
+                {% if p.product_name %}{{ p.product_name }}{% endif %}
+                to earn: {{ p.reward_description }}
+                {% endif %}
+            </div>
+        </div>
         {% endfor %}
     </div>
     {% endif %}
 
+    <!-- QR Code -->
     <div class="qr-card">
         <h3 style="margin-bottom:12px">Your QR Code</h3>
         <img src="data:image/png;base64,{{ qr_img }}" alt="My QR Code">
         <p>Show this code at the counter on every visit</p>
     </div>
 
+    <!-- Visit History -->
     {% if visits %}
     <div class="card" style="margin-top:20px">
         <h2>History</h2>
@@ -34,8 +68,10 @@
             <li class="customer-item">
                 <span>Visit #{{ visits|length - loop.index0 }}</span>
                 <div style="text-align:right">
-                    {% if v.product_name %}<span class="customer-meta">{{ v.product_name }}</span><br>{% endif %}
-                    <span class="customer-meta">{{ v.visited_at|fdatetime }}</span>
+                    <div style="font-size:0.85rem">{{ v.visited_at[:10] }}</div>
+                    {% if v.product_name %}
+                    <div class="customer-meta">{{ v.product_name }}</div>
+                    {% endif %}
                 </div>
             </li>
             {% endfor %}
@@ -43,8 +79,9 @@
     </div>
     {% endif %}
 
-    <p style="text-align:center; margin:20px 0">
-        <a href="javascript:void(0)" onclick="addBookmark()" style="color:var(--primary); font-size:0.9rem">
+    <p style="text-align:center;margin:20px 0">
+        <a href="javascript:void(0)" onclick="addBookmark()"
+           style="color:var(--primary);font-size:0.9rem">
             Bookmark this page for quick access
         </a>
     </p>

@@ -1,111 +1,265 @@
 {% extends "base.html" %}
 {% block title %}LY - {{ current_user.shop_name }}{% endblock %}
 
-<!-- uses default navbar from base.html -->
+{% block navbar %}
+<nav class="navbar">
+    <span class="logo">LY</span>
+    <div>
+        <span>{{ current_user.shop_name }}</span>
+        <a href="{{ url_for('scan') }}">Scan</a>
+        <a href="{{ url_for('settings') }}">Settings</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+</nav>
+{% endblock %}
 
 {% block content %}
 <div class="container">
 
-    <!-- Stats -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <!-- ── KPI stats ─────────────────────────────────────────── -->
     <div class="stats">
         <div class="stat-box">
             <div class="number">{{ customers|length }}</div>
             <div class="label">Customers</div>
         </div>
         <div class="stat-box">
-            <div class="number" style="color: var(--danger)">{{ at_risk|length }}</div>
+            <div class="number" style="color:var(--danger)">{{ at_risk|length }}</div>
             <div class="label">At risk</div>
         </div>
         <div class="stat-box">
-            <div class="number">
-                {% set total_visits = customers|sum(attribute='visit_count') %}
-                {{ total_visits }}
-            </div>
+            <div class="number">{{ total_visits }}</div>
             <div class="label">Total visits</div>
         </div>
         <div class="stat-box">
-            <div class="number" style="color: var(--warning)">{{ birthdays|length }}</div>
+            <div class="number">{{ birthdays|length }}</div>
             <div class="label">Birthdays soon</div>
         </div>
     </div>
 
-    <!-- Tier Distribution -->
+    <!-- ── Visit trend (last 30 days) ────────────────────────── -->
     <div class="card">
-        <h2>Loyalty Tiers</h2>
-        <div class="stats" style="margin-bottom:0">
-            {% for tier_name, count in tier_dist.items() %}
-            <div class="stat-box">
-                <div class="number" style="color: {% if tier_name == 'Platinum' %}#9B59B6{% elif tier_name == 'Gold' %}#F1C40F{% elif tier_name == 'Silver' %}#95A5A6{% else %}#CD7F32{% endif %}">
-                    {{ count }}
-                </div>
-                <div class="label">{{ tier_name }}</div>
+        <h2>Visits — last 30 days</h2>
+        <div class="bar-chart">
+            {% for d in visit_data %}
+            <div class="bar-col">
+                <div class="bar-fill"
+                     style="height:{{ (d.count / max_day * 100)|int }}%"
+                     title="{{ d.label }}: {{ d.count }} visits"></div>
+                {% if loop.index % 5 == 0 or loop.first or loop.last %}
+                <div class="bar-label">{{ d.label }}</div>
+                {% else %}
+                <div class="bar-label">&nbsp;</div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <!-- At-Risk Alerts (ONLY at-risk customers) -->
+    <!-- ── Two-col: tiers + products ─────────────────────────── -->
+    <div class="two-col">
+
+        <div class="card">
+            <h2>Customer tiers</h2>
+            {% set tier_order = ['Platinum','Gold','Silver','Bronze','New'] %}
+            {% set tier_colors = {'Platinum':'#6C47FF','Gold':'#d4a017','Silver':'#6b7f8e','Bronze':'#a0522d','New':'#aaaaaa'} %}
+            {% for t in tier_order %}
+            {% if tier_dist.get(t, 0) > 0 %}
+            <div class="tier-row">
+                <span class="tier-badge" style="background:{{ tier_colors[t] }}">{{ t }}</span>
+                <div class="tier-bar-wrap">
+                    <div class="tier-bar-fill"
+                         style="width:{{ (tier_dist[t] / customers|length * 100)|int if customers else 0 }}%;background:{{ tier_colors[t] }}"></div>
+                </div>
+                <span class="tier-count">{{ tier_dist[t] }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% if not customers %}
+            <p style="color:var(--text-light);text-align:center;padding:16px">No customers yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Top products</h2>
+            {% if product_data %}
+            {% set max_prod = product_data[0].count %}
+            {% for p in product_data[:6] %}
+            <div class="tier-row">
+                <span style="font-size:0.85rem;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span>
+                <div class="tier-bar-wrap">
+                    <div class="tier-bar-fill"
+                         style="width:{{ (p.count / max_prod * 100)|int }}%;background:var(--primary)"></div>
+                </div>
+                <span class="tier-count">{{ p.count }}</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="color:var(--text-light);text-align:center;padding:16px">
+                No product data yet.<br>
+                <a href="{{ url_for('settings') }}">Add products in Settings</a> to start tracking.
+            </p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- ── At-risk customers ──────────────────────────────────── -->
     {% if at_risk %}
     <div class="card">
-        <h2>At-risk customers</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h2 style="margin:0">At-risk customers</h2>
+            <span style="font-size:0.8rem;color:var(--text-light)">{{ at_risk|length }} customer{{ 's' if at_risk|length != 1 }}</span>
+        </div>
         {% for c in at_risk %}
-        <div class="churn-alert">
-            <div>
-                <a href="{{ url_for('customer_profile', customer_id=c.id) }}" style="text-decoration:none; color:inherit">
+        <div class="churn-card">
+            <div class="churn-card-top">
+                <div>
                     <strong>{{ c.first_name }}</strong>
-                    <span class="tier-badge tier-{{ c.tier|lower }}">{{ c.tier }}</span>
-                </a>
-                <div class="customer-meta">
-                    {{ c.visit_count }} visits &middot;
-                    Absent for {{ c.days_absent }} days (avg: {{ c.avg_interval_days }}d)
+                    <span class="tier-badge" style="background:{{ c.tier.color }};font-size:0.62rem;margin-left:6px">{{ c.tier.name }}</span>
+                    <div class="customer-meta">
+                        {{ c.visit_count }} visits &middot; absent <strong>{{ c.days_absent }} days</strong>
+                        &middot; avg every {{ c.avg_interval_days }}d
+                    </div>
                 </div>
-            </div>
-            <div style="display:flex; gap:8px; align-items:center">
-                <a href="{{ url_for('messages_page') }}?customer_id={{ c.id }}" class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem">Message</a>
                 <span class="risk-badge">AT RISK</span>
+            </div>
+
+            <div class="msg-preview">
+                <div class="msg-preview-label">WhatsApp message</div>
+                <div class="msg-preview-body">{{ c.wa_msg }}</div>
+            </div>
+
+            <div class="msg-actions">
+                <a href="{{ c.wa_url }}" target="_blank" class="btn-msg btn-wa">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-3px;margin-right:5px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.122 1.523 5.857L0 24l6.344-1.502A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.79 9.79 0 01-5.012-1.378l-.36-.214-3.726.882.916-3.618-.235-.372A9.79 9.79 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                    Send on WhatsApp
+                </a>
+                <button class="btn-msg btn-email"
+                        onclick="copyEmail('{{ c.email_subject|e }}', `{{ c.email_body|replace('\n','\\n')|e }}`)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:5px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8l10 6 10-6"/></svg>
+                    Copy email
+                </button>
             </div>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Birthday Alerts -->
+    <!-- ── Upcoming birthdays ─────────────────────────────────── -->
     {% if birthdays %}
     <div class="card">
         <h2>Upcoming birthdays</h2>
-        {% for b in birthdays %}
-        <div class="customer-item">
-            <div>
-                <span class="customer-name">{{ b.first_name }}</span>
-                <div class="customer-meta">
-                    {% if b.days_until == 0 %}Today!{% elif b.days_until == 1 %}Tomorrow{% else %}In {{ b.days_until }} days{% endif %}
-                    ({{ b.birthday }})
+        {% for c in birthdays %}
+        <div class="churn-card">
+            <div class="churn-card-top">
+                <div>
+                    <strong>{{ c.first_name }}</strong>
+                    <div class="customer-meta">{{ c.phone }} &middot; {{ c.birthday_display }}</div>
                 </div>
+                <span style="background:#fff3cd;color:#856404;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:12px">
+                    {% if c.days_until == 0 %}TODAY 🎂
+                    {% elif c.days_until == 1 %}TOMORROW
+                    {% else %}IN {{ c.days_until }} DAYS{% endif %}
+                </span>
             </div>
-            <a href="{{ url_for('messages_page') }}?customer_id={{ b.id }}&type=birthday" class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem">Send wishes</a>
+
+            <div class="msg-preview">
+                <div class="msg-preview-label">Birthday WhatsApp</div>
+                <div class="msg-preview-body">{{ c.wa_msg }}</div>
+            </div>
+
+            <div class="msg-actions">
+                <a href="{{ c.wa_url }}" target="_blank" class="btn-msg btn-wa">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-3px;margin-right:5px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.555 4.122 1.523 5.857L0 24l6.344-1.502A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.79 9.79 0 01-5.012-1.378l-.36-.214-3.726.882.916-3.618-.235-.372A9.79 9.79 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                    Send birthday message
+                </a>
+                <button class="btn-msg btn-email"
+                        onclick="copyEmail('{{ c.email_subject|e }}', `{{ c.email_body|replace('\n','\\n')|e }}`)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:5px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8l10 6 10-6"/></svg>
+                    Copy email
+                </button>
+            </div>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Shop QR Code & Employee Link -->
+    <!-- ── Messaging / Broadcasts ─────────────────────────────── -->
+    <div class="card" id="messaging">
+        <h2>Send a message</h2>
+        <p style="color:var(--text-light);font-size:0.85rem;margin-bottom:16px">
+            Compose your message, pick a segment, then export contacts to send via WhatsApp or SMS.
+        </p>
+        <form method="POST" action="{{ url_for('broadcast') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Subject / Title</label>
+                <input type="text" name="title" required placeholder="We miss you — here's a gift">
+            </div>
+            <div class="form-group">
+                <label>Message body</label>
+                <textarea name="body" rows="3" required
+                    placeholder="Hi {name}, it's been a while! Come back this week for a free coffee."
+                    style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;resize:vertical"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Target segment</label>
+                <select name="segment" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem">
+                    <option value="all">All customers</option>
+                    <option value="at_risk">At-risk customers only</option>
+                    <option value="vip">VIP (Gold + Platinum)</option>
+                    <option value="new">New customers (1-2 visits)</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button type="submit" class="btn btn-primary">Save message</button>
+                <a href="{{ url_for('broadcast_contacts', segment='at_risk') }}" class="btn btn-secondary" style="text-decoration:none">Export at-risk contacts</a>
+                <a href="{{ url_for('broadcast_contacts', segment='all') }}" class="btn btn-secondary" style="text-decoration:none">Export all contacts</a>
+            </div>
+        </form>
+
+        {% if broadcasts %}
+        <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px">
+            <h3 style="font-size:0.95rem;margin-bottom:12px">Recent messages</h3>
+            {% for b in broadcasts[:5] %}
+            <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <strong style="font-size:0.9rem">{{ b.title }}</strong>
+                    <span class="customer-meta">{{ b.segment }} &middot; {{ b.created_at[:10] }}</span>
+                </div>
+                <div class="customer-meta" style="margin-top:4px">{{ b.body[:100] }}{% if b.body|length > 100 %}…{% endif %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Shop QR code ───────────────────────────────────────── -->
     <div class="card">
         <h2>Your shop QR code</h2>
-        <p style="margin-bottom:12px; color: var(--text-light); font-size:0.9rem">
-            Display this at your counter. New customers scan it to sign up.
+        <p style="color:var(--text-light);font-size:0.9rem;margin-bottom:12px">
+            Display this at your counter. New customers scan to sign up.
         </p>
         <div class="qr-container">
-            <img src="data:image/png;base64,{{ shop_qr }}" alt="Shop QR Code">
-            <p style="margin-top:10px; font-size:0.8rem; color: var(--text-light)">{{ shop_url }}</p>
+            <img src="data:image/png;base64,{{ shop_qr }}" alt="Shop QR">
+            <p style="margin-top:8px;font-size:0.75rem;color:var(--text-light)">{{ shop_url }}</p>
         </div>
-        <div style="margin-top:16px; padding:12px; background:var(--bg); border-radius:8px">
-            <strong>Employee scan link:</strong>
-            <code style="font-size:0.85rem; word-break:break-all">{{ employee_url }}</code>
-            <p style="font-size:0.8rem; color:var(--text-light); margin-top:4px">Share this with your staff — no login required to scan customers.</p>
+        <div style="margin-top:16px;padding:12px;background:#f8f8ff;border-radius:8px;border:1px solid #e0d8ff">
+            <strong style="font-size:0.85rem">Employee scan link</strong>
+            <p style="font-size:0.8rem;color:var(--text-light);margin:4px 0">
+                Share this link with your staff — no login needed, scan-only access:
+            </p>
+            <code style="font-size:0.8rem;word-break:break-all;color:var(--primary)">{{ employee_url }}</code>
         </div>
     </div>
 
-    <!-- All Customers -->
+    <!-- ── All customers ──────────────────────────────────────── -->
     <div class="card">
         <h2>All customers</h2>
         {% if customers %}
@@ -113,26 +267,128 @@
             {% for c in customers %}
             <li class="customer-item">
                 <div>
-                    <a href="{{ url_for('customer_profile', customer_id=c.id) }}" style="text-decoration:none; color:inherit">
-                        <span class="customer-name">{{ c.first_name }}</span>
-                        <span class="tier-badge tier-{{ c.tier|lower }}">{{ c.tier }}</span>
-                    </a>
+                    <a href="{{ url_for('customer_profile', customer_id=c.id) }}"
+                       style="font-weight:600;color:var(--text);text-decoration:none">{{ c.first_name }}</a>
+                    <span class="tier-badge" style="background:{{ c.tier.color }};font-size:0.6rem;margin-left:6px">{{ c.tier.name }}</span>
                     <div class="customer-meta">{{ c.phone }}</div>
                 </div>
                 <div style="text-align:right">
                     <strong>{{ c.visit_count }}</strong> visits
                     <div class="customer-meta">
-                        {% if c.last_visit %}Last: {{ c.last_visit|fdate }}{% else %}No visits{% endif %}
+                        {% if c.last_visit %}Last: {{ c.last_visit[:10] }}
+                        {% else %}No visits yet{% endif %}
                     </div>
                 </div>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p style="color: var(--text-light); text-align:center; padding:20px">
+        <p style="color:var(--text-light);text-align:center;padding:20px">
             No customers yet. Display your QR code at the counter!
         </p>
         {% endif %}
     </div>
+
 </div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:600px){ .two-col{ grid-template-columns:1fr; } }
+
+/* Bar chart */
+.bar-chart {
+    display:flex; align-items:flex-end; gap:3px;
+    height:100px; padding:8px 0 24px;
+    overflow-x:auto;
+}
+.bar-col { display:flex; flex-direction:column; align-items:center; flex:1; min-width:8px; }
+.bar-fill {
+    width:100%; min-height:3px; background:var(--primary);
+    border-radius:3px 3px 0 0; transition:height 0.3s;
+}
+.bar-label { font-size:0.55rem; color:var(--text-light); margin-top:4px; white-space:nowrap; }
+
+/* Tier rows */
+.tier-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.tier-badge {
+    color:#fff; font-size:0.7rem; font-weight:700;
+    padding:2px 7px; border-radius:20px; white-space:nowrap;
+}
+.tier-bar-wrap { flex:1; height:8px; background:#f0f0f0; border-radius:4px; overflow:hidden; }
+.tier-bar-fill { height:100%; border-radius:4px; transition:width 0.4s; }
+.tier-count { font-size:0.85rem; font-weight:600; min-width:20px; text-align:right; }
+
+.alert { padding:10px 14px; border-radius:8px; margin-bottom:12px; font-size:0.9rem; }
+.alert-success { background:#e6f9f0; color:#1a7a4a; border:1px solid #b0eacb; }
+.alert-error   { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+
+.btn-secondary {
+    background:#f0f0f0; color:var(--text); border:none;
+    padding:10px 18px; border-radius:8px; font-size:0.9rem;
+    cursor:pointer; font-weight:600;
+}
+
+/* Churn / birthday cards */
+.churn-card {
+    border:1px solid #ffe4e4; border-radius:10px;
+    background:#fffafa; padding:14px; margin-bottom:12px;
+}
+.churn-card-top {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:10px;
+}
+
+/* Message preview bubble */
+.msg-preview {
+    background:#f5f5f5; border-radius:8px; padding:10px 12px;
+    margin-bottom:10px; border-left:3px solid #25D366;
+}
+.msg-preview-label {
+    font-size:0.7rem; font-weight:700; color:#888;
+    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;
+}
+.msg-preview-body {
+    font-size:0.82rem; color:#333; white-space:pre-wrap; line-height:1.5;
+}
+
+/* Action buttons */
+.msg-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-msg {
+    display:inline-flex; align-items:center;
+    padding:8px 14px; border-radius:8px;
+    font-size:0.82rem; font-weight:600;
+    border:none; cursor:pointer; text-decoration:none;
+}
+.btn-wa    { background:#25D366; color:#fff; }
+.btn-wa:hover { background:#1ebe5d; }
+.btn-email { background:#f0f0f0; color:#333; }
+.btn-email:hover { background:#e0e0e0; }
+
+/* Toast notification */
+#copy-toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:#1a1a2e; color:#fff; padding:10px 20px;
+    border-radius:20px; font-size:0.85rem;
+    opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:999;
+}
+#copy-toast.show { opacity:1; }
+</style>
+
+<div id="copy-toast">Email copied to clipboard</div>
+
+<script>
+function copyEmail(subject, body) {
+    const text = 'Subject: ' + subject + '\n\n' + body.replace(/\\n/g, '\n');
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('copy-toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }).catch(() => {
+        prompt('Copy this email:', text);
+    });
+}
+</script>
+
 {% endblock %}

@@ -1,31 +1,71 @@
 {% extends "base.html" %}
 {% block title %}LY - Scan{% endblock %}
 
-<!-- uses default navbar from base.html -->
+{% block navbar %}
+<nav class="navbar">
+    <span class="logo">LY</span>
+    <div>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+</nav>
+{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width:500px">
+<div class="container">
 
     {% if result %}
     <div class="card">
         {% if result.success %}
         <div class="scan-result success">
-            <div class="icon" style="font-size:3rem; color:var(--success)">&#10003;</div>
+            <div class="icon">&#10003;</div>
             <h2 style="margin:10px 0">Welcome back, {{ result.name }}!</h2>
-            <p style="font-size:1.2rem">Visit #<strong>{{ result.visit_count }}</strong></p>
-            <span class="tier-badge tier-{{ result.tier|lower }}" style="font-size:0.9rem">{{ result.tier }}</span>
-            {% if result.rewards %}
-            <div class="alert alert-success" style="margin-top:16px">
-                {% for r in result.rewards %}
-                <strong>Reward earned!</strong> {{ r.reward }}<br>
-                {% endfor %}
+            <div>
+                <span style="background:{{ result.tier.color }};color:#fff;
+                             font-size:0.75rem;font-weight:700;padding:3px 10px;
+                             border-radius:20px">{{ result.tier.name }}</span>
             </div>
-            {% endif %}
+            <p style="font-size:1.1rem;margin-top:8px">Visit #<strong>{{ result.visit_count }}</strong> recorded</p>
         </div>
+
+        {% if result.progress %}
+        <div style="margin-top:16px">
+            {% for p in result.progress %}
+            <div style="margin-bottom:12px;padding:12px;border-radius:8px;
+                        background:{% if p.ready %}#e6f9f0{% else %}#f8f8ff{% endif %};
+                        border:1px solid {% if p.ready %}#34c87a{% else %}#e0d8ff{% endif %}">
+                {% if p.ready %}
+                <div style="font-weight:700;color:#1a7a4a;margin-bottom:4px">🎁 {{ p.name }} — Reward ready!</div>
+                <div style="font-size:0.85rem;margin-bottom:8px">Give customer: <strong>{{ p.reward_description }}</strong></div>
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="qr_token" value="{{ request.form.get('qr_token','') }}">
+                    <input type="hidden" name="redeem_rule_id" value="{{ p.rule_id }}">
+                    <button type="submit" class="btn btn-success" style="padding:8px 16px;font-size:0.85rem">
+                        Mark as redeemed
+                    </button>
+                </form>
+                {% else %}
+                <div style="font-size:0.85rem;font-weight:600;margin-bottom:6px">{{ p.name }}</div>
+                <div style="height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin-bottom:4px">
+                    <div style="height:100%;width:{{ p.pct }}%;background:var(--primary);border-radius:4px"></div>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-light)">
+                    {{ p.visits_done }}/{{ p.visits_required }}
+                    {% if p.product_name %}({{ p.product_name }}){% endif %}
+                    → {{ p.reward_description }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         {% else %}
         <div class="scan-result fail">
-            <div class="icon" style="font-size:3rem; color:var(--danger)">&#10007;</div>
+            <div class="icon">&#10007;</div>
             <h2 style="margin:10px 0">Customer not found</h2>
+            <p>This QR code is not valid for your shop.</p>
         </div>
         {% endif %}
     </div>
@@ -33,48 +73,55 @@
 
     <div class="card">
         <h2>Scan a customer</h2>
+
         <div id="scanner-container" style="margin-bottom:20px">
             <video id="preview" playsinline></video>
         </div>
+
         <form method="POST" id="scan-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>QR token (auto-filled by camera or enter manually)</label>
+                <input type="text" name="qr_token" id="qr-input"
+                       placeholder="Customer QR token" required>
+            </div>
+
             {% if products %}
             <div class="form-group">
-                <label>Product (optional)</label>
-                <select name="product_id" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-size:1rem">
-                    <option value="">-- None --</option>
+                <label>Product purchased</label>
+                <select name="product_id">
+                    <option value="">— select product (optional) —</option>
                     {% for p in products %}
-                    {% if p.active %}
-                    <option value="{{ p.id }}">{{ p.name }}{% if p.price %} ({{ "%.2f"|format(p.price) }}€){% endif %}</option>
-                    {% endif %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             {% endif %}
-            <div class="form-group">
-                <label>QR token (auto-filled by camera or enter manually)</label>
-                <input type="text" name="qr_token" id="qr-input" placeholder="Customer QR token" required>
-            </div>
+
             <button type="submit" class="btn btn-success btn-full">Record visit</button>
         </form>
     </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://unpkg.com/@nicolo-ribaudo/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const qrInput = document.getElementById('qr-input');
-    const scanForm = document.getElementById('scan-form');
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('qr-input');
+    const form  = document.getElementById('scan-form');
+    if (!input || !form) return;
+
     if (typeof Html5Qrcode !== 'undefined') {
-        const scanner = new Html5Qrcode("scanner-container");
+        const scanner = new Html5Qrcode('scanner-container');
         scanner.start(
-            { facingMode: "environment" },
+            { facingMode: 'environment' },
             { fps: 10, qrbox: { width: 250, height: 250 } },
-            (decodedText) => {
-                scanner.stop();
-                qrInput.value = decodedText;
-                scanForm.submit();
+            (decoded) => {
+                scanner.stop().catch(() => {});
+                input.value = decoded;
+                form.submit();
             },
             () => {}
         ).catch(() => {
