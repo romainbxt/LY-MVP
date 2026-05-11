@@ -7,18 +7,7 @@ export type Customer = {
   last_visit_at: string | null
 }
 
-// Anon key — read-only, safe to expose, used for SELECT queries
-function supabaseHeaders() {
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  return {
-    apikey: key,
-    Authorization: `Bearer ${key}`,
-    'Content-Type': 'application/json',
-    Prefer: 'return=representation',
-  }
-}
-
-// Service role key — never exposed to browser, used for INSERT/UPDATE/DELETE
+// Service role key — server-only, never sent to the browser
 function supabaseAdminHeaders() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
   return {
@@ -33,7 +22,7 @@ const BASE = () => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/stamps`
 
 export async function getCustomerByEmail(email: string): Promise<Customer | null> {
   const res = await fetch(`${BASE()}?email=eq.${encodeURIComponent(email)}&limit=1`, {
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
     cache: 'no-store',
   })
   const data = await res.json()
@@ -52,7 +41,7 @@ export async function createCustomer(name: string, email: string): Promise<Custo
 
 export async function getCustomerByUniqueId(uniqueId: string): Promise<Customer | null> {
   const res = await fetch(`${BASE()}?unique_id=eq.${uniqueId}&limit=1`, {
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
     cache: 'no-store',
   })
   const data = await res.json()
