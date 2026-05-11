@@ -1,5 +1,14 @@
 import nodemailer from 'nodemailer'
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 const REWARDS: Record<number, string> = {
   3: 'Free Cookie 🍪',
   6: 'Free Matcha 🍵',
@@ -32,6 +41,7 @@ function buildEmailHtml({
   qrDataUrl: string
   logoUrl: string
 }): string {
+  const safeName = escapeHtml(name)
   const row1 = [1, 2, 3, 4, 5].map(n => buildStampCell(n, stampCount)).join('')
   const row2 = [6, 7, 8, 9, 10].map(n => buildStampCell(n, stampCount)).join('')
 
@@ -48,7 +58,7 @@ function buildEmailHtml({
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
-        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">Hi ${name}! &#9749;</h1>
+        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">Hi ${safeName}! &#9749;</h1>
         <p style="margin:0;font-size:16px;color:#666666;">
           You have <span style="color:#C9A227;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — keep coming back!
         </p>
@@ -105,16 +115,18 @@ function buildReengagementHtml({
   daysSince?: number
   offer?: string
 }): string {
+  const safeName = escapeHtml(name)
+  const safeOffer = offer ? escapeHtml(offer) : undefined
   const row1 = [1, 2, 3, 4, 5].map(n => buildStampCell(n, stampCount)).join('')
   const row2 = [6, 7, 8, 9, 10].map(n => buildStampCell(n, stampCount)).join('')
   const stampsLeft = 10 - stampCount
   const missYouLine = daysSince ? `It's been ${daysSince} days since your last visit.` : `We haven't seen you in a while.`
-  const offerBlock = offer ? `
+  const offerBlock = safeOffer ? `
       <tr><td align="center" style="padding-bottom:28px;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#C9A227;border-radius:16px;padding:24px 20px;">
           <tr><td align="center">
             <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.85);font-weight:600;">Special Offer For You</p>
-            <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">${offer}</p>
+            <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">${safeOffer}</p>
           </td></tr>
         </table>
       </td></tr>` : ''
@@ -132,7 +144,7 @@ function buildReengagementHtml({
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
-        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">We miss you, ${name}! &#9749;</h1>
+        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">We miss you, ${safeName}! &#9749;</h1>
         <p style="margin:0 0 6px;font-size:16px;color:#666666;">${missYouLine}</p>
         <p style="margin:0;font-size:16px;color:#666666;">
           Your stamp card has <span style="color:#C9A227;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — only <strong>${stampsLeft}</strong> more to your next reward!
