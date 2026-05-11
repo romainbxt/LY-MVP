@@ -7,8 +7,20 @@ export type Customer = {
   last_visit_at: string | null
 }
 
+// Anon key — read-only, safe to expose, used for SELECT queries
 function supabaseHeaders() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  return {
+    apikey: key,
+    Authorization: `Bearer ${key}`,
+    'Content-Type': 'application/json',
+    Prefer: 'return=representation',
+  }
+}
+
+// Service role key — never exposed to browser, used for INSERT/UPDATE/DELETE
+function supabaseAdminHeaders() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
   return {
     apikey: key,
     Authorization: `Bearer ${key}`,
@@ -31,7 +43,7 @@ export async function getCustomerByEmail(email: string): Promise<Customer | null
 export async function createCustomer(name: string, email: string): Promise<Customer | null> {
   const res = await fetch(BASE(), {
     method: 'POST',
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
     body: JSON.stringify({ name, email, stamp_count: 0 }),
   })
   const data = await res.json()
@@ -50,14 +62,13 @@ export async function getCustomerByUniqueId(uniqueId: string): Promise<Customer 
 export async function updateStampCount(uniqueId: string, newCount: number): Promise<boolean> {
   const res = await fetch(`${BASE()}?unique_id=eq.${uniqueId}`, {
     method: 'PATCH',
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
     body: JSON.stringify({ stamp_count: newCount, last_visit_at: new Date().toISOString() }),
   })
   if (res.ok) return true
-  // Fallback if last_visit_at column doesn't exist yet
   const res2 = await fetch(`${BASE()}?unique_id=eq.${uniqueId}`, {
     method: 'PATCH',
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
     body: JSON.stringify({ stamp_count: newCount }),
   })
   return res2.ok
@@ -66,14 +77,14 @@ export async function updateStampCount(uniqueId: string, newCount: number): Prom
 export async function deleteCustomer(uniqueId: string): Promise<boolean> {
   const res = await fetch(`${BASE()}?unique_id=eq.${uniqueId}`, {
     method: 'DELETE',
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
   })
   return res.ok
 }
 
 export async function getAllCustomers(): Promise<Customer[]> {
   const res = await fetch(`${BASE()}?order=last_visit_at.desc.nullslast`, {
-    headers: supabaseHeaders(),
+    headers: supabaseAdminHeaders(),
     cache: 'no-store',
   })
   const data = await res.json()
