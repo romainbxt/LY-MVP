@@ -10,18 +10,19 @@ function escapeHtml(str: string): string {
 }
 
 const REWARDS: Record<number, string> = {
-  3: 'Free Cookie 🍪',
-  6: 'Free Matcha 🍵',
-  10: 'Free Toast 🍞',
+  10: 'Freund*innen Rabatt 🎁',
 }
+
+const BRAND_COLOR = '#26BDC7'
+const LOGO_URL = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png'
 
 function buildStampCell(num: number, stampCount: number): string {
   const filled = num <= stampCount
   const reward = REWARDS[num]
   const earned = filled && reward ? ' (Earned!)' : ''
-  const circleBg = filled ? '#C9A227' : '#f0ece4'
+  const circleBg = filled ? '#26BDC7' : '#f0ece4'
   const circleText = filled ? '#ffffff' : '#c0b8a8'
-  const labelColor = filled ? '#C9A227' : '#c0b8a8'
+  const labelColor = filled ? '#26BDC7' : '#c0b8a8'
   const label = reward ? `${reward}${earned}` : ''
 
   return `<td style="text-align:center;vertical-align:top;padding:4px;">
@@ -54,13 +55,13 @@ function buildEmailHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       <tr><td align="center" style="padding-bottom:20px;">
-        <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve%20cafe%20logo.jpg" alt="VVE Cafe" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
+        <img src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png" alt="Flussbad Berlin" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
-        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">Hi ${safeName}! &#9749;</h1>
+        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">Hi ${safeName}! 🌊</h1>
         <p style="margin:0;font-size:16px;color:#666666;">
-          You have <span style="color:#C9A227;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — keep coming back!
+          You have <span style="color:#26BDC7;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — keep coming back!
         </p>
       </td></tr>
 
@@ -90,7 +91,7 @@ function buildEmailHtml({
       </td></tr>
 
       <tr><td align="center">
-        <p style="margin:0;font-size:11px;color:#bbbbbb;">VVE Cafe Rewards &bull; Powered by LY Loyalty</p>
+        <p style="margin:0;font-size:11px;color:#bbbbbb;">Flussbad Berlin Rewards &bull; Powered by LY Loyalty</p>
       </td></tr>
 
     </table>
@@ -123,7 +124,7 @@ function buildReengagementHtml({
   const missYouLine = daysSince ? `It's been ${daysSince} days since your last visit.` : `We haven't seen you in a while.`
   const offerBlock = safeOffer ? `
       <tr><td align="center" style="padding-bottom:28px;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#C9A227;border-radius:16px;padding:24px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#26BDC7;border-radius:16px;padding:24px 20px;">
           <tr><td align="center">
             <p style="margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.85);font-weight:600;">Special Offer For You</p>
             <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;">${safeOffer}</p>
@@ -140,14 +141,14 @@ function buildReengagementHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       <tr><td align="center" style="padding-bottom:20px;">
-        <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve%20cafe%20logo.jpg" alt="VVE Cafe" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
+        <img src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png" alt="Flussbad Berlin" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
-        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">We miss you, ${safeName}! &#9749;</h1>
+        <h1 style="margin:0 0 8px;font-size:26px;font-weight:700;color:#1a1a1a;">We miss you, ${safeName}! 🌊</h1>
         <p style="margin:0 0 6px;font-size:16px;color:#666666;">${missYouLine}</p>
         <p style="margin:0;font-size:16px;color:#666666;">
-          Your stamp card has <span style="color:#C9A227;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — only <strong>${stampsLeft}</strong> more to your next reward!
+          Your stamp card has <span style="color:#26BDC7;font-weight:700;">${stampCount} stamp${stampCount !== 1 ? 's' : ''}</span> — only <strong>${stampsLeft}</strong> more to your next reward!
         </p>
       </td></tr>
 
@@ -179,7 +180,7 @@ function buildReengagementHtml({
       </td></tr>
 
       <tr><td align="center">
-        <p style="margin:0;font-size:11px;color:#bbbbbb;">VVE Cafe Rewards &bull; Powered by LY Loyalty</p>
+        <p style="margin:0;font-size:11px;color:#bbbbbb;">Flussbad Berlin Rewards &bull; Powered by LY Loyalty</p>
       </td></tr>
 
     </table>
@@ -221,7 +222,7 @@ export async function sendReengagementEmail({
   await transporter.sendMail({
     from: `VVE Cafe Rewards <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: offer ? `A special offer for you at VVE Cafe ☕` : `We miss you at VVE Cafe, ${name}! ☕`,
+    subject: offer ? `A special offer for you at Flussbad Berlin 🌊` : `We miss you at Flussbad Berlin, ${name}! 🌊`,
     html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, daysSince, offer }),
   })
 }
@@ -244,7 +245,7 @@ export async function sendStampCardEmail({
   await transporter.sendMail({
     from: `VVE Cafe Rewards <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: 'Your VVE Cafe Stamp Card ☕',
+    subject: 'Your Flussbad Berlin Stamp Card 🌊',
     html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl }),
   })
 }

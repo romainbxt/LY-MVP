@@ -31,7 +31,7 @@ export default function RegisterForm() {
           type="text"
           required
           placeholder="Your first name"
-          className="w-full px-4 py-3.5 rounded-2xl border border-stone-200 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-base bg-stone-50"
+          className="w-full px-4 py-3.5 rounded-2xl border border-stone-200 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-base bg-stone-50"
         />
       </div>
 
@@ -44,7 +44,7 @@ export default function RegisterForm() {
           type="email"
           required
           placeholder="your@email.com"
-          className="w-full px-4 py-3.5 rounded-2xl border border-stone-200 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-amber-400 text-base bg-stone-50"
+          className="w-full px-4 py-3.5 rounded-2xl border border-stone-200 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 text-base bg-stone-50"
         />
       </div>
 
@@ -57,7 +57,8 @@ export default function RegisterForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold py-4 rounded-2xl text-base transition-all flex items-center justify-center gap-2 disabled:opacity-60 mt-2"
+        style={{ background: '#26BDC7' }}
+        className="w-full hover:opacity-90 active:scale-[0.98] text-white font-bold py-4 rounded-2xl text-base transition-all flex items-center justify-center gap-2 disabled:opacity-60 mt-2"
       >
         {isPending ? (
           <>
@@ -65,7 +66,7 @@ export default function RegisterForm() {
             Creating your card…
           </>
         ) : (
-          'Get My Stamp Card ☕'
+          'Get My Stamp Card 🌊'
         )}
       </button>
     </form>

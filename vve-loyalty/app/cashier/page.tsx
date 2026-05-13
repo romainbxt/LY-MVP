@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import CashierLoginForm from '@/components/CashierLoginForm'
 import Dashboard from '@/components/Dashboard'
 
+const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png'
+
 export default async function CashierPage() {
   const cookieStore = await cookies()
   const isLoggedIn = cookieStore.get('is_cashier')?.value === 'true'
@@ -13,10 +15,10 @@ export default async function CashierPage() {
       <div className="w-full max-w-xs">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src="https://lvcmxhnrxcazejverpir.supabase.co/storage/v1/object/public/public-assets/vve%20cafe%20logo.jpg" alt="VVE Cafe" width={80} height={80} style={{ borderRadius: '16px', objectFit: 'cover' }} />
+            <img src={LOGO} alt="Flussbad Berlin" width={80} height={80} style={{ borderRadius: '16px', objectFit: 'cover', background: '#fff' }} />
           </div>
           <h1 className="text-white text-2xl font-bold mb-1">Staff Login</h1>
-          <p className="text-stone-400 text-sm">VVE Cafe Back Office</p>
+          <p className="text-stone-400 text-sm">Flussbad Back Office</p>
         </div>
         <div className="bg-stone-800 rounded-3xl p-6 shadow-xl">
           <CashierLoginForm />

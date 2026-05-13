@@ -1,13 +1,13 @@
 import QRCode from 'qrcode'
 import { headers } from 'next/headers'
 import type { Customer } from '@/lib/supabase'
-import Image from 'next/image'
 
 const REWARDS: Record<number, string> = {
-  3: 'Cookie 🍪',
-  6: 'Matcha 🍵',
-  10: 'Toast 🍞',
+  10: 'Freund*innen Rabatt 🎁',
 }
+
+const BRAND = '#26BDC7'
+const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png'
 
 export default async function CustomerCardView({
   customer,
@@ -23,38 +23,37 @@ export default async function CustomerCardView({
   const qrDataUrl = await QRCode.toDataURL(scanUrl, { width: 280, margin: 2 })
 
   const { stamp_count: stampCount, name } = customer
-  const nextMilestone = [3, 6, 10].find(n => n > stampCount)
-  const stampsToGo = nextMilestone ? nextMilestone - stampCount : 0
+  const stampsToGo = 10 - stampCount
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-100 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-b from-cyan-50 to-sky-100 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
 
         <div className="flex justify-center mb-6">
-          <Image
-            src="/vve-logo.png"
-            alt="VVE Cafe"
+          <img
+            src={LOGO}
+            alt="Flussbad Berlin"
             width={80}
             height={80}
-            className="rounded-2xl shadow-md object-cover"
+            style={{ borderRadius: '16px', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', objectFit: 'cover', background: '#fff' }}
           />
         </div>
 
         <div className="text-center mb-5">
-          <h1 className="text-2xl font-bold text-stone-800">Hi, {name}! ☕</h1>
+          <h1 className="text-2xl font-bold text-stone-800">Hi, {name}! 🌊</h1>
           <p className="text-stone-500 mt-1">
             You have{' '}
-            <span className="text-amber-600 font-bold">{stampCount}</span>{' '}
+            <span className="font-bold" style={{ color: BRAND }}>{stampCount}</span>{' '}
             stamp{stampCount !== 1 ? 's' : ''}
           </p>
-          {nextMilestone && (
+          {stampCount < 10 && (
             <p className="text-xs text-stone-400 mt-1">
-              {stampsToGo} more for your {REWARDS[nextMilestone]}
+              {stampsToGo} more for your Freund*innen Rabatt
             </p>
           )}
           {stampCount >= 10 && (
-            <p className="text-sm font-semibold text-amber-600 mt-1">
-              🎉 Card complete! Claim your reward.
+            <p className="text-sm font-semibold mt-1" style={{ color: BRAND }}>
+              🎉 Card complete! Claim your Freund*innen Rabatt.
             </p>
           )}
         </div>
@@ -67,23 +66,24 @@ export default async function CustomerCardView({
             {Array.from({ length: 10 }).map((_, i) => {
               const num = i + 1
               const filled = num <= stampCount
-              const reward = REWARDS[num]
+              const isReward = num === 10
               return (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-colors ${
-                      filled ? 'bg-amber-400 text-white shadow-sm' : 'bg-stone-100 text-stone-300'
-                    }`}
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
+                    style={{
+                      background: filled ? BRAND : '#f1f5f9',
+                      color: filled ? '#fff' : '#cbd5e1',
+                    }}
                   >
-                    {filled ? '☕' : num}
+                    {filled ? '🌊' : num}
                   </div>
-                  {reward && (
+                  {isReward && (
                     <span
-                      className={`text-[8px] text-center leading-tight font-semibold ${
-                        filled ? 'text-amber-500' : 'text-stone-300'
-                      }`}
+                      className="text-[8px] text-center leading-tight font-semibold"
+                      style={{ color: filled ? BRAND : '#cbd5e1' }}
                     >
-                      {reward}
+                      Rabatt 🎁
                     </span>
                   )}
                 </div>
@@ -95,7 +95,7 @@ export default async function CustomerCardView({
         <div className="bg-white rounded-3xl shadow-md p-6 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={qrDataUrl} alt="Your QR Code" className="w-48 h-48 mx-auto mb-3" />
-          <p className="text-stone-400 text-sm font-medium">Show this to the barista</p>
+          <p className="text-stone-400 text-sm font-medium">Show this at the entrance</p>
         </div>
 
         <p className="text-center text-stone-400 text-xs mt-4">

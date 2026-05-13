@@ -4,6 +4,8 @@ import { useActionState } from 'react'
 import { stampCustomer } from '@/app/actions'
 import type { Customer } from '@/lib/supabase'
 
+const BRAND = '#26BDC7'
+
 export default function CashierView({
   customer,
   uniqueId,
@@ -16,7 +18,7 @@ export default function CashierView({
 
   if (state?.success) {
     return (
-      <div className="min-h-screen bg-green-500 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: BRAND }}>
         <div className="text-center text-white mb-8">
           <div className="text-[96px] leading-none mb-4">✓</div>
           <h1 className="text-5xl font-black mb-3">SUCCESS!</h1>
@@ -25,7 +27,7 @@ export default function CashierView({
         </div>
 
         {state.reward && (
-          <div className="w-full max-w-xs bg-yellow-400 text-stone-900 rounded-3xl p-8 text-center animate-flash">
+          <div className="w-full max-w-xs bg-white text-stone-900 rounded-3xl p-8 text-center">
             <p className="text-4xl font-black mb-2">🎉 REWARD!</p>
             <p className="text-2xl font-bold mb-1">{state.reward}</p>
             <p className="text-lg font-semibold uppercase tracking-wider">Give to customer NOW</p>
@@ -45,9 +47,8 @@ export default function CashierView({
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
-              className={`w-5 h-5 rounded-full transition-colors ${
-                i < customer.stamp_count ? 'bg-amber-400' : 'bg-stone-700'
-              }`}
+              className="w-5 h-5 rounded-full transition-colors"
+              style={{ background: i < customer.stamp_count ? BRAND : '#44403c' }}
             />
           ))}
         </div>
@@ -62,7 +63,8 @@ export default function CashierView({
         <button
           type="submit"
           disabled={isPending || customer.stamp_count >= 10}
-          className="w-full bg-amber-500 active:scale-95 transition-transform text-white text-3xl font-black py-10 rounded-3xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: BRAND }}
+          className="w-full active:scale-95 transition-transform text-white text-3xl font-black py-10 rounded-3xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending
             ? '…'

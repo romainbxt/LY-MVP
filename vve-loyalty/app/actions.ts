@@ -13,9 +13,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 const REWARDS: Record<number, string> = {
-  3: 'Free Cookie 🍪',
-  6: 'Free Matcha 🍵',
-  10: 'Free Toast 🍞',
+  10: 'Freund*innen Rabatt 🎁',
 }
 
 async function getBaseUrl(): Promise<string> {
