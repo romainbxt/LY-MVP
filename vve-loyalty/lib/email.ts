@@ -14,7 +14,7 @@ const REWARDS: Record<number, string> = {
 }
 
 const BRAND_COLOR = '#26BDC7'
-const LOGO_URL = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png'
+const LOGO_URL = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg'
 
 function buildStampCell(num: number, stampCount: number): string {
   const filled = num <= stampCount
@@ -55,7 +55,7 @@ function buildEmailHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       <tr><td align="center" style="padding-bottom:20px;">
-        <img src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png" alt="Flussbad Berlin" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
+        <img src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg" alt="Flussbad Berlin" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">
@@ -141,7 +141,7 @@ function buildReengagementHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       <tr><td align="center" style="padding-bottom:20px;">
-        <img src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png" alt="Flussbad Berlin" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
+        <img src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg" alt="Flussbad Berlin" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;" />
       </td></tr>
 
       <tr><td align="center" style="padding-bottom:28px;">

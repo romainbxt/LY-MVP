@@ -7,7 +7,7 @@ const REWARDS: Record<number, string> = {
 }
 
 const BRAND = '#26BDC7'
-const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png'
+const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg'
 
 export default async function CustomerCardView({
   customer,

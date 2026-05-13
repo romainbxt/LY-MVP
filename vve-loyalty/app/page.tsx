@@ -7,7 +7,7 @@ export default function HomePage() {
 
         <div className="flex justify-center mb-8">
           <img
-            src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png"
+            src="https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg"
             alt="Flussbad Berlin"
             width={110}
             height={110}

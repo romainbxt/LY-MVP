@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import CashierLoginForm from '@/components/CashierLoginForm'
 import Dashboard from '@/components/Dashboard'
 
-const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/public-assets/flussbad-logo.png'
+const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg'
 
 export default async function CashierPage() {
   const cookieStore = await cookies()
