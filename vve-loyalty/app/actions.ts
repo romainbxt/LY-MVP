@@ -49,6 +49,8 @@ export async function registerCustomer(
   const baseUrl = await getBaseUrl()
   const scanUrl = `${baseUrl}/scan/${customer.unique_id}`
 
+  const totalStamps = venue.rewards[venue.rewards.length - 1]?.stamp ?? 10
+
   try {
     await sendStampCardEmail({
       name,
@@ -56,6 +58,10 @@ export async function registerCustomer(
       stampCount: 0,
       scanUrl,
       logoUrl: venue.logo_url ?? `${baseUrl}/vve-logo.png`,
+      venueName: venue.name,
+      brandColor: venue.brand_color,
+      totalStamps,
+      rewards: venue.rewards,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -107,6 +113,10 @@ export async function stampCustomer(
       stampCount: newCount,
       scanUrl,
       logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
+      venueName: venue?.name ?? 'Loyalty',
+      brandColor: venue?.brand_color ?? '#D97706',
+      totalStamps,
+      rewards,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -157,6 +167,9 @@ export async function reengageCustomer(
 
   const offer = (formData.get('offer') as string)?.trim() || undefined
 
+  const reengageRewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
+  const reengageTotalStamps = reengageRewards[reengageRewards.length - 1]?.stamp ?? 10
+
   try {
     await sendReengagementEmail({
       name: customer.name,
@@ -164,6 +177,10 @@ export async function reengageCustomer(
       stampCount: customer.stamp_count,
       scanUrl,
       logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
+      venueName: venue?.name ?? 'Loyalty',
+      brandColor: venue?.brand_color ?? '#D97706',
+      totalStamps: reengageTotalStamps,
+      rewards: reengageRewards,
       daysSince,
       offer,
     })
