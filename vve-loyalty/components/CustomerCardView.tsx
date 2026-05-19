@@ -1,20 +1,15 @@
 import QRCode from 'qrcode'
 import { headers } from 'next/headers'
-import type { Customer } from '@/lib/supabase'
-
-const REWARDS: Record<number, string> = {
-  10: 'Freund*innen Rabatt 🎁',
-}
-
-const BRAND = '#26BDC7'
-const LOGO = 'https://rznvtehkibnfmukpppiz.supabase.co/storage/v1/object/public/flussbad-logo.png/logo.png.jpg'
+import type { Customer, Venue } from '@/lib/supabase'
 
 export default async function CustomerCardView({
   customer,
   uniqueId,
+  venue,
 }: {
   customer: Customer
   uniqueId: string
+  venue: Venue | null
 }) {
   const h = await headers()
   const host = h.get('host') ?? 'localhost:3000'
@@ -23,37 +18,47 @@ export default async function CustomerCardView({
   const qrDataUrl = await QRCode.toDataURL(scanUrl, { width: 280, margin: 2 })
 
   const { stamp_count: stampCount, name } = customer
-  const stampsToGo = 10 - stampCount
+  const brand = venue?.brand_color ?? '#D97706'
+  const rewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
+  const totalStamps = rewards[rewards.length - 1]?.stamp ?? 10
+  const nextReward = rewards.find(r => r.stamp > stampCount)
+  const stampsToGo = (nextReward?.stamp ?? totalStamps) - stampCount
+  const cardComplete = stampCount >= totalStamps
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-cyan-50 to-sky-100 flex items-center justify-center p-4">
+    <main
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: `linear-gradient(to bottom, ${brand}18, ${brand}08)` }}
+    >
       <div className="w-full max-w-sm">
 
-        <div className="flex justify-center mb-6">
-          <img
-            src={LOGO}
-            alt="Flussbad Berlin"
-            width={80}
-            height={80}
-            style={{ borderRadius: '16px', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', objectFit: 'cover', background: '#fff' }}
-          />
-        </div>
+        {venue?.logo_url && (
+          <div className="flex justify-center mb-6">
+            <img
+              src={venue.logo_url}
+              alt={venue.name}
+              width={80}
+              height={80}
+              style={{ borderRadius: '16px', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', objectFit: 'cover', background: '#fff' }}
+            />
+          </div>
+        )}
 
         <div className="text-center mb-5">
-          <h1 className="text-2xl font-bold text-stone-800">Hi, {name}! 🌊</h1>
+          <h1 className="text-2xl font-bold text-stone-800">Hi, {name}!</h1>
           <p className="text-stone-500 mt-1">
             You have{' '}
-            <span className="font-bold" style={{ color: BRAND }}>{stampCount}</span>{' '}
+            <span className="font-bold" style={{ color: brand }}>{stampCount}</span>{' '}
             stamp{stampCount !== 1 ? 's' : ''}
           </p>
-          {stampCount < 10 && (
+          {!cardComplete && nextReward && (
             <p className="text-xs text-stone-400 mt-1">
-              {stampsToGo} more for your Freund*innen Rabatt
+              {stampsToGo} more for {nextReward.label}
             </p>
           )}
-          {stampCount >= 10 && (
-            <p className="text-sm font-semibold mt-1" style={{ color: BRAND }}>
-              🎉 Card complete! Claim your Freund*innen Rabatt.
+          {cardComplete && (
+            <p className="text-sm font-semibold mt-1" style={{ color: brand }}>
+              🎉 Card complete! Claim your reward.
             </p>
           )}
         </div>
@@ -62,28 +67,28 @@ export default async function CustomerCardView({
           <p className="text-[10px] text-stone-400 uppercase tracking-widest text-center mb-4 font-semibold">
             Your Stamp Card
           </p>
-          <div className="grid grid-cols-5 gap-2">
-            {Array.from({ length: 10 }).map((_, i) => {
+          <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(totalStamps, 5)}, 1fr)` }}>
+            {Array.from({ length: totalStamps }).map((_, i) => {
               const num = i + 1
               const filled = num <= stampCount
-              const isReward = num === 10
+              const rewardHere = rewards.find(r => r.stamp === num)
               return (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
                     style={{
-                      background: filled ? BRAND : '#f1f5f9',
+                      background: filled ? brand : '#f1f5f9',
                       color: filled ? '#fff' : '#cbd5e1',
                     }}
                   >
-                    {filled ? '🌊' : num}
+                    {filled ? '✓' : num}
                   </div>
-                  {isReward && (
+                  {rewardHere && (
                     <span
                       className="text-[8px] text-center leading-tight font-semibold"
-                      style={{ color: filled ? BRAND : '#cbd5e1' }}
+                      style={{ color: filled ? brand : '#cbd5e1' }}
                     >
-                      Rabatt 🎁
+                      {rewardHere.label.split(' ').slice(0, 2).join(' ')}
                     </span>
                   )}
                 </div>
@@ -95,7 +100,7 @@ export default async function CustomerCardView({
         <div className="bg-white rounded-3xl shadow-md p-6 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={qrDataUrl} alt="Your QR Code" className="w-48 h-48 mx-auto mb-3" />
-          <p className="text-stone-400 text-sm font-medium">Show this at the entrance</p>
+          <p className="text-stone-400 text-sm font-medium">Show this at the counter</p>
         </div>
 
         <p className="text-center text-stone-400 text-xs mt-4">

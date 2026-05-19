@@ -1,6 +1,8 @@
 'use server'
 
 import {
+  getVenueBySlug,
+  getVenueById,
   getCustomerByEmail,
   createCustomer,
   getCustomerByUniqueId,
@@ -11,10 +13,6 @@ import { sendStampCardEmail, sendReengagementEmail } from '@/lib/email'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-
-const REWARDS: Record<number, string> = {
-  10: 'Freund*innen Rabatt 🎁',
-}
 
 async function getBaseUrl(): Promise<string> {
   if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL
@@ -29,6 +27,7 @@ async function getBaseUrl(): Promise<string> {
 export type RegisterState = { success?: boolean; name?: string; error?: string } | null
 
 export async function registerCustomer(
+  slug: string,
   prevState: RegisterState,
   formData: FormData
 ): Promise<RegisterState> {
@@ -38,10 +37,13 @@ export async function registerCustomer(
   if (!name || !email) return { error: 'Name and email are required.' }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'Please enter a valid email.' }
 
-  const existing = await getCustomerByEmail(email)
+  const venue = await getVenueBySlug(slug)
+  if (!venue) return { error: 'Venue not found.' }
+
+  const existing = await getCustomerByEmail(email, venue.id)
   if (existing) return { error: 'Email already registered — check your inbox for your stamp card!' }
 
-  const customer = await createCustomer(name, email)
+  const customer = await createCustomer(name, email, venue.id)
   if (!customer) return { error: 'Registration failed. Please try again.' }
 
   const baseUrl = await getBaseUrl()
@@ -53,7 +55,7 @@ export async function registerCustomer(
       email,
       stampCount: 0,
       scanUrl,
-      logoUrl: `${baseUrl}/vve-logo.png`,
+      logoUrl: venue.logo_url ?? `${baseUrl}/vve-logo.png`,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -69,6 +71,7 @@ export type StampState = {
   name?: string
   newCount?: number
   reward?: string
+  totalStamps?: number
   error?: string
 } | null
 
@@ -79,14 +82,21 @@ export async function stampCustomer(
 ): Promise<StampState> {
   const customer = await getCustomerByUniqueId(uniqueId)
   if (!customer) return { error: 'Customer not found.' }
-  if (customer.stamp_count >= 10) return { error: 'Stamp card already complete — should have auto-reset.' }
+
+  const venue = customer.venue_id ? await getVenueById(customer.venue_id) : null
+  const rewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
+  const totalStamps = rewards[rewards.length - 1]?.stamp ?? 10
+
+  if (customer.stamp_count >= totalStamps) {
+    return { error: 'Stamp card already complete — should have auto-reset.' }
+  }
 
   const newCount = customer.stamp_count + 1
-  const savedCount = newCount >= 10 ? 0 : newCount
+  const savedCount = newCount >= totalStamps ? 0 : newCount
   const ok = await updateStampCount(uniqueId, savedCount)
   if (!ok) return { error: 'Failed to add stamp. Try again.' }
 
-  const reward = REWARDS[newCount]
+  const reward = rewards.find(r => r.stamp === newCount)?.label
   const baseUrl = await getBaseUrl()
   const scanUrl = `${baseUrl}/scan/${uniqueId}`
 
@@ -96,13 +106,13 @@ export async function stampCustomer(
       email: customer.email,
       stampCount: newCount,
       scanUrl,
-      logoUrl: `${baseUrl}/vve-logo.png`,
+      logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
     })
   } catch (e) {
     console.error('Email send failed:', e)
   }
 
-  return { success: true, name: customer.name, newCount, reward }
+  return { success: true, name: customer.name, newCount, reward, totalStamps }
 }
 
 // ── Delete Customer ───────────────────────────────────────────────────────────
@@ -114,9 +124,13 @@ export async function deleteCustomerAction(
   prevState: DeleteState,
   formData: FormData
 ): Promise<DeleteState> {
+  const customer = await getCustomerByUniqueId(uniqueId)
+  const venue = customer?.venue_id ? await getVenueById(customer.venue_id) : null
+
   const ok = await deleteCustomer(uniqueId)
   if (!ok) return { error: 'Failed to delete.' }
-  revalidatePath('/cashier')
+
+  if (venue) revalidatePath(`/cashier/${venue.slug}`)
   return { success: true }
 }
 
@@ -131,6 +145,8 @@ export async function reengageCustomer(
 ): Promise<ReengageState> {
   const customer = await getCustomerByUniqueId(uniqueId)
   if (!customer) return { error: 'Customer not found.' }
+
+  const venue = customer.venue_id ? await getVenueById(customer.venue_id) : null
 
   const baseUrl = await getBaseUrl()
   const scanUrl = `${baseUrl}/scan/${uniqueId}`
@@ -147,7 +163,7 @@ export async function reengageCustomer(
       email: customer.email,
       stampCount: customer.stamp_count,
       scanUrl,
-      logoUrl: `${baseUrl}/vve-logo.png`,
+      logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
       daysSince,
       offer,
     })
@@ -163,17 +179,21 @@ export async function reengageCustomer(
 export type LoginState = { error?: string } | null
 
 export async function cashierLogin(
+  slug: string,
   prevState: LoginState,
   formData: FormData
 ): Promise<LoginState> {
   const password = formData.get('password') as string
 
-  if (password !== process.env.CASHIER_PASSWORD) {
+  const venue = await getVenueBySlug(slug)
+  if (!venue) return { error: 'Venue not found.' }
+
+  if (password !== venue.cashier_password) {
     return { error: 'Incorrect password.' }
   }
 
   const cookieStore = await cookies()
-  cookieStore.set('is_cashier', 'true', {
+  cookieStore.set(`cashier_${slug}`, 'true', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24 * 7,
@@ -181,5 +201,13 @@ export async function cashierLogin(
     path: '/',
   })
 
-  redirect('/cashier')
+  redirect(`/cashier/${slug}`)
+}
+
+// ── Cashier Logout ────────────────────────────────────────────────────────────
+
+export async function cashierLogout(slug: string): Promise<never> {
+  const cookieStore = await cookies()
+  cookieStore.delete(`cashier_${slug}`)
+  redirect(`/cashier/${slug}`)
 }
