@@ -35,13 +35,13 @@ export default async function CustomerCardView({
 
         {venue?.logo_url && (
           <div className="flex justify-center mb-6">
-            <img
-              src={venue.logo_url}
-              alt={venue.name}
-              width={80}
-              height={80}
-              style={{ borderRadius: '16px', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', objectFit: 'contain', background: '#fff', padding: '6px' }}
-            />
+            <div style={{ width: 96, height: 96, borderRadius: '18px', background: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+              <img
+                src={venue.logo_url}
+                alt={venue.name}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }}
+              />
+            </div>
           </div>
         )}
 

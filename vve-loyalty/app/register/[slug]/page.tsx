@@ -24,14 +24,13 @@ export default async function RegisterPage({
       <div className="w-full max-w-xs">
         <div className="text-center mb-8">
           {venue.logo_url && (
-            <img
-              src={venue.logo_url}
-              alt={venue.name}
-              width={90}
-              height={90}
-              className="mx-auto mb-4 object-cover"
-              style={{ borderRadius: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.12)', background: '#fff', objectFit: 'contain', padding: '8px' }}
-            />
+            <div style={{ width: 96, height: 96, borderRadius: '20px', background: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', margin: '0 auto 16px' }}>
+              <img
+                src={venue.logo_url}
+                alt={venue.name}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', display: 'block' }}
+              />
+            </div>
           )}
           <h1 className="text-2xl font-bold text-stone-800">{venue.name}</h1>
           <p className="text-stone-500 text-sm mt-1">Join the loyalty program</p>
