@@ -3,18 +3,37 @@
 import { useState } from 'react'
 
 const PRESETS = [
-  { label: 'Warm Cream',   value: '#FDF6EC' },
-  { label: 'Soft Blush',   value: '#FDF0F0' },
-  { label: 'Sage Green',   value: '#EEF4EE' },
-  { label: 'Dusty Blue',   value: '#EEF3F8' },
-  { label: 'Lavender',     value: '#F3F0F9' },
-  { label: 'Warm Sand',    value: '#F5EFE6' },
-  { label: 'Charcoal',     value: '#1C1C1E' },
-  { label: 'Deep Navy',    value: '#0D1B2A' },
-  { label: 'Forest',       value: '#1A2E1A' },
-  { label: 'Espresso',     value: '#1C1008' },
-  { label: 'Pure White',   value: '#FFFFFF' },
-  { label: 'Off White',    value: '#F9F6F2' },
+  // Whites & creams
+  { label: 'Pure White',    value: '#FFFFFF' },
+  { label: 'Warm Cream',    value: '#FDF6EC' },
+  { label: 'Off White',     value: '#F5F0E8' },
+  // Yellows & oranges
+  { label: 'Butter',        value: '#FFF3B0' },
+  { label: 'Peach',         value: '#FDDCB5' },
+  { label: 'Terracotta',    value: '#E07A5F' },
+  { label: 'Amber',         value: '#D97706' },
+  // Reds & pinks
+  { label: 'Blush',         value: '#F4A7B9' },
+  { label: 'Rose',          value: '#D64045' },
+  { label: 'Burgundy',      value: '#7B2D3E' },
+  // Greens
+  { label: 'Mint',          value: '#B7E4C7' },
+  { label: 'Sage',          value: '#84A98C' },
+  { label: 'Forest',        value: '#2D6A4F' },
+  { label: 'Dark Green',    value: '#1B3A2D' },
+  // Blues & teals
+  { label: 'Sky',           value: '#BDE0FE' },
+  { label: 'Teal',          value: '#4ECDC4' },
+  { label: 'Ocean',         value: '#1A6B8A' },
+  { label: 'Navy',          value: '#0D1B2A' },
+  // Purples
+  { label: 'Lavender',      value: '#C8B6E2' },
+  { label: 'Plum',          value: '#6B3FA0' },
+  // Neutrals & darks
+  { label: 'Sand',          value: '#C9A87C' },
+  { label: 'Stone',         value: '#8D8D8D' },
+  { label: 'Charcoal',      value: '#3A3A3A' },
+  { label: 'Espresso',      value: '#1C1008' },
 ]
 
 export default function ColorPicker({
@@ -36,7 +55,7 @@ export default function ColorPicker({
   return (
     <div>
       <p className="text-xs text-stone-400 mb-2">{label}</p>
-      <div className="grid grid-cols-6 gap-1.5 mb-2">
+      <div className="grid grid-cols-8 gap-1.5 mb-2">
         {PRESETS.map(p => (
           <button
             key={p.value}
