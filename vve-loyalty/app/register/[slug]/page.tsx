@@ -39,19 +39,23 @@ export default async function RegisterPage({
           <RegisterForm slug={slug} brandColor={venue.brand_color} />
         </div>
 
-        <div className="bg-white/70 rounded-2xl p-4 text-center shadow-sm">
-          <div className="flex justify-center gap-1.5 mb-2">
+        <div className="bg-white/70 rounded-2xl p-4 shadow-sm">
+          <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-widest mb-3">
+            {venue.name}&apos;s Rules
+          </p>
+          <div className="space-y-2">
             {rewards.map(r => (
-              <span
-                key={r.stamp}
-                className="text-[10px] font-semibold px-2 py-1 rounded-full"
-                style={{ background: venue.brand_color + '20', color: venue.brand_color }}
-              >
-                {r.stamp}× {r.label}
-              </span>
+              <div key={r.stamp} className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0"
+                  style={{ background: venue.brand_color }}
+                >
+                  {r.stamp}
+                </div>
+                <p className="text-sm text-stone-700 font-medium">{r.label}</p>
+              </div>
             ))}
           </div>
-          <p className="text-xs text-stone-400">Collect {totalStamps} stamps to earn rewards</p>
         </div>
       </div>
     </main>
