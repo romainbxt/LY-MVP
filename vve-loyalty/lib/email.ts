@@ -55,6 +55,7 @@ function buildEmailHtml({
   logoUrl,
   venueName,
   brandColor,
+  backgroundColor,
   totalStamps,
   rewards,
 }: {
@@ -64,6 +65,7 @@ function buildEmailHtml({
   logoUrl: string
   venueName: string
   brandColor: string
+  backgroundColor: string
   totalStamps: number
   rewards: Array<{ stamp: number; label: string }>
 }): string {
@@ -79,15 +81,15 @@ function buildEmailHtml({
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f5f0e6;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f5f0e6">
+<body style="margin:0;padding:0;background:${backgroundColor};font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${backgroundColor}">
   <tr><td align="center" style="padding:40px 16px;">
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
-          <tr><td align="center" style="width:90px;height:90px;background:#ffffff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">
-            <img src="${logoUrl}" alt="${safeVenue}" width="70" height="70" style="display:block;max-width:70px;max-height:70px;object-fit:contain;" />
+          <tr><td align="center" style="background:#ffffff;border-radius:12px;padding:12px;">
+            <img src="${logoUrl}" alt="${safeVenue}" width="80" style="display:block;max-width:80px;height:auto;" />
           </td></tr>
         </table>
       </td></tr>` : ''}
@@ -136,6 +138,7 @@ function buildReengagementHtml({
   logoUrl,
   venueName,
   brandColor,
+  backgroundColor,
   totalStamps,
   rewards,
   daysSince,
@@ -147,6 +150,7 @@ function buildReengagementHtml({
   logoUrl: string
   venueName: string
   brandColor: string
+  backgroundColor: string
   totalStamps: number
   rewards: Array<{ stamp: number; label: string }>
   daysSince?: number
@@ -176,15 +180,15 @@ function buildReengagementHtml({
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f5f0e6;font-family:Arial,Helvetica,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f5f0e6">
+<body style="margin:0;padding:0;background:${backgroundColor};font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${backgroundColor}">
   <tr><td align="center" style="padding:40px 16px;">
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
-          <tr><td align="center" style="width:90px;height:90px;background:#ffffff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">
-            <img src="${logoUrl}" alt="${safeVenue}" width="70" height="70" style="display:block;max-width:70px;max-height:70px;object-fit:contain;" />
+          <tr><td align="center" style="background:#ffffff;border-radius:12px;padding:12px;">
+            <img src="${logoUrl}" alt="${safeVenue}" width="80" style="display:block;max-width:80px;height:auto;" />
           </td></tr>
         </table>
       </td></tr>` : ''}
@@ -244,6 +248,7 @@ export async function sendStampCardEmail({
   logoUrl,
   venueName,
   brandColor,
+  backgroundColor,
   totalStamps,
   rewards,
 }: {
@@ -254,6 +259,7 @@ export async function sendStampCardEmail({
   logoUrl: string
   venueName: string
   brandColor: string
+  backgroundColor: string
   totalStamps: number
   rewards: Array<{ stamp: number; label: string }>
 }) {
@@ -263,7 +269,7 @@ export async function sendStampCardEmail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     to: email,
     subject: `Your ${venueName} Stamp Card`,
-    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, totalStamps, rewards }),
+    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards }),
   })
 }
 
@@ -275,6 +281,7 @@ export async function sendReengagementEmail({
   logoUrl,
   venueName,
   brandColor,
+  backgroundColor,
   totalStamps,
   rewards,
   daysSince,
@@ -287,6 +294,7 @@ export async function sendReengagementEmail({
   logoUrl: string
   venueName: string
   brandColor: string
+  backgroundColor: string
   totalStamps: number
   rewards: Array<{ stamp: number; label: string }>
   daysSince?: number
@@ -298,6 +306,6 @@ export async function sendReengagementEmail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     to: email,
     subject: offer ? `A special offer for you at ${venueName}` : `We miss you at ${venueName}, ${name}!`,
-    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, totalStamps, rewards, daysSince, offer }),
+    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer }),
   })
 }

@@ -60,6 +60,7 @@ export async function registerCustomer(
       logoUrl: venue.logo_url ?? `${baseUrl}/vve-logo.png`,
       venueName: venue.name,
       brandColor: venue.brand_color,
+      backgroundColor: venue.background_color ?? `${venue.brand_color}18`,
       totalStamps,
       rewards: venue.rewards,
     })
@@ -115,6 +116,7 @@ export async function stampCustomer(
       logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
       venueName: venue?.name ?? 'Loyalty',
       brandColor: venue?.brand_color ?? '#D97706',
+      backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
       totalStamps,
       rewards,
     })
@@ -179,6 +181,7 @@ export async function reengageCustomer(
       logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
       venueName: venue?.name ?? 'Loyalty',
       brandColor: venue?.brand_color ?? '#D97706',
+      backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
       totalStamps: reengageTotalStamps,
       rewards: reengageRewards,
       daysSince,
