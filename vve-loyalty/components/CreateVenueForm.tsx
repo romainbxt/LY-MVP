@@ -64,7 +64,7 @@ export default function CreateVenueForm() {
         <textarea
           name="rewards"
           rows={3}
-          placeholder={`Rewards JSON (optional)\ne.g. [{"stamp":5,"label":"Free Coffee ☕"},{"stamp":10,"label":"Free Meal 🍽️"}]`}
+          placeholder={`Rewards (optional) — one per line:\n3 = Free Cookie 🍪\n6 = Free Drink ☕\n10 = Free Meal 🍽️`}
           className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
         />
 

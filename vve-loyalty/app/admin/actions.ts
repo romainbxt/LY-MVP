@@ -55,10 +55,26 @@ export async function createVenueAction(
   ]
 
   if (rewardsRaw) {
-    try {
-      rewards = JSON.parse(rewardsRaw)
-    } catch {
-      return { error: 'Invalid rewards JSON.' }
+    // Accept simple "5 = Free Coffee ☕" lines or JSON
+    if (rewardsRaw.trim().startsWith('[')) {
+      try {
+        rewards = JSON.parse(rewardsRaw)
+      } catch {
+        return { error: 'Invalid rewards format.' }
+      }
+    } else {
+      const parsed = rewardsRaw
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const [stampPart, ...labelParts] = line.split('=')
+          const stamp = parseInt(stampPart.trim(), 10)
+          const label = labelParts.join('=').trim()
+          return { stamp, label }
+        })
+        .filter(r => !isNaN(r.stamp) && r.label)
+      if (parsed.length > 0) rewards = parsed
     }
   }
 
