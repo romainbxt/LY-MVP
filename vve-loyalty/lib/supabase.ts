@@ -4,6 +4,7 @@ export type Venue = {
   name: string
   logo_url: string | null
   brand_color: string
+  background_color: string | null
   cashier_password: string
   rewards: Array<{ stamp: number; label: string }>
   created_at: string
@@ -77,13 +78,14 @@ export async function createVenue(
   name: string,
   logoUrl: string | null,
   brandColor: string,
+  backgroundColor: string | null,
   cashierPassword: string,
   rewards: Array<{ stamp: number; label: string }>
 ): Promise<Venue | null> {
   const res = await fetch(`${BASE()}/venues`, {
     method: 'POST',
     headers: supabaseAdminHeaders(),
-    body: JSON.stringify({ slug, name, logo_url: logoUrl, brand_color: brandColor, cashier_password: cashierPassword, rewards }),
+    body: JSON.stringify({ slug, name, logo_url: logoUrl, brand_color: brandColor, background_color: backgroundColor, cashier_password: cashierPassword, rewards }),
   })
   const data = await res.json()
   return Array.isArray(data) ? (data[0] ?? null) : (data ?? null)

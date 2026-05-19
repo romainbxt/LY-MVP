@@ -58,6 +58,7 @@ export async function createVenueAction(
   const name = (formData.get('name') as string)?.trim()
   const logoUrl = (formData.get('logo_url') as string)?.trim() || null
   const brandColor = (formData.get('brand_color') as string)?.trim() || '#D97706'
+  const backgroundColor = (formData.get('background_color') as string)?.trim() || null
   const cashierPassword = (formData.get('cashier_password') as string)?.trim()
   const rewardsRaw = (formData.get('rewards') as string)?.trim()
 
@@ -74,7 +75,7 @@ export async function createVenueAction(
     { stamp: 10, label: 'Free Meal 🍽️' },
   ]
 
-  const venue = await createVenue(slug, name, logoUrl, brandColor, cashierPassword, rewards)
+  const venue = await createVenue(slug, name, logoUrl, brandColor, backgroundColor, cashierPassword, rewards)
   if (!venue) return { error: 'Failed to create venue. Slug may already be taken.' }
 
   redirect(`/admin`)
@@ -90,12 +91,14 @@ export async function updateVenueAction(
   const name = (formData.get('name') as string)?.trim()
   const logoUrl = (formData.get('logo_url') as string)?.trim() || null
   const brandColor = (formData.get('brand_color') as string)?.trim() || '#D97706'
+  const backgroundColor = (formData.get('background_color') as string)?.trim() || null
   const cashierPassword = (formData.get('cashier_password') as string)?.trim() || undefined
   const rewardsRaw = (formData.get('rewards') as string)?.trim()
 
   const fields: Parameters<typeof updateVenue>[1] = {}
   if (name) fields.name = name
   if (logoUrl !== undefined) fields.logo_url = logoUrl
+  fields.background_color = backgroundColor
   if (brandColor) fields.brand_color = brandColor
   if (cashierPassword) fields.cashier_password = cashierPassword
 

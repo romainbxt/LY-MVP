@@ -14,10 +14,12 @@ export default async function RegisterPage({
   const rewards = venue.rewards ?? []
   const totalStamps = rewards[rewards.length - 1]?.stamp ?? 10
 
+  const bgColor = venue.background_color ?? `${venue.brand_color}18`
+
   return (
     <main
       className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ background: `${venue.brand_color}12` }}
+      style={{ background: bgColor }}
     >
       <div className="w-full max-w-xs">
         <div className="text-center mb-8">

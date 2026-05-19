@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react'
 import { updateVenueAction } from '@/app/admin/actions'
 import type { Venue } from '@/lib/supabase'
+import ColorPicker from '@/components/ColorPicker'
 import { Loader2 } from 'lucide-react'
 
 function rewardsToText(rewards: Venue['rewards']): string {
@@ -58,6 +59,14 @@ export default function EditVenueForm({ venue }: { venue: Venue }) {
             className="flex-1 px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
+        <div className="bg-stone-700/50 rounded-xl p-3">
+          <ColorPicker
+            name="background_color"
+            label="Registration page background"
+            defaultValue={venue.background_color}
+          />
+        </div>
+
         <textarea
           name="rewards"
           rows={venue.rewards.length + 1}

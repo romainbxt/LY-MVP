@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { createVenueAction } from '@/app/admin/actions'
+import ColorPicker from '@/components/ColorPicker'
 import { Loader2 } from 'lucide-react'
 
 export default function CreateVenueForm() {
@@ -44,15 +45,13 @@ export default function CreateVenueForm() {
           className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
         />
         <div className="flex gap-3">
-          <div className="flex-1">
-            <input
-              name="brand_color"
-              type="text"
-              defaultValue="#D97706"
-              placeholder="Brand color (#hex)"
-              className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-          </div>
+          <input
+            name="brand_color"
+            type="text"
+            defaultValue="#D97706"
+            placeholder="Brand color (#hex)"
+            className="flex-1 px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
           <input
             name="cashier_password"
             type="text"
@@ -61,6 +60,15 @@ export default function CreateVenueForm() {
             className="flex-1 px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
           />
         </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3">
+          <ColorPicker
+            name="background_color"
+            label="Registration page background"
+            defaultValue={null}
+          />
+        </div>
+
         <textarea
           name="rewards"
           rows={3}
