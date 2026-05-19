@@ -60,6 +60,18 @@ export async function getAllVenues(): Promise<Venue[]> {
   return Array.isArray(data) ? data : []
 }
 
+export async function updateVenue(
+  id: string,
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'cashier_password' | 'rewards'>>
+): Promise<boolean> {
+  const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: supabaseAdminHeaders(),
+    body: JSON.stringify(fields),
+  })
+  return res.ok
+}
+
 export async function createVenue(
   slug: string,
   name: string,

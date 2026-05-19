@@ -2,7 +2,27 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createVenue } from '@/lib/supabase'
+import { createVenue, updateVenue } from '@/lib/supabase'
+
+function parseRewards(raw: string): Array<{ stamp: number; label: string }> | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  if (trimmed.startsWith('[')) {
+    try { return JSON.parse(trimmed) } catch { return null }
+  }
+  const parsed = trimmed
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const [stampPart, ...labelParts] = line.split('=')
+      const stamp = parseInt(stampPart.trim(), 10)
+      const label = labelParts.join('=').trim()
+      return { stamp, label }
+    })
+    .filter(r => !isNaN(r.stamp) && r.label)
+  return parsed.length > 0 ? parsed : null
+}
 
 export type AdminLoginState = { error?: string } | null
 
@@ -48,38 +68,45 @@ export async function createVenueAction(
     return { error: 'Slug can only contain lowercase letters, numbers, and hyphens.' }
   }
 
-  let rewards: Array<{ stamp: number; label: string }> = [
+  const rewards = parseRewards(rewardsRaw ?? '') ?? [
     { stamp: 3, label: 'Free Cookie 🍪' },
     { stamp: 6, label: 'Free Drink ☕' },
     { stamp: 10, label: 'Free Meal 🍽️' },
   ]
 
-  if (rewardsRaw) {
-    // Accept simple "5 = Free Coffee ☕" lines or JSON
-    if (rewardsRaw.trim().startsWith('[')) {
-      try {
-        rewards = JSON.parse(rewardsRaw)
-      } catch {
-        return { error: 'Invalid rewards format.' }
-      }
-    } else {
-      const parsed = rewardsRaw
-        .split('\n')
-        .map(line => line.trim())
-        .filter(Boolean)
-        .map(line => {
-          const [stampPart, ...labelParts] = line.split('=')
-          const stamp = parseInt(stampPart.trim(), 10)
-          const label = labelParts.join('=').trim()
-          return { stamp, label }
-        })
-        .filter(r => !isNaN(r.stamp) && r.label)
-      if (parsed.length > 0) rewards = parsed
-    }
-  }
-
   const venue = await createVenue(slug, name, logoUrl, brandColor, cashierPassword, rewards)
   if (!venue) return { error: 'Failed to create venue. Slug may already be taken.' }
 
   redirect(`/admin`)
+}
+
+export type UpdateVenueState = { error?: string; success?: boolean } | null
+
+export async function updateVenueAction(
+  venueId: string,
+  prevState: UpdateVenueState,
+  formData: FormData
+): Promise<UpdateVenueState> {
+  const name = (formData.get('name') as string)?.trim()
+  const logoUrl = (formData.get('logo_url') as string)?.trim() || null
+  const brandColor = (formData.get('brand_color') as string)?.trim() || '#D97706'
+  const cashierPassword = (formData.get('cashier_password') as string)?.trim() || undefined
+  const rewardsRaw = (formData.get('rewards') as string)?.trim()
+
+  const fields: Parameters<typeof updateVenue>[1] = {}
+  if (name) fields.name = name
+  if (logoUrl !== undefined) fields.logo_url = logoUrl
+  if (brandColor) fields.brand_color = brandColor
+  if (cashierPassword) fields.cashier_password = cashierPassword
+
+  if (rewardsRaw) {
+    const rewards = parseRewards(rewardsRaw)
+    if (!rewards) return { error: 'Invalid rewards format. Use "5 = Free Coffee ☕" per line.' }
+    fields.rewards = rewards
+  }
+
+  const ok = await updateVenue(venueId, fields)
+  if (!ok) return { error: 'Failed to update venue.' }
+
+  redirect('/admin')
 }

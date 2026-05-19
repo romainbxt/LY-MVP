@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { getAllVenues } from '@/lib/supabase'
 import AdminLoginForm from '@/components/AdminLoginForm'
 import CreateVenueForm from '@/components/CreateVenueForm'
+import EditVenueForm from '@/components/EditVenueForm'
 import Link from 'next/link'
 
 export default async function AdminPage() {
@@ -73,6 +74,8 @@ export default async function AdminPage() {
                   </span>
                 ))}
               </div>
+
+              <EditVenueForm venue={v} />
             </div>
           ))}
 
