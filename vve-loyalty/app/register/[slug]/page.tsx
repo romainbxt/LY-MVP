@@ -30,7 +30,7 @@ export default async function RegisterPage({
               width={90}
               height={90}
               className="mx-auto mb-4 object-cover"
-              style={{ borderRadius: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.12)', background: '#fff' }}
+              style={{ borderRadius: '20px', boxShadow: '0 4px 14px rgba(0,0,0,0.12)', background: '#fff', objectFit: 'contain', padding: '8px' }}
             />
           )}
           <h1 className="text-2xl font-bold text-stone-800">{venue.name}</h1>

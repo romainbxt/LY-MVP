@@ -19,6 +19,7 @@ export default async function CustomerCardView({
 
   const { stamp_count: stampCount, name } = customer
   const brand = venue?.brand_color ?? '#D97706'
+  const bgColor = venue?.background_color ?? `${brand}18`
   const rewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
   const totalStamps = rewards[rewards.length - 1]?.stamp ?? 10
   const nextReward = rewards.find(r => r.stamp > stampCount)
@@ -28,7 +29,7 @@ export default async function CustomerCardView({
   return (
     <main
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: `linear-gradient(to bottom, ${brand}18, ${brand}08)` }}
+      style={{ background: bgColor }}
     >
       <div className="w-full max-w-sm">
 
@@ -39,7 +40,7 @@ export default async function CustomerCardView({
               alt={venue.name}
               width={80}
               height={80}
-              style={{ borderRadius: '16px', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', objectFit: 'cover', background: '#fff' }}
+              style={{ borderRadius: '16px', boxShadow: '0 4px 14px rgba(0,0,0,0.1)', objectFit: 'contain', background: '#fff', padding: '6px' }}
             />
           </div>
         )}
