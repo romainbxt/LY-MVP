@@ -85,7 +85,11 @@ function buildEmailHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
-        <img src="${logoUrl}" alt="${safeVenue}" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;object-fit:cover;" />
+        <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+          <tr><td align="center" style="width:90px;height:90px;background:#ffffff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+            <img src="${logoUrl}" alt="${safeVenue}" width="70" height="70" style="display:block;max-width:70px;max-height:70px;object-fit:contain;" />
+          </td></tr>
+        </table>
       </td></tr>` : ''}
 
       <tr><td align="center" style="padding-bottom:28px;">
@@ -178,7 +182,11 @@ function buildReengagementHtml({
     <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
 
       ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
-        <img src="${logoUrl}" alt="${safeVenue}" width="90" height="90" style="border-radius:12px;display:block;margin:0 auto;object-fit:cover;" />
+        <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+          <tr><td align="center" style="width:90px;height:90px;background:#ffffff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+            <img src="${logoUrl}" alt="${safeVenue}" width="70" height="70" style="display:block;max-width:70px;max-height:70px;object-fit:contain;" />
+          </td></tr>
+        </table>
       </td></tr>` : ''}
 
       <tr><td align="center" style="padding-bottom:28px;">
