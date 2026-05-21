@@ -32,6 +32,26 @@ function supabaseAdminHeaders() {
 
 const BASE = () => `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1`
 
+export async function uploadLogo(file: File): Promise<string | null> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/logos/${filename}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        apikey: key,
+        'Content-Type': file.type || 'image/png',
+      },
+      body: Buffer.from(await file.arrayBuffer()),
+    }
+  )
+  if (!res.ok) return null
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/logos/${filename}`
+}
+
 // ── Venue functions ────────────────────────────────────────────────────────────
 
 export async function getVenueBySlug(slug: string): Promise<Venue | null> {

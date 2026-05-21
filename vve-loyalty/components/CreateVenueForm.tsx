@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react'
 export default function CreateVenueForm() {
   const [open, setOpen] = useState(false)
   const [state, action, isPending] = useActionState(createVenueAction, null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   if (!open) {
     return (
@@ -38,12 +39,27 @@ export default function CreateVenueForm() {
           placeholder="Venue name"
           className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
         />
-        <input
-          name="logo_url"
-          type="url"
-          placeholder="Logo URL (optional)"
-          className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-        />
+        <div className="space-y-2">
+          {logoPreview && (
+            <div className="w-16 h-16 rounded-xl bg-white flex items-center justify-center p-1.5">
+              <img src={logoPreview} alt="Preview" className="max-w-full max-h-full object-contain" />
+            </div>
+          )}
+          <label className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 cursor-pointer hover:border-amber-400 transition-colors">
+            <span className="text-amber-400 text-sm font-semibold shrink-0">Choose Logo</span>
+            <span className="text-stone-500 text-sm truncate">{logoPreview ? 'Image selected' : 'Optional — PNG or JPG'}</span>
+            <input
+              type="file"
+              name="logo"
+              accept="image/*"
+              className="hidden"
+              onChange={e => {
+                const file = e.target.files?.[0]
+                if (file) setLogoPreview(URL.createObjectURL(file))
+              }}
+            />
+          </label>
+        </div>
         <div className="flex gap-3">
           <input
             name="brand_color"

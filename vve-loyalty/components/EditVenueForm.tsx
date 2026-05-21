@@ -14,6 +14,7 @@ export default function EditVenueForm({ venue }: { venue: Venue }) {
   const [open, setOpen] = useState(false)
   const boundAction = updateVenueAction.bind(null, venue.id)
   const [state, action, isPending] = useActionState(boundAction, null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   if (!open) {
     return (
@@ -37,13 +38,33 @@ export default function EditVenueForm({ venue }: { venue: Venue }) {
           placeholder="Venue name"
           className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
         />
-        <input
-          name="logo_url"
-          type="url"
-          defaultValue={venue.logo_url ?? ''}
-          placeholder="Logo URL"
-          className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-        />
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            {(logoPreview ?? venue.logo_url) && (
+              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center p-1 shrink-0">
+                <img src={logoPreview ?? venue.logo_url!} alt="Logo" className="max-w-full max-h-full object-contain" />
+              </div>
+            )}
+            <label className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 cursor-pointer hover:border-amber-400 transition-colors">
+              <span className="text-amber-400 text-xs font-semibold shrink-0">
+                {venue.logo_url ? 'Replace Logo' : 'Upload Logo'}
+              </span>
+              <span className="text-stone-500 text-xs truncate">
+                {logoPreview ? 'New image selected' : 'PNG or JPG'}
+              </span>
+              <input
+                type="file"
+                name="logo"
+                accept="image/*"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0]
+                  if (file) setLogoPreview(URL.createObjectURL(file))
+                }}
+              />
+            </label>
+          </div>
+        </div>
         <div className="flex gap-2">
           <input
             name="brand_color"

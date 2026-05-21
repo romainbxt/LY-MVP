@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createVenue, updateVenue } from '@/lib/supabase'
+import { createVenue, updateVenue, uploadLogo } from '@/lib/supabase'
 
 function parseRewards(raw: string): Array<{ stamp: number; label: string }> | null {
   const trimmed = raw.trim()
@@ -56,7 +56,6 @@ export async function createVenueAction(
 ): Promise<CreateVenueState> {
   const slug = (formData.get('slug') as string)?.trim().toLowerCase().replace(/\s+/g, '-')
   const name = (formData.get('name') as string)?.trim()
-  const logoUrl = (formData.get('logo_url') as string)?.trim() || null
   const brandColor = (formData.get('brand_color') as string)?.trim() || '#D97706'
   const backgroundColor = (formData.get('background_color') as string)?.trim() || null
   const cashierPassword = (formData.get('cashier_password') as string)?.trim()
@@ -67,6 +66,13 @@ export async function createVenueAction(
   }
   if (!/^[a-z0-9-]+$/.test(slug)) {
     return { error: 'Slug can only contain lowercase letters, numbers, and hyphens.' }
+  }
+
+  const logoFile = formData.get('logo') as File | null
+  let logoUrl: string | null = null
+  if (logoFile && logoFile.size > 0) {
+    logoUrl = await uploadLogo(logoFile)
+    if (!logoUrl) return { error: 'Failed to upload logo. Try again.' }
   }
 
   const rewards = parseRewards(rewardsRaw ?? '') ?? [
@@ -89,11 +95,18 @@ export async function updateVenueAction(
   formData: FormData
 ): Promise<UpdateVenueState> {
   const name = (formData.get('name') as string)?.trim()
-  const logoUrl = (formData.get('logo_url') as string)?.trim() || null
   const brandColor = (formData.get('brand_color') as string)?.trim() || '#D97706'
   const backgroundColor = (formData.get('background_color') as string)?.trim() || null
   const cashierPassword = (formData.get('cashier_password') as string)?.trim() || undefined
   const rewardsRaw = (formData.get('rewards') as string)?.trim()
+
+  const logoFile = formData.get('logo') as File | null
+  let logoUrl: string | null | undefined = undefined
+  if (logoFile && logoFile.size > 0) {
+    const uploaded = await uploadLogo(logoFile)
+    if (!uploaded) return { error: 'Failed to upload logo. Try again.' }
+    logoUrl = uploaded
+  }
 
   const fields: Parameters<typeof updateVenue>[1] = {}
   if (name) fields.name = name
