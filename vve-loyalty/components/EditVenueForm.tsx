@@ -4,6 +4,8 @@ import { useActionState, useState } from 'react'
 import { updateVenueAction } from '@/app/admin/actions'
 import type { Venue } from '@/lib/supabase'
 import ColorPicker from '@/components/ColorPicker'
+import StampIconPicker from '@/components/StampIconPicker'
+import StampOverridePicker from '@/components/StampOverridePicker'
 import { Loader2 } from 'lucide-react'
 
 function rewardsToText(rewards: Venue['rewards']): string {
@@ -15,6 +17,9 @@ export default function EditVenueForm({ venue }: { venue: Venue }) {
   const boundAction = updateVenueAction.bind(null, venue.id)
   const [state, action, isPending] = useActionState(boundAction, null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [rewardOnLastStamp, setRewardOnLastStamp] = useState(venue.reward_on_last_stamp ?? true)
+  const [askBirthday, setAskBirthday] = useState(venue.ask_birthday ?? false)
+  const totalStamps = venue.rewards[venue.rewards.length - 1]?.stamp ?? 10
 
   if (!open) {
     return (
@@ -95,6 +100,51 @@ export default function EditVenueForm({ venue }: { venue: Venue }) {
           placeholder={'3 = Free Cookie 🍪\n6 = Free Drink ☕\n10 = Free Meal 🍽️'}
           className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none font-mono"
         />
+
+        <div className="bg-stone-700/50 rounded-xl p-3">
+          <StampIconPicker name="stamp_icon" defaultValue={venue.stamp_icon ?? '☕'} />
+        </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3">
+          <StampOverridePicker
+            name="stamp_overrides"
+            totalStamps={totalStamps}
+            defaultIcon={venue.stamp_icon ?? '☕'}
+            defaultOverrides={venue.stamp_overrides ?? []}
+          />
+        </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-3">
+          <label className="flex items-center justify-between cursor-pointer">
+            <div>
+              <p className="text-sm text-white font-medium">Reward on final stamp</p>
+              <p className="text-[10px] text-stone-400">Card resets automatically when last stamp is given</p>
+            </div>
+            <div
+              onClick={() => setRewardOnLastStamp(!rewardOnLastStamp)}
+              className="w-11 h-6 rounded-full relative transition-colors cursor-pointer shrink-0"
+              style={{ background: rewardOnLastStamp ? '#f59e0b' : '#57534e' }}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${rewardOnLastStamp ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <input type="hidden" name="reward_on_last_stamp" value={String(rewardOnLastStamp)} />
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer">
+            <div>
+              <p className="text-sm text-white font-medium">Ask for birthday</p>
+              <p className="text-[10px] text-stone-400">Show birthday field on customer registration</p>
+            </div>
+            <div
+              onClick={() => setAskBirthday(!askBirthday)}
+              className="w-11 h-6 rounded-full relative transition-colors cursor-pointer shrink-0"
+              style={{ background: askBirthday ? '#f59e0b' : '#57534e' }}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${askBirthday ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <input type="hidden" name="ask_birthday" value={String(askBirthday)} />
+          </label>
+        </div>
 
         {state?.error && (
           <p className="text-red-400 text-xs">{state.error}</p>

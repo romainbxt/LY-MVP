@@ -43,7 +43,8 @@ export async function registerCustomer(
   const existing = await getCustomerByEmail(email, venue.id)
   if (existing) return { error: 'Email already registered — check your inbox for your stamp card!' }
 
-  const customer = await createCustomer(name, email, venue.id)
+  const birthday = (formData.get('birthday') as string)?.trim() || null
+  const customer = await createCustomer(name, email, venue.id, birthday)
   if (!customer) return { error: 'Registration failed. Please try again.' }
 
   const baseUrl = await getBaseUrl()
@@ -63,6 +64,8 @@ export async function registerCustomer(
       backgroundColor: venue.background_color ?? `${venue.brand_color}18`,
       totalStamps,
       rewards: venue.rewards,
+      stampIcon: venue.stamp_icon ?? '☕',
+      stampOverrides: venue.stamp_overrides ?? [],
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -99,7 +102,9 @@ export async function stampCustomer(
   }
 
   const newCount = customer.stamp_count + 1
-  const savedCount = newCount >= totalStamps ? 0 : newCount
+  const rewardOnLastStamp = venue?.reward_on_last_stamp ?? true
+  const cardComplete = newCount >= totalStamps
+  const savedCount = cardComplete && rewardOnLastStamp ? 0 : newCount
   const ok = await updateStampCount(uniqueId, savedCount)
   if (!ok) return { error: 'Failed to add stamp. Try again.' }
 
@@ -119,6 +124,8 @@ export async function stampCustomer(
       backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
       totalStamps,
       rewards,
+      stampIcon: venue?.stamp_icon ?? '☕',
+      stampOverrides: venue?.stamp_overrides ?? [],
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -144,6 +151,47 @@ export async function deleteCustomerAction(
 
   if (venue) revalidatePath(`/cashier/${venue.slug}`)
   return { success: true }
+}
+
+// ── Redeem & Reset ────────────────────────────────────────────────────────────
+
+export type RedeemState = { success?: boolean; name?: string; error?: string } | null
+
+export async function redeemAndReset(
+  uniqueId: string,
+  prevState: RedeemState,
+  formData: FormData
+): Promise<RedeemState> {
+  const customer = await getCustomerByUniqueId(uniqueId)
+  if (!customer) return { error: 'Customer not found.' }
+
+  const venue = customer.venue_id ? await getVenueById(customer.venue_id) : null
+  const ok = await updateStampCount(uniqueId, 0)
+  if (!ok) return { error: 'Failed to reset card.' }
+
+  const baseUrl = await getBaseUrl()
+  const scanUrl = `${baseUrl}/scan/${uniqueId}`
+  const rewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
+  const totalStamps = rewards[rewards.length - 1]?.stamp ?? 10
+
+  try {
+    await sendStampCardEmail({
+      name: customer.name,
+      email: customer.email,
+      stampCount: 0,
+      scanUrl,
+      logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
+      venueName: venue?.name ?? 'Loyalty',
+      brandColor: venue?.brand_color ?? '#D97706',
+      backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
+      totalStamps,
+      rewards,
+    })
+  } catch (e) {
+    console.error('Email send failed:', e)
+  }
+
+  return { success: true, name: customer.name }
 }
 
 // ── Re-engagement ─────────────────────────────────────────────────────────────
@@ -186,6 +234,8 @@ export async function reengageCustomer(
       rewards: reengageRewards,
       daysSince,
       offer,
+      stampIcon: venue?.stamp_icon ?? '☕',
+      stampOverrides: venue?.stamp_overrides ?? [],
     })
     return { success: true }
   } catch (e) {

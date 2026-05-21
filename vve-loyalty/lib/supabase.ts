@@ -7,6 +7,10 @@ export type Venue = {
   background_color: string | null
   cashier_password: string
   rewards: Array<{ stamp: number; label: string }>
+  stamp_icon: string | null
+  stamp_overrides: Array<{ stamp: number; icon: string }> | null
+  reward_on_last_stamp: boolean | null
+  ask_birthday: boolean | null
   created_at: string
 }
 
@@ -18,6 +22,7 @@ export type Customer = {
   stamp_count: number
   last_visit_at: string | null
   venue_id: string | null
+  birthday: string | null
 }
 
 function supabaseAdminHeaders() {
@@ -83,7 +88,7 @@ export async function getAllVenues(): Promise<Venue[]> {
 
 export async function updateVenue(
   id: string,
-  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards'>>
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday'>>
 ): Promise<boolean> {
   const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
     method: 'PATCH',
@@ -100,12 +105,16 @@ export async function createVenue(
   brandColor: string,
   backgroundColor: string | null,
   cashierPassword: string,
-  rewards: Array<{ stamp: number; label: string }>
+  rewards: Array<{ stamp: number; label: string }>,
+  stampIcon: string,
+  stampOverrides: Array<{ stamp: number; icon: string }>,
+  rewardOnLastStamp: boolean,
+  askBirthday: boolean
 ): Promise<Venue | null> {
   const res = await fetch(`${BASE()}/venues`, {
     method: 'POST',
     headers: supabaseAdminHeaders(),
-    body: JSON.stringify({ slug, name, logo_url: logoUrl, brand_color: brandColor, background_color: backgroundColor, cashier_password: cashierPassword, rewards }),
+    body: JSON.stringify({ slug, name, logo_url: logoUrl, brand_color: brandColor, background_color: backgroundColor, cashier_password: cashierPassword, rewards, stamp_icon: stampIcon, stamp_overrides: stampOverrides, reward_on_last_stamp: rewardOnLastStamp, ask_birthday: askBirthday }),
   })
   const data = await res.json()
   return Array.isArray(data) ? (data[0] ?? null) : (data ?? null)
@@ -122,11 +131,11 @@ export async function getCustomerByEmail(email: string, venueId: string): Promis
   return data[0] ?? null
 }
 
-export async function createCustomer(name: string, email: string, venueId: string): Promise<Customer | null> {
+export async function createCustomer(name: string, email: string, venueId: string, birthday?: string | null): Promise<Customer | null> {
   const res = await fetch(`${BASE()}/stamps`, {
     method: 'POST',
     headers: supabaseAdminHeaders(),
-    body: JSON.stringify({ name, email, stamp_count: 0, venue_id: venueId }),
+    body: JSON.stringify({ name, email, stamp_count: 0, venue_id: venueId, ...(birthday ? { birthday } : {}) }),
   })
   const data = await res.json()
   return Array.isArray(data) ? (data[0] ?? null) : (data ?? null)

@@ -3,12 +3,15 @@
 import { useActionState, useState } from 'react'
 import { createVenueAction } from '@/app/admin/actions'
 import ColorPicker from '@/components/ColorPicker'
+import StampIconPicker from '@/components/StampIconPicker'
 import { Loader2 } from 'lucide-react'
 
 export default function CreateVenueForm() {
   const [open, setOpen] = useState(false)
   const [state, action, isPending] = useActionState(createVenueAction, null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [rewardOnLastStamp, setRewardOnLastStamp] = useState(true)
+  const [askBirthday, setAskBirthday] = useState(false)
 
   if (!open) {
     return (
@@ -91,6 +94,42 @@ export default function CreateVenueForm() {
           placeholder={`Rewards (optional) — one per line:\n3 = Free Cookie 🍪\n6 = Free Drink ☕\n10 = Free Meal 🍽️`}
           className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
         />
+
+        <div className="bg-stone-700/50 rounded-xl p-3">
+          <StampIconPicker name="stamp_icon" defaultValue="☕" />
+        </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-3">
+          <label className="flex items-center justify-between cursor-pointer">
+            <div>
+              <p className="text-sm text-white font-medium">Reward on final stamp</p>
+              <p className="text-[10px] text-stone-400">Card resets automatically when last stamp is given</p>
+            </div>
+            <div
+              onClick={() => setRewardOnLastStamp(!rewardOnLastStamp)}
+              className="w-11 h-6 rounded-full relative transition-colors cursor-pointer"
+              style={{ background: rewardOnLastStamp ? '#f59e0b' : '#57534e' }}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${rewardOnLastStamp ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <input type="hidden" name="reward_on_last_stamp" value={String(rewardOnLastStamp)} />
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer">
+            <div>
+              <p className="text-sm text-white font-medium">Ask for birthday</p>
+              <p className="text-[10px] text-stone-400">Show birthday field on customer registration</p>
+            </div>
+            <div
+              onClick={() => setAskBirthday(!askBirthday)}
+              className="w-11 h-6 rounded-full relative transition-colors cursor-pointer"
+              style={{ background: askBirthday ? '#f59e0b' : '#57534e' }}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${askBirthday ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <input type="hidden" name="ask_birthday" value={String(askBirthday)} />
+          </label>
+        </div>
 
         {state?.error && (
           <p className="text-red-400 text-xs">{state.error}</p>

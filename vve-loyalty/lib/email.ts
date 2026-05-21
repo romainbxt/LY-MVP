@@ -13,16 +13,18 @@ function buildStampCell(
   num: number,
   stampCount: number,
   brandColor: string,
+  stampIcon: string,
+  overrideMap: Record<number, string>,
   rewardLabel?: string
 ): string {
   const filled = num <= stampCount
+  const icon = overrideMap[num] ?? stampIcon
   const circleBg = filled ? brandColor : '#f0ece4'
-  const circleText = filled ? '#ffffff' : '#c0b8a8'
   const labelColor = filled ? brandColor : '#c0b8a8'
   const displayLabel = rewardLabel && filled ? `${rewardLabel} ✓` : (rewardLabel ?? '')
 
   return `<td style="text-align:center;vertical-align:top;padding:4px;">
-    <div style="width:52px;height:52px;border-radius:50%;background:${circleBg};line-height:52px;text-align:center;font-size:${filled ? '18px' : '14px'};font-weight:700;color:${circleText};margin:0 auto 4px;">${filled ? '✓' : String(num)}</div>
+    <div style="width:52px;height:52px;border-radius:50%;background:${circleBg};line-height:52px;text-align:center;font-size:22px;margin:0 auto 4px;opacity:${filled ? '1' : '0.35'};">${icon}</div>
     <div style="font-size:9px;color:${labelColor};text-align:center;width:56px;font-weight:600;line-height:1.3;min-height:12px;">${escapeHtml(displayLabel)}</div>
   </td>`
 }
@@ -31,6 +33,8 @@ function buildStampRows(
   stampCount: number,
   totalStamps: number,
   brandColor: string,
+  stampIcon: string,
+  overrideMap: Record<number, string>,
   rewards: Array<{ stamp: number; label: string }>
 ): string {
   const rewardMap = Object.fromEntries(rewards.map(r => [r.stamp, r.label]))
@@ -40,7 +44,7 @@ function buildStampRows(
 
   for (let i = 0; i < all.length; i += cols) {
     const cells = all.slice(i, i + cols)
-      .map(n => buildStampCell(n, stampCount, brandColor, rewardMap[n]))
+      .map(n => buildStampCell(n, stampCount, brandColor, stampIcon, overrideMap, rewardMap[n]))
       .join('')
     rows.push(`<table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:4px;"><tr>${cells}</tr></table>`)
   }
@@ -58,6 +62,8 @@ function buildEmailHtml({
   backgroundColor,
   totalStamps,
   rewards,
+  stampIcon = '☕',
+  stampOverrides = [],
 }: {
   name: string
   stampCount: number
@@ -68,10 +74,13 @@ function buildEmailHtml({
   backgroundColor: string
   totalStamps: number
   rewards: Array<{ stamp: number; label: string }>
+  stampIcon?: string
+  stampOverrides?: Array<{ stamp: number; icon: string }>
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
-  const stampRows = buildStampRows(stampCount, totalStamps, brandColor, rewards)
+  const overrideMap = Object.fromEntries(stampOverrides.map(o => [o.stamp, o.icon]))
+  const stampRows = buildStampRows(stampCount, totalStamps, brandColor, stampIcon, overrideMap, rewards)
   const nextReward = rewards.find(r => r.stamp > stampCount)
   const stampsToGo = nextReward ? nextReward.stamp - stampCount : 0
   const progressLine = nextReward
@@ -143,6 +152,8 @@ function buildReengagementHtml({
   rewards,
   daysSince,
   offer,
+  stampIcon = '☕',
+  stampOverrides = [],
 }: {
   name: string
   stampCount: number
@@ -155,11 +166,14 @@ function buildReengagementHtml({
   rewards: Array<{ stamp: number; label: string }>
   daysSince?: number
   offer?: string
+  stampIcon?: string
+  stampOverrides?: Array<{ stamp: number; icon: string }>
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
   const safeOffer = offer ? escapeHtml(offer) : undefined
-  const stampRows = buildStampRows(stampCount, totalStamps, brandColor, rewards)
+  const overrideMap = Object.fromEntries(stampOverrides.map(o => [o.stamp, o.icon]))
+  const stampRows = buildStampRows(stampCount, totalStamps, brandColor, stampIcon, overrideMap, rewards)
   const nextReward = rewards.find(r => r.stamp > stampCount)
   const stampsLeft = nextReward ? nextReward.stamp - stampCount : 0
   const missYouLine = daysSince ? `It's been ${daysSince} days since your last visit.` : `We haven't seen you in a while.`
@@ -251,6 +265,8 @@ export async function sendStampCardEmail({
   backgroundColor,
   totalStamps,
   rewards,
+  stampIcon = '☕',
+  stampOverrides = [],
 }: {
   name: string
   email: string
@@ -262,6 +278,8 @@ export async function sendStampCardEmail({
   backgroundColor: string
   totalStamps: number
   rewards: Array<{ stamp: number; label: string }>
+  stampIcon?: string
+  stampOverrides?: Array<{ stamp: number; icon: string }>
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
   const transporter = createTransporter()
@@ -269,7 +287,7 @@ export async function sendStampCardEmail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     to: email,
     subject: `Your ${venueName} Stamp Card`,
-    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards }),
+    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, stampIcon, stampOverrides }),
   })
 }
 
@@ -286,6 +304,8 @@ export async function sendReengagementEmail({
   rewards,
   daysSince,
   offer,
+  stampIcon = '☕',
+  stampOverrides = [],
 }: {
   name: string
   email: string
@@ -299,6 +319,8 @@ export async function sendReengagementEmail({
   rewards: Array<{ stamp: number; label: string }>
   daysSince?: number
   offer?: string
+  stampIcon?: string
+  stampOverrides?: Array<{ stamp: number; icon: string }>
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
   const transporter = createTransporter()
@@ -306,6 +328,6 @@ export async function sendReengagementEmail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     to: email,
     subject: offer ? `A special offer for you at ${venueName}` : `We miss you at ${venueName}, ${name}!`,
-    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer }),
+    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer, stampIcon, stampOverrides }),
   })
 }

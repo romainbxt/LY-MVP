@@ -7,9 +7,11 @@ import { Loader2 } from 'lucide-react'
 export default function RegisterForm({
   slug,
   brandColor = '#D97706',
+  askBirthday = false,
 }: {
   slug: string
   brandColor?: string
+  askBirthday?: boolean
 }) {
   const boundRegister = registerCustomer.bind(null, slug)
   const [state, action, isPending] = useActionState(boundRegister, null)
@@ -54,6 +56,19 @@ export default function RegisterForm({
           className="w-full px-4 py-3.5 rounded-2xl border border-stone-200 text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 text-base bg-stone-50"
         />
       </div>
+
+      {askBirthday && (
+        <div>
+          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1.5">
+            Birthday <span className="text-stone-300 normal-case font-normal">(optional)</span>
+          </label>
+          <input
+            name="birthday"
+            type="date"
+            className="w-full px-4 py-3.5 rounded-2xl border border-stone-200 text-stone-800 focus:outline-none focus:ring-2 text-base bg-stone-50"
+          />
+        </div>
+      )}
 
       {state?.error && (
         <p className="text-red-500 text-sm text-center bg-red-50 rounded-xl py-2 px-3">

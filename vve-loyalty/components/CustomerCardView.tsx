@@ -25,6 +25,8 @@ export default async function CustomerCardView({
   const nextReward = rewards.find(r => r.stamp > stampCount)
   const stampsToGo = (nextReward?.stamp ?? totalStamps) - stampCount
   const cardComplete = stampCount >= totalStamps
+  const stampIcon = venue?.stamp_icon ?? '☕'
+  const overrideMap = Object.fromEntries((venue?.stamp_overrides ?? []).map(o => [o.stamp, o.icon]))
 
   return (
     <main
@@ -72,17 +74,18 @@ export default async function CustomerCardView({
             {Array.from({ length: totalStamps }).map((_, i) => {
               const num = i + 1
               const filled = num <= stampCount
+              const icon = overrideMap[num] ?? stampIcon
               const rewardHere = rewards.find(r => r.stamp === num)
               return (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-colors"
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-xl transition-colors"
                     style={{
                       background: filled ? brand : '#f1f5f9',
-                      color: filled ? '#fff' : '#cbd5e1',
+                      opacity: filled ? 1 : 0.4,
                     }}
                   >
-                    {filled ? '✓' : num}
+                    {icon}
                   </div>
                   {rewardHere && (
                     <span

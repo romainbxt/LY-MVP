@@ -37,7 +37,7 @@ export default async function RegisterPage({
         </div>
 
         <div className="bg-white rounded-3xl shadow-lg p-6 mb-4">
-          <RegisterForm slug={slug} brandColor={venue.brand_color} />
+          <RegisterForm slug={slug} brandColor={venue.brand_color} askBirthday={venue.ask_birthday ?? false} />
         </div>
 
         <div className="bg-white/70 rounded-2xl p-4 shadow-sm">

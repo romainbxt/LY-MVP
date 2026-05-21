@@ -75,13 +75,17 @@ export async function createVenueAction(
     if (!logoUrl) return { error: 'Failed to upload logo. Try again.' }
   }
 
+  const stampIcon = (formData.get('stamp_icon') as string)?.trim() || '☕'
+  const rewardOnLastStamp = formData.get('reward_on_last_stamp') !== 'false'
+  const askBirthday = formData.get('ask_birthday') === 'true'
+
   const rewards = parseRewards(rewardsRaw ?? '') ?? [
     { stamp: 3, label: 'Free Cookie 🍪' },
     { stamp: 6, label: 'Free Drink ☕' },
     { stamp: 10, label: 'Free Meal 🍽️' },
   ]
 
-  const venue = await createVenue(slug, name, logoUrl, brandColor, backgroundColor, cashierPassword, rewards)
+  const venue = await createVenue(slug, name, logoUrl, brandColor, backgroundColor, cashierPassword, rewards, stampIcon, [], rewardOnLastStamp, askBirthday)
   if (!venue) return { error: 'Failed to create venue. Slug may already be taken.' }
 
   redirect(`/admin`)
@@ -108,12 +112,23 @@ export async function updateVenueAction(
     logoUrl = uploaded
   }
 
+  const stampIcon = (formData.get('stamp_icon') as string)?.trim() || undefined
+  const stampOverridesRaw = (formData.get('stamp_overrides') as string)?.trim()
+  const rewardOnLastStampRaw = formData.get('reward_on_last_stamp') as string | null
+  const askBirthdayRaw = formData.get('ask_birthday') as string | null
+
   const fields: Parameters<typeof updateVenue>[1] = {}
   if (name) fields.name = name
   if (logoUrl !== undefined) fields.logo_url = logoUrl
   fields.background_color = backgroundColor
   if (brandColor) fields.brand_color = brandColor
   if (cashierPassword) fields.cashier_password = cashierPassword
+  if (stampIcon) fields.stamp_icon = stampIcon
+  if (stampOverridesRaw) {
+    try { fields.stamp_overrides = JSON.parse(stampOverridesRaw) } catch { /* ignore */ }
+  }
+  if (rewardOnLastStampRaw !== null) fields.reward_on_last_stamp = rewardOnLastStampRaw !== 'false'
+  if (askBirthdayRaw !== null) fields.ask_birthday = askBirthdayRaw === 'true'
 
   if (rewardsRaw) {
     const rewards = parseRewards(rewardsRaw)
