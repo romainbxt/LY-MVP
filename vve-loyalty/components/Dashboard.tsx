@@ -44,7 +44,7 @@ export default async function Dashboard({ venue }: { venue: Venue }) {
 
       <div className="px-5 py-6 border-b border-stone-800">
         <p className="text-stone-500 text-[10px] uppercase tracking-widest mb-4">Shop QR Code</p>
-        <ShopQR registerUrl={registerUrl} />
+        <ShopQR registerUrl={registerUrl} slug={venue.slug} />
       </div>
 
       <div className="px-5 py-6">

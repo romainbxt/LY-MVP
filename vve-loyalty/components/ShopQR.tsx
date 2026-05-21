@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 
-export default function ShopQR({ registerUrl }: { registerUrl: string }) {
+export default function ShopQR({ registerUrl, slug }: { registerUrl: string; slug: string }) {
   const [dataUrl, setDataUrl] = useState<string>('')
 
   useEffect(() => {
@@ -13,7 +13,7 @@ export default function ShopQR({ registerUrl }: { registerUrl: string }) {
   const handleDownload = () => {
     const a = document.createElement('a')
     a.href = dataUrl
-    a.download = 'vve-shop-qr.png'
+    a.download = `${slug}-shop-qr.png`
     a.click()
   }
 
