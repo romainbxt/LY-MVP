@@ -3,6 +3,7 @@ import { getAllVenues } from '@/lib/supabase'
 import AdminLoginForm from '@/components/AdminLoginForm'
 import CreateVenueForm from '@/components/CreateVenueForm'
 import EditVenueForm from '@/components/EditVenueForm'
+import StampCardPreview from '@/components/StampCardPreview'
 import Link from 'next/link'
 
 export default async function AdminPage() {
@@ -75,6 +76,7 @@ export default async function AdminPage() {
                 ))}
               </div>
 
+              <StampCardPreview venue={v} />
               <EditVenueForm venue={v} />
             </div>
           ))}
