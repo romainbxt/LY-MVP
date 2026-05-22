@@ -3,6 +3,8 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createVenue, updateVenue, uploadLogo } from '@/lib/supabase'
+import type { WinBackRule } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 
 function parseRewards(raw: string): Array<{ stamp: number; label: string }> | null {
   const trimmed = raw.trim()
@@ -140,4 +142,13 @@ export async function updateVenueAction(
   if (!ok) return { error: 'Failed to update venue.' }
 
   redirect('/admin')
+}
+
+export async function updateWinBackRules(
+  venueId: string,
+  rules: WinBackRule[]
+): Promise<boolean> {
+  const ok = await updateVenue(venueId, { win_back_rules: rules })
+  if (ok) revalidatePath('/admin')
+  return ok
 }

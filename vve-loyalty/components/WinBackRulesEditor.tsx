@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { WinBackRule } from '@/lib/supabase'
-import { updateVenue } from '@/app/admin/actions'
+import { updateWinBackRules } from '@/app/admin/actions'
 
 const TEMPLATES: Omit<WinBackRule, 'id'>[] = [
   {
@@ -83,7 +83,7 @@ export default function WinBackRulesEditor({
   const handleSaveRules = async () => {
     setSaving(true)
     try {
-      const success = await updateVenue(venueId, { win_back_rules: rules })
+      const success = await updateWinBackRules(venueId, rules)
       if (success) {
         alert('Win-back rules saved successfully!')
       } else {

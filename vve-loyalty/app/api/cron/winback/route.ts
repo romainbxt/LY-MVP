@@ -1,6 +1,5 @@
-import { getAllVenues, getVenueById, getCustomersForWinBack, updateWinBackSent } from '@/lib/supabase'
+import { getAllVenues, getCustomersForWinBack, updateWinBackSent } from '@/lib/supabase'
 import { sendWinBackEmail } from '@/lib/email'
-import { headers } from 'next/headers'
 
 const WINBACK_SECRET = process.env.WINBACK_SECRET || 'test_secret'
 
