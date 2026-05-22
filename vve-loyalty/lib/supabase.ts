@@ -1,3 +1,11 @@
+export type WinBackRule = {
+  id: string
+  inactiveDays: number
+  subject: string
+  offer: string
+  level: number
+}
+
 export type Venue = {
   id: string
   slug: string
@@ -11,6 +19,7 @@ export type Venue = {
   stamp_overrides: Array<{ stamp: number; icon: string }> | null
   reward_on_last_stamp: boolean | null
   ask_birthday: boolean | null
+  win_back_rules: WinBackRule[] | null
   created_at: string
 }
 
@@ -23,6 +32,8 @@ export type Customer = {
   last_visit_at: string | null
   venue_id: string | null
   birthday: string | null
+  last_winback_sent_at: string | null
+  winback_level_sent: number
 }
 
 function supabaseAdminHeaders() {
@@ -88,7 +99,7 @@ export async function getAllVenues(): Promise<Venue[]> {
 
 export async function updateVenue(
   id: string,
-  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday'>>
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules'>>
 ): Promise<boolean> {
   const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
     method: 'PATCH',
@@ -154,13 +165,13 @@ export async function updateStampCount(uniqueId: string, newCount: number): Prom
   const res = await fetch(`${BASE()}/stamps?unique_id=eq.${uniqueId}`, {
     method: 'PATCH',
     headers: supabaseAdminHeaders(),
-    body: JSON.stringify({ stamp_count: newCount, last_visit_at: new Date().toISOString() }),
+    body: JSON.stringify({ stamp_count: newCount, last_visit_at: new Date().toISOString(), last_winback_sent_at: null, winback_level_sent: 0 }),
   })
   if (res.ok) return true
   const res2 = await fetch(`${BASE()}/stamps?unique_id=eq.${uniqueId}`, {
     method: 'PATCH',
     headers: supabaseAdminHeaders(),
-    body: JSON.stringify({ stamp_count: newCount }),
+    body: JSON.stringify({ stamp_count: newCount, last_winback_sent_at: null, winback_level_sent: 0 }),
   })
   return res2.ok
 }
@@ -180,4 +191,27 @@ export async function getAllCustomers(venueId: string): Promise<Customer[]> {
   )
   const data = await res.json()
   return Array.isArray(data) ? data : []
+}
+
+// ── Win-Back Engine ──────────────────────────────────────────────────────────
+
+export async function getCustomersForWinBack(venueId: string, inactiveDays: number, winbackLevel: number): Promise<Customer[]> {
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
+
+  const res = await fetch(
+    `${BASE()}/stamps?venue_id=eq.${venueId}&last_visit_at=lt.${cutoffDate.toISOString()}&winback_level_sent=lt.${winbackLevel}&order=last_visit_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function updateWinBackSent(uniqueId: string, level: number): Promise<boolean> {
+  const res = await fetch(`${BASE()}/stamps?unique_id=eq.${uniqueId}`, {
+    method: 'PATCH',
+    headers: supabaseAdminHeaders(),
+    body: JSON.stringify({ last_winback_sent_at: new Date().toISOString(), winback_level_sent: level }),
+  })
+  return res.ok
 }

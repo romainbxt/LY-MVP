@@ -331,3 +331,108 @@ export async function sendReengagementEmail({
     html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer, stampIcon, stampOverrides }),
   })
 }
+
+function buildWinBackHtml({
+  name,
+  subject,
+  offer,
+  logoUrl,
+  venueName,
+  brandColor,
+  backgroundColor,
+  scanUrl,
+}: {
+  name: string
+  subject: string
+  offer: string
+  logoUrl: string
+  venueName: string
+  brandColor: string
+  backgroundColor: string
+  scanUrl: string
+}): string {
+  const safeName = escapeHtml(name)
+  const safeVenue = escapeHtml(venueName)
+  const safeOffer = escapeHtml(offer)
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:${backgroundColor};font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${backgroundColor}">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
+
+      ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+          <tr><td align="center" style="background:#ffffff;border-radius:12px;padding:12px;">
+            <img src="${logoUrl}" alt="${safeVenue}" width="80" style="display:block;max-width:80px;height:auto;" />
+          </td></tr>
+        </table>
+      </td></tr>` : ''}
+
+      <tr><td align="center" style="padding-bottom:28px;">
+        <h1 style="margin:0 0 12px;font-size:28px;font-weight:700;color:#1a1a1a;">${escapeHtml(subject)}</h1>
+        <p style="margin:0;font-size:16px;color:#666666;">Hi ${safeName},</p>
+      </td></tr>
+
+      <tr><td align="center" style="padding-bottom:28px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${brandColor};border-radius:16px;padding:24px 20px;">
+          <tr><td align="center">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff;">${safeOffer}</p>
+          </td></tr>
+        </table>
+      </td></tr>
+
+      <tr><td align="center" style="padding-bottom:32px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-radius:16px;padding:24px;">
+          <tr><td align="center">
+            <img src="${qrImageUrl}" alt="Your QR Code" width="180" height="180" style="display:block;margin:0 auto 12px;" />
+            <p style="margin:0;font-size:13px;color:#888888;font-weight:500;">Show this QR code at ${safeVenue}</p>
+          </td></tr>
+        </table>
+      </td></tr>
+
+      <tr><td align="center">
+        <p style="margin:0;font-size:11px;color:#bbbbbb;">${safeVenue} &bull; Powered by LY Loyalty</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`
+}
+
+export async function sendWinBackEmail({
+  name,
+  email,
+  subject,
+  offer,
+  venueName,
+  brandColor,
+  backgroundColor,
+  logoUrl,
+  scanUrl,
+}: {
+  name: string
+  email: string
+  subject: string
+  offer: string
+  venueName: string
+  brandColor: string
+  backgroundColor?: string
+  logoUrl: string
+  scanUrl: string
+}) {
+  const transporter = createTransporter()
+  const bgColor = backgroundColor || `${brandColor}18`
+
+  await transporter.sendMail({
+    from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject,
+    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl }),
+  })
+}

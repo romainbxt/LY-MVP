@@ -4,6 +4,7 @@ import AdminLoginForm from '@/components/AdminLoginForm'
 import CreateVenueForm from '@/components/CreateVenueForm'
 import EditVenueForm from '@/components/EditVenueForm'
 import StampCardPreview from '@/components/StampCardPreview'
+import WinBackRulesEditor from '@/components/WinBackRulesEditor'
 import Link from 'next/link'
 
 export default async function AdminPage() {
@@ -78,6 +79,11 @@ export default async function AdminPage() {
 
               <StampCardPreview venue={v} />
               <EditVenueForm venue={v} />
+              <WinBackRulesEditor
+                venueId={v.id}
+                initialRules={v.win_back_rules || []}
+                brandColor={v.brand_color}
+              />
             </div>
           ))}
 
