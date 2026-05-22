@@ -98,8 +98,8 @@ export default function WinBackRulesEditor({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-2xl font-bold mb-6">Win-Back Rules</h2>
+    <div className="bg-white text-gray-900 rounded-lg shadow-sm border border-gray-200 p-6 mt-4">
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">Win-Back Rules</h2>
 
       {rules.length === 0 ? (
         <div className="space-y-6">
