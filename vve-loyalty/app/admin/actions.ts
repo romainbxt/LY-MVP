@@ -81,13 +81,40 @@ export async function createVenueAction(
   const rewardOnLastStamp = formData.get('reward_on_last_stamp') !== 'false'
   const askBirthday = formData.get('ask_birthday') === 'true'
 
+  const legalName = (formData.get('legal_name') as string)?.trim() || null
+  const addressStreet = (formData.get('address_street') as string)?.trim() || null
+  const addressPostcode = (formData.get('address_postcode') as string)?.trim() || null
+  const addressCity = (formData.get('address_city') as string)?.trim() || null
+  const registerCourt = (formData.get('register_court') as string)?.trim() || null
+  const registerNumber = (formData.get('register_number') as string)?.trim() || null
+  const ownerEmail = (formData.get('owner_email') as string)?.trim().toLowerCase() || null
+
   const rewards = parseRewards(rewardsRaw ?? '') ?? [
     { stamp: 3, label: 'Free Cookie 🍪' },
     { stamp: 6, label: 'Free Drink ☕' },
     { stamp: 10, label: 'Free Meal 🍽️' },
   ]
 
-  const venue = await createVenue(slug, name, logoUrl, brandColor, backgroundColor, cashierPassword, rewards, stampIcon, [], rewardOnLastStamp, askBirthday)
+  const venue = await createVenue({
+    slug,
+    name,
+    logoUrl,
+    brandColor,
+    backgroundColor,
+    cashierPassword,
+    rewards,
+    stampIcon,
+    stampOverrides: [],
+    rewardOnLastStamp,
+    askBirthday,
+    legalName,
+    addressStreet,
+    addressPostcode,
+    addressCity,
+    registerCourt,
+    registerNumber,
+    ownerEmail,
+  })
   if (!venue) return { error: 'Failed to create venue. Slug may already be taken.' }
 
   redirect(`/admin`)
@@ -119,6 +146,14 @@ export async function updateVenueAction(
   const rewardOnLastStampRaw = formData.get('reward_on_last_stamp') as string | null
   const askBirthdayRaw = formData.get('ask_birthday') as string | null
 
+  const legalNameRaw = formData.get('legal_name') as string | null
+  const addressStreetRaw = formData.get('address_street') as string | null
+  const addressPostcodeRaw = formData.get('address_postcode') as string | null
+  const addressCityRaw = formData.get('address_city') as string | null
+  const registerCourtRaw = formData.get('register_court') as string | null
+  const registerNumberRaw = formData.get('register_number') as string | null
+  const ownerEmailRaw = formData.get('owner_email') as string | null
+
   const fields: Parameters<typeof updateVenue>[1] = {}
   if (name) fields.name = name
   if (logoUrl !== undefined) fields.logo_url = logoUrl
@@ -131,6 +166,14 @@ export async function updateVenueAction(
   }
   if (rewardOnLastStampRaw !== null) fields.reward_on_last_stamp = rewardOnLastStampRaw !== 'false'
   if (askBirthdayRaw !== null) fields.ask_birthday = askBirthdayRaw === 'true'
+
+  if (legalNameRaw !== null) fields.legal_name = legalNameRaw.trim() || null
+  if (addressStreetRaw !== null) fields.address_street = addressStreetRaw.trim() || null
+  if (addressPostcodeRaw !== null) fields.address_postcode = addressPostcodeRaw.trim() || null
+  if (addressCityRaw !== null) fields.address_city = addressCityRaw.trim() || null
+  if (registerCourtRaw !== null) fields.register_court = registerCourtRaw.trim() || null
+  if (registerNumberRaw !== null) fields.register_number = registerNumberRaw.trim() || null
+  if (ownerEmailRaw !== null) fields.owner_email = ownerEmailRaw.trim().toLowerCase() || null
 
   if (rewardsRaw) {
     const rewards = parseRewards(rewardsRaw)

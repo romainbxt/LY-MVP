@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import type { Venue } from './supabase'
 
 function escapeHtml(str: string): string {
   return str
@@ -7,6 +8,56 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
+}
+
+export type LegalInfo = {
+  venueName: string
+  legalName?: string | null
+  addressStreet?: string | null
+  addressPostcode?: string | null
+  addressCity?: string | null
+  registerCourt?: string | null
+  registerNumber?: string | null
+}
+
+export function legalFromVenue(venue: Venue | null, fallbackName: string): LegalInfo {
+  return {
+    venueName: venue?.name ?? fallbackName,
+    legalName: venue?.legal_name,
+    addressStreet: venue?.address_street,
+    addressPostcode: venue?.address_postcode,
+    addressCity: venue?.address_city,
+    registerCourt: venue?.register_court,
+    registerNumber: venue?.register_number,
+  }
+}
+
+function buildLegalFooter(legal: LegalInfo): string {
+  const safeVenue = escapeHtml(legal.venueName)
+  const lines: string[] = []
+
+  lines.push(`&copy; ${safeVenue}. All rights reserved.`)
+
+  const addressParts: string[] = []
+  if (legal.legalName) addressParts.push(escapeHtml(legal.legalName))
+  const streetLine = [legal.addressStreet, legal.addressPostcode && legal.addressCity ? `${legal.addressPostcode} ${legal.addressCity}` : (legal.addressPostcode ?? legal.addressCity)]
+    .filter(Boolean)
+    .join(', ')
+  if (streetLine) addressParts.push(escapeHtml(streetLine))
+  if (addressParts.length > 0) lines.push(addressParts.join(', '))
+
+  if (legal.registerCourt) lines.push(escapeHtml(legal.registerCourt))
+  if (legal.registerNumber) lines.push(escapeHtml(legal.registerNumber))
+
+  const linesHtml = lines
+    .map(l => `<p style="margin:0 0 4px;font-size:11px;color:#888888;line-height:1.5;">${l}</p>`)
+    .join('')
+
+  return `<tr><td align="center" style="padding-top:24px;border-top:1px solid #eeeeee;">
+    ${linesHtml}
+    <p style="margin:12px 0 4px;font-size:11px;color:#aaaaaa;line-height:1.5;">You're receiving this because you joined ${safeVenue}'s loyalty program. Powered by LY Loyalty.</p>
+    <p style="margin:4px 0 0;font-size:11px;color:#666666;line-height:1.5;">To unsubscribe, reply to this email with <strong>STOP</strong>.</p>
+  </td></tr>`
 }
 
 function buildStampCell(
@@ -64,6 +115,7 @@ function buildEmailHtml({
   rewards,
   stampIcon = '☕',
   stampOverrides = [],
+  legal,
 }: {
   name: string
   stampCount: number
@@ -76,6 +128,7 @@ function buildEmailHtml({
   rewards: Array<{ stamp: number; label: string }>
   stampIcon?: string
   stampOverrides?: Array<{ stamp: number; icon: string }>
+  legal: LegalInfo
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
@@ -129,9 +182,7 @@ function buildEmailHtml({
         </table>
       </td></tr>
 
-      <tr><td align="center">
-        <p style="margin:0;font-size:11px;color:#bbbbbb;">${safeVenue} &bull; Powered by LY Loyalty</p>
-      </td></tr>
+      ${buildLegalFooter(legal)}
 
     </table>
   </td></tr>
@@ -154,6 +205,7 @@ function buildReengagementHtml({
   offer,
   stampIcon = '☕',
   stampOverrides = [],
+  legal,
 }: {
   name: string
   stampCount: number
@@ -168,6 +220,7 @@ function buildReengagementHtml({
   offer?: string
   stampIcon?: string
   stampOverrides?: Array<{ stamp: number; icon: string }>
+  legal: LegalInfo
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
@@ -233,9 +286,7 @@ function buildReengagementHtml({
         </table>
       </td></tr>
 
-      <tr><td align="center">
-        <p style="margin:0;font-size:11px;color:#bbbbbb;">${safeVenue} &bull; Powered by LY Loyalty</p>
-      </td></tr>
+      ${buildLegalFooter(legal)}
 
     </table>
   </td></tr>
@@ -267,6 +318,8 @@ export async function sendStampCardEmail({
   rewards,
   stampIcon = '☕',
   stampOverrides = [],
+  legal,
+  ownerEmail,
 }: {
   name: string
   email: string
@@ -280,14 +333,17 @@ export async function sendStampCardEmail({
   rewards: Array<{ stamp: number; label: string }>
   stampIcon?: string
   stampOverrides?: Array<{ stamp: number; icon: string }>
+  legal: LegalInfo
+  ownerEmail?: string | null
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
   const transporter = createTransporter()
   await transporter.sendMail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
+    replyTo: ownerEmail ?? undefined,
     to: email,
     subject: `Your ${venueName} Stamp Card`,
-    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, stampIcon, stampOverrides }),
+    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, stampIcon, stampOverrides, legal }),
   })
 }
 
@@ -306,6 +362,8 @@ export async function sendReengagementEmail({
   offer,
   stampIcon = '☕',
   stampOverrides = [],
+  legal,
+  ownerEmail,
 }: {
   name: string
   email: string
@@ -321,14 +379,17 @@ export async function sendReengagementEmail({
   offer?: string
   stampIcon?: string
   stampOverrides?: Array<{ stamp: number; icon: string }>
+  legal: LegalInfo
+  ownerEmail?: string | null
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
   const transporter = createTransporter()
   await transporter.sendMail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
+    replyTo: ownerEmail ?? undefined,
     to: email,
     subject: offer ? `A special offer for you at ${venueName}` : `We miss you at ${venueName}, ${name}!`,
-    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer, stampIcon, stampOverrides }),
+    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer, stampIcon, stampOverrides, legal }),
   })
 }
 
@@ -341,6 +402,7 @@ function buildWinBackHtml({
   brandColor,
   backgroundColor,
   scanUrl,
+  legal,
 }: {
   name: string
   subject: string
@@ -350,6 +412,7 @@ function buildWinBackHtml({
   brandColor: string
   backgroundColor: string
   scanUrl: string
+  legal: LegalInfo
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
@@ -394,9 +457,7 @@ function buildWinBackHtml({
         </table>
       </td></tr>
 
-      <tr><td align="center">
-        <p style="margin:0;font-size:11px;color:#bbbbbb;">${safeVenue} &bull; Powered by LY Loyalty</p>
-      </td></tr>
+      ${buildLegalFooter(legal)}
 
     </table>
   </td></tr>
@@ -415,6 +476,8 @@ export async function sendWinBackEmail({
   backgroundColor,
   logoUrl,
   scanUrl,
+  legal,
+  ownerEmail,
 }: {
   name: string
   email: string
@@ -425,14 +488,17 @@ export async function sendWinBackEmail({
   backgroundColor?: string
   logoUrl: string
   scanUrl: string
+  legal: LegalInfo
+  ownerEmail?: string | null
 }) {
   const transporter = createTransporter()
   const bgColor = backgroundColor || `${brandColor}18`
 
   await transporter.sendMail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
+    replyTo: ownerEmail ?? undefined,
     to: email,
     subject,
-    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl }),
+    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal }),
   })
 }

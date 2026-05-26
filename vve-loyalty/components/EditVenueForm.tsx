@@ -146,6 +146,63 @@ export default function EditVenueForm({ venue }: { venue: Venue }) {
           </label>
         </div>
 
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-2.5">
+          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">
+            Legal & Contact (shown in email footer)
+          </p>
+          <input
+            name="legal_name"
+            type="text"
+            defaultValue={venue.legal_name ?? ''}
+            placeholder="Legal business name (e.g. Flussbad Berlin e.V.)"
+            className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <input
+            name="address_street"
+            type="text"
+            defaultValue={venue.address_street ?? ''}
+            placeholder="Street + number"
+            className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <div className="flex gap-2">
+            <input
+              name="address_postcode"
+              type="text"
+              defaultValue={venue.address_postcode ?? ''}
+              placeholder="Postcode"
+              className="w-24 px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+            <input
+              name="address_city"
+              type="text"
+              defaultValue={venue.address_city ?? ''}
+              placeholder="City"
+              className="flex-1 px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+          <input
+            name="register_court"
+            type="text"
+            defaultValue={venue.register_court ?? ''}
+            placeholder="Register (e.g. Handelsregister Amtsgericht Charlottenburg)"
+            className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <input
+            name="register_number"
+            type="text"
+            defaultValue={venue.register_number ?? ''}
+            placeholder="Register number (e.g. HRB 252024 B or VR 31234 B)"
+            className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <input
+            name="owner_email"
+            type="email"
+            defaultValue={venue.owner_email ?? ''}
+            placeholder="Owner reply email"
+            className="w-full px-3 py-2.5 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+        </div>
+
         {state?.error && (
           <p className="text-red-400 text-xs">{state.error}</p>
         )}

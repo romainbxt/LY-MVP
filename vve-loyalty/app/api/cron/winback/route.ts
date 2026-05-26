@@ -1,5 +1,5 @@
 import { getAllVenues, getCustomersForWinBack, updateWinBackSent } from '@/lib/supabase'
-import { sendWinBackEmail } from '@/lib/email'
+import { sendWinBackEmail, legalFromVenue } from '@/lib/email'
 
 const WINBACK_SECRET = process.env.WINBACK_SECRET || 'test_secret'
 
@@ -52,6 +52,8 @@ export async function GET(request: Request) {
               brandColor: venue.brand_color,
               logoUrl: venue.logo_url || `${baseUrl}/vve-logo.png`,
               scanUrl: `${baseUrl}/scan/${customer.unique_id}`,
+              legal: legalFromVenue(venue, venue.name),
+              ownerEmail: venue.owner_email,
             })
 
             await updateWinBackSent(customer.unique_id, rule.level)

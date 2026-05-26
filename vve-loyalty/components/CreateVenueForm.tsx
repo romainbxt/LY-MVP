@@ -131,6 +131,56 @@ export default function CreateVenueForm() {
           </label>
         </div>
 
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-3">
+          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">
+            Legal & Contact (required for email compliance)
+          </p>
+          <input
+            name="legal_name"
+            type="text"
+            placeholder="Legal business name (e.g. Flussbad Berlin e.V.)"
+            className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <input
+            name="address_street"
+            type="text"
+            placeholder="Street + number (e.g. Wrangelstr. 81)"
+            className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <div className="flex gap-3">
+            <input
+              name="address_postcode"
+              type="text"
+              placeholder="Postcode"
+              className="w-24 px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+            <input
+              name="address_city"
+              type="text"
+              placeholder="City"
+              className="flex-1 px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+          <input
+            name="register_court"
+            type="text"
+            placeholder="Register (e.g. Handelsregister Amtsgericht Charlottenburg)"
+            className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <input
+            name="register_number"
+            type="text"
+            placeholder="Register number (e.g. HRB 252024 B or VR 31234 B)"
+            className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <input
+            name="owner_email"
+            type="email"
+            placeholder="Owner reply email (replies to loyalty emails go here)"
+            className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+        </div>
+
         {state?.error && (
           <p className="text-red-400 text-xs">{state.error}</p>
         )}

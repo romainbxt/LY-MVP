@@ -9,7 +9,7 @@ import {
   updateStampCount,
   deleteCustomer,
 } from '@/lib/supabase'
-import { sendStampCardEmail, sendReengagementEmail } from '@/lib/email'
+import { sendStampCardEmail, sendReengagementEmail, legalFromVenue } from '@/lib/email'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
@@ -66,6 +66,8 @@ export async function registerCustomer(
       rewards: venue.rewards,
       stampIcon: venue.stamp_icon ?? '☕',
       stampOverrides: venue.stamp_overrides ?? [],
+      legal: legalFromVenue(venue, venue.name),
+      ownerEmail: venue.owner_email,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -126,6 +128,8 @@ export async function stampCustomer(
       rewards,
       stampIcon: venue?.stamp_icon ?? '☕',
       stampOverrides: venue?.stamp_overrides ?? [],
+      legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
+      ownerEmail: venue?.owner_email,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -186,6 +190,8 @@ export async function redeemAndReset(
       backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
       totalStamps,
       rewards,
+      legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
+      ownerEmail: venue?.owner_email,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -236,6 +242,8 @@ export async function reengageCustomer(
       offer,
       stampIcon: venue?.stamp_icon ?? '☕',
       stampOverrides: venue?.stamp_overrides ?? [],
+      legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
+      ownerEmail: venue?.owner_email,
     })
     return { success: true }
   } catch (e) {

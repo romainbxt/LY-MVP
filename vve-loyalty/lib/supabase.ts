@@ -20,6 +20,13 @@ export type Venue = {
   reward_on_last_stamp: boolean | null
   ask_birthday: boolean | null
   win_back_rules: WinBackRule[] | null
+  legal_name: string | null
+  address_street: string | null
+  address_postcode: string | null
+  address_city: string | null
+  register_court: string | null
+  register_number: string | null
+  owner_email: string | null
   created_at: string
 }
 
@@ -99,7 +106,7 @@ export async function getAllVenues(): Promise<Venue[]> {
 
 export async function updateVenue(
   id: string,
-  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules'>>
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email'>>
 ): Promise<boolean> {
   const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
     method: 'PATCH',
@@ -109,23 +116,49 @@ export async function updateVenue(
   return res.ok
 }
 
-export async function createVenue(
-  slug: string,
-  name: string,
-  logoUrl: string | null,
-  brandColor: string,
-  backgroundColor: string | null,
-  cashierPassword: string,
-  rewards: Array<{ stamp: number; label: string }>,
-  stampIcon: string,
-  stampOverrides: Array<{ stamp: number; icon: string }>,
-  rewardOnLastStamp: boolean,
+export async function createVenue(input: {
+  slug: string
+  name: string
+  logoUrl: string | null
+  brandColor: string
+  backgroundColor: string | null
+  cashierPassword: string
+  rewards: Array<{ stamp: number; label: string }>
+  stampIcon: string
+  stampOverrides: Array<{ stamp: number; icon: string }>
+  rewardOnLastStamp: boolean
   askBirthday: boolean
-): Promise<Venue | null> {
+  legalName?: string | null
+  addressStreet?: string | null
+  addressPostcode?: string | null
+  addressCity?: string | null
+  registerCourt?: string | null
+  registerNumber?: string | null
+  ownerEmail?: string | null
+}): Promise<Venue | null> {
   const res = await fetch(`${BASE()}/venues`, {
     method: 'POST',
     headers: supabaseAdminHeaders(),
-    body: JSON.stringify({ slug, name, logo_url: logoUrl, brand_color: brandColor, background_color: backgroundColor, cashier_password: cashierPassword, rewards, stamp_icon: stampIcon, stamp_overrides: stampOverrides, reward_on_last_stamp: rewardOnLastStamp, ask_birthday: askBirthday }),
+    body: JSON.stringify({
+      slug: input.slug,
+      name: input.name,
+      logo_url: input.logoUrl,
+      brand_color: input.brandColor,
+      background_color: input.backgroundColor,
+      cashier_password: input.cashierPassword,
+      rewards: input.rewards,
+      stamp_icon: input.stampIcon,
+      stamp_overrides: input.stampOverrides,
+      reward_on_last_stamp: input.rewardOnLastStamp,
+      ask_birthday: input.askBirthday,
+      legal_name: input.legalName ?? null,
+      address_street: input.addressStreet ?? null,
+      address_postcode: input.addressPostcode ?? null,
+      address_city: input.addressCity ?? null,
+      register_court: input.registerCourt ?? null,
+      register_number: input.registerNumber ?? null,
+      owner_email: input.ownerEmail ?? null,
+    }),
   })
   const data = await res.json()
   return Array.isArray(data) ? (data[0] ?? null) : (data ?? null)
