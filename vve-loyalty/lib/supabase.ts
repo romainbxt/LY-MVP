@@ -41,6 +41,16 @@ export type Customer = {
   birthday: string | null
   last_winback_sent_at: string | null
   winback_level_sent: number
+  unsubscribed_marketing_at: string | null
+  unsubscribed_transactional_at: string | null
+}
+
+export type SubscriptionPreference = 'all' | 'transactional_only' | 'none'
+
+export function preferenceFromCustomer(c: Pick<Customer, 'unsubscribed_marketing_at' | 'unsubscribed_transactional_at'>): SubscriptionPreference {
+  if (c.unsubscribed_transactional_at) return 'none'
+  if (c.unsubscribed_marketing_at) return 'transactional_only'
+  return 'all'
 }
 
 function supabaseAdminHeaders() {
@@ -233,11 +243,33 @@ export async function getCustomersForWinBack(venueId: string, inactiveDays: numb
   cutoffDate.setDate(cutoffDate.getDate() - inactiveDays)
 
   const res = await fetch(
-    `${BASE()}/stamps?venue_id=eq.${venueId}&last_visit_at=lt.${cutoffDate.toISOString()}&winback_level_sent=lt.${winbackLevel}&order=last_visit_at.asc`,
+    `${BASE()}/stamps?venue_id=eq.${venueId}&last_visit_at=lt.${cutoffDate.toISOString()}&winback_level_sent=lt.${winbackLevel}&unsubscribed_marketing_at=is.null&order=last_visit_at.asc`,
     { headers: supabaseAdminHeaders(), cache: 'no-store' }
   )
   const data = await res.json()
   return Array.isArray(data) ? data : []
+}
+
+// ── Subscription preferences ──────────────────────────────────────────────────
+
+export async function updateSubscriptionPreference(
+  uniqueId: string,
+  preference: SubscriptionPreference
+): Promise<boolean> {
+  const now = new Date().toISOString()
+  const fields =
+    preference === 'all'
+      ? { unsubscribed_marketing_at: null, unsubscribed_transactional_at: null }
+      : preference === 'transactional_only'
+        ? { unsubscribed_marketing_at: now, unsubscribed_transactional_at: null }
+        : { unsubscribed_marketing_at: now, unsubscribed_transactional_at: now }
+
+  const res = await fetch(`${BASE()}/stamps?unique_id=eq.${uniqueId}`, {
+    method: 'PATCH',
+    headers: supabaseAdminHeaders(),
+    body: JSON.stringify(fields),
+  })
+  return res.ok
 }
 
 export async function updateWinBackSent(uniqueId: string, level: number): Promise<boolean> {

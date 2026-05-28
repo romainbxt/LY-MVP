@@ -54,6 +54,8 @@ export async function GET(request: Request) {
               scanUrl: `${baseUrl}/scan/${customer.unique_id}`,
               legal: legalFromVenue(venue, venue.name),
               ownerEmail: venue.owner_email,
+              baseUrl,
+              uniqueId: customer.unique_id,
             })
 
             await updateWinBackSent(customer.unique_id, rule.level)

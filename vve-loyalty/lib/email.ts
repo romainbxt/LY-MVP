@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import type { Venue } from './supabase'
+import { buildUnsubscribeUrl } from './hmac'
 
 function escapeHtml(str: string): string {
   return str
@@ -32,7 +33,7 @@ export function legalFromVenue(venue: Venue | null, fallbackName: string): Legal
   }
 }
 
-function buildLegalFooter(legal: LegalInfo): string {
+function buildLegalFooter(legal: LegalInfo, unsubscribeUrl?: string): string {
   const safeVenue = escapeHtml(legal.venueName)
   const lines: string[] = []
 
@@ -53,11 +54,30 @@ function buildLegalFooter(legal: LegalInfo): string {
     .map(l => `<p style="margin:0 0 4px;font-size:11px;color:#888888;line-height:1.5;">${l}</p>`)
     .join('')
 
+  const unsubLine = unsubscribeUrl
+    ? `<p style="margin:4px 0 0;font-size:11px;color:#888888;line-height:1.5;"><a href="${unsubscribeUrl}" style="color:#888888;text-decoration:underline;">Manage email preferences or unsubscribe</a></p>`
+    : ''
+
   return `<tr><td align="center" style="padding-top:24px;border-top:1px solid #eeeeee;">
     ${linesHtml}
     <p style="margin:12px 0 4px;font-size:11px;color:#aaaaaa;line-height:1.5;">You're receiving this because you joined ${safeVenue}'s loyalty program. Powered by LY Loyalty.</p>
-    <p style="margin:4px 0 0;font-size:11px;color:#666666;line-height:1.5;">To unsubscribe, reply to this email with <strong>STOP</strong>.</p>
+    ${unsubLine}
   </td></tr>`
+}
+
+function buildListUnsubscribeHeaders(baseUrl: string | undefined, uniqueId: string | undefined): Record<string, string> {
+  if (!baseUrl || !uniqueId) return {}
+  try {
+    const url = buildUnsubscribeUrl(baseUrl, uniqueId)
+    const sig = url.split('sig=')[1] ?? ''
+    const oneClickUrl = `${baseUrl}/api/unsubscribe/${uniqueId}?sig=${sig}`
+    return {
+      'List-Unsubscribe': `<${oneClickUrl}>, <${url}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    }
+  } catch {
+    return {}
+  }
 }
 
 function buildStampCell(
@@ -116,6 +136,7 @@ function buildEmailHtml({
   stampIcon = '☕',
   stampOverrides = [],
   legal,
+  unsubscribeUrl,
 }: {
   name: string
   stampCount: number
@@ -129,6 +150,7 @@ function buildEmailHtml({
   stampIcon?: string
   stampOverrides?: Array<{ stamp: number; icon: string }>
   legal: LegalInfo
+  unsubscribeUrl?: string
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
@@ -182,7 +204,7 @@ function buildEmailHtml({
         </table>
       </td></tr>
 
-      ${buildLegalFooter(legal)}
+      ${buildLegalFooter(legal, unsubscribeUrl)}
 
     </table>
   </td></tr>
@@ -206,6 +228,7 @@ function buildReengagementHtml({
   stampIcon = '☕',
   stampOverrides = [],
   legal,
+  unsubscribeUrl,
 }: {
   name: string
   stampCount: number
@@ -221,6 +244,7 @@ function buildReengagementHtml({
   stampIcon?: string
   stampOverrides?: Array<{ stamp: number; icon: string }>
   legal: LegalInfo
+  unsubscribeUrl?: string
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
@@ -286,7 +310,7 @@ function buildReengagementHtml({
         </table>
       </td></tr>
 
-      ${buildLegalFooter(legal)}
+      ${buildLegalFooter(legal, unsubscribeUrl)}
 
     </table>
   </td></tr>
@@ -320,6 +344,8 @@ export async function sendStampCardEmail({
   stampOverrides = [],
   legal,
   ownerEmail,
+  baseUrl,
+  uniqueId,
 }: {
   name: string
   email: string
@@ -335,15 +361,19 @@ export async function sendStampCardEmail({
   stampOverrides?: Array<{ stamp: number; icon: string }>
   legal: LegalInfo
   ownerEmail?: string | null
+  baseUrl?: string
+  uniqueId?: string
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
+  const unsubscribeUrl = baseUrl && uniqueId ? buildUnsubscribeUrl(baseUrl, uniqueId) : undefined
   const transporter = createTransporter()
   await transporter.sendMail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     replyTo: ownerEmail ?? undefined,
     to: email,
     subject: `Your ${venueName} Stamp Card`,
-    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, stampIcon, stampOverrides, legal }),
+    headers: buildListUnsubscribeHeaders(baseUrl, uniqueId),
+    html: buildEmailHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, stampIcon, stampOverrides, legal, unsubscribeUrl }),
   })
 }
 
@@ -364,6 +394,8 @@ export async function sendReengagementEmail({
   stampOverrides = [],
   legal,
   ownerEmail,
+  baseUrl,
+  uniqueId,
 }: {
   name: string
   email: string
@@ -381,15 +413,19 @@ export async function sendReengagementEmail({
   stampOverrides?: Array<{ stamp: number; icon: string }>
   legal: LegalInfo
   ownerEmail?: string | null
+  baseUrl?: string
+  uniqueId?: string
 }) {
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
+  const unsubscribeUrl = baseUrl && uniqueId ? buildUnsubscribeUrl(baseUrl, uniqueId) : undefined
   const transporter = createTransporter()
   await transporter.sendMail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     replyTo: ownerEmail ?? undefined,
     to: email,
     subject: offer ? `A special offer for you at ${venueName}` : `We miss you at ${venueName}, ${name}!`,
-    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer, stampIcon, stampOverrides, legal }),
+    headers: buildListUnsubscribeHeaders(baseUrl, uniqueId),
+    html: buildReengagementHtml({ name, stampCount, qrDataUrl: qrImageUrl, logoUrl, venueName, brandColor, backgroundColor, totalStamps, rewards, daysSince, offer, stampIcon, stampOverrides, legal, unsubscribeUrl }),
   })
 }
 
@@ -403,6 +439,7 @@ function buildWinBackHtml({
   backgroundColor,
   scanUrl,
   legal,
+  unsubscribeUrl,
 }: {
   name: string
   subject: string
@@ -413,6 +450,7 @@ function buildWinBackHtml({
   backgroundColor: string
   scanUrl: string
   legal: LegalInfo
+  unsubscribeUrl?: string
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
@@ -457,7 +495,7 @@ function buildWinBackHtml({
         </table>
       </td></tr>
 
-      ${buildLegalFooter(legal)}
+      ${buildLegalFooter(legal, unsubscribeUrl)}
 
     </table>
   </td></tr>
@@ -478,6 +516,8 @@ export async function sendWinBackEmail({
   scanUrl,
   legal,
   ownerEmail,
+  baseUrl,
+  uniqueId,
 }: {
   name: string
   email: string
@@ -490,15 +530,19 @@ export async function sendWinBackEmail({
   scanUrl: string
   legal: LegalInfo
   ownerEmail?: string | null
+  baseUrl?: string
+  uniqueId?: string
 }) {
   const transporter = createTransporter()
   const bgColor = backgroundColor || `${brandColor}18`
+  const unsubscribeUrl = baseUrl && uniqueId ? buildUnsubscribeUrl(baseUrl, uniqueId) : undefined
 
   await transporter.sendMail({
     from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
     replyTo: ownerEmail ?? undefined,
     to: email,
     subject,
-    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal }),
+    headers: buildListUnsubscribeHeaders(baseUrl, uniqueId),
+    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal, unsubscribeUrl }),
   })
 }

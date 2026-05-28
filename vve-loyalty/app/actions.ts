@@ -68,6 +68,8 @@ export async function registerCustomer(
       stampOverrides: venue.stamp_overrides ?? [],
       legal: legalFromVenue(venue, venue.name),
       ownerEmail: venue.owner_email,
+      baseUrl,
+      uniqueId: customer.unique_id,
     })
   } catch (e) {
     console.error('Email send failed:', e)
@@ -114,25 +116,29 @@ export async function stampCustomer(
   const baseUrl = await getBaseUrl()
   const scanUrl = `${baseUrl}/scan/${uniqueId}`
 
-  try {
-    await sendStampCardEmail({
-      name: customer.name,
-      email: customer.email,
-      stampCount: newCount,
-      scanUrl,
-      logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
-      venueName: venue?.name ?? 'Loyalty',
-      brandColor: venue?.brand_color ?? '#D97706',
-      backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
-      totalStamps,
-      rewards,
-      stampIcon: venue?.stamp_icon ?? '☕',
-      stampOverrides: venue?.stamp_overrides ?? [],
-      legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
-      ownerEmail: venue?.owner_email,
-    })
-  } catch (e) {
-    console.error('Email send failed:', e)
+  if (!customer.unsubscribed_transactional_at) {
+    try {
+      await sendStampCardEmail({
+        name: customer.name,
+        email: customer.email,
+        stampCount: newCount,
+        scanUrl,
+        logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
+        venueName: venue?.name ?? 'Loyalty',
+        brandColor: venue?.brand_color ?? '#D97706',
+        backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
+        totalStamps,
+        rewards,
+        stampIcon: venue?.stamp_icon ?? '☕',
+        stampOverrides: venue?.stamp_overrides ?? [],
+        legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
+        ownerEmail: venue?.owner_email,
+        baseUrl,
+        uniqueId,
+      })
+    } catch (e) {
+      console.error('Email send failed:', e)
+    }
   }
 
   return { success: true, name: customer.name, newCount, reward, totalStamps }
@@ -178,23 +184,27 @@ export async function redeemAndReset(
   const rewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
   const totalStamps = rewards[rewards.length - 1]?.stamp ?? 10
 
-  try {
-    await sendStampCardEmail({
-      name: customer.name,
-      email: customer.email,
-      stampCount: 0,
-      scanUrl,
-      logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
-      venueName: venue?.name ?? 'Loyalty',
-      brandColor: venue?.brand_color ?? '#D97706',
-      backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
-      totalStamps,
-      rewards,
-      legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
-      ownerEmail: venue?.owner_email,
-    })
-  } catch (e) {
-    console.error('Email send failed:', e)
+  if (!customer.unsubscribed_transactional_at) {
+    try {
+      await sendStampCardEmail({
+        name: customer.name,
+        email: customer.email,
+        stampCount: 0,
+        scanUrl,
+        logoUrl: venue?.logo_url ?? `${baseUrl}/vve-logo.png`,
+        venueName: venue?.name ?? 'Loyalty',
+        brandColor: venue?.brand_color ?? '#D97706',
+        backgroundColor: venue?.background_color ?? `${venue?.brand_color ?? '#D97706'}18`,
+        totalStamps,
+        rewards,
+        legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
+        ownerEmail: venue?.owner_email,
+        baseUrl,
+        uniqueId,
+      })
+    } catch (e) {
+      console.error('Email send failed:', e)
+    }
   }
 
   return { success: true, name: customer.name }
@@ -211,6 +221,10 @@ export async function reengageCustomer(
 ): Promise<ReengageState> {
   const customer = await getCustomerByUniqueId(uniqueId)
   if (!customer) return { error: 'Customer not found.' }
+
+  if (customer.unsubscribed_marketing_at) {
+    return { error: 'Customer has unsubscribed from marketing emails.' }
+  }
 
   const venue = customer.venue_id ? await getVenueById(customer.venue_id) : null
 
@@ -244,6 +258,8 @@ export async function reengageCustomer(
       stampOverrides: venue?.stamp_overrides ?? [],
       legal: legalFromVenue(venue, venue?.name ?? 'Loyalty'),
       ownerEmail: venue?.owner_email,
+      baseUrl,
+      uniqueId,
     })
     return { success: true }
   } catch (e) {
