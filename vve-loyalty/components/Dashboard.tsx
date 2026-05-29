@@ -69,7 +69,17 @@ export default async function Dashboard({ venue }: { venue: Venue }) {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-semibold truncate">{c.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold truncate">{c.name}</p>
+                        {c.unsubscribed_marketing_at && (
+                          <span
+                            className="shrink-0 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded text-stone-400 bg-stone-700"
+                            title="Customer opted out of marketing emails"
+                          >
+                            No offers
+                          </span>
+                        )}
+                      </div>
                       <p className="text-stone-400 text-xs truncate">{c.email}</p>
                     </div>
                     <div className="text-right shrink-0">
@@ -96,7 +106,12 @@ export default async function Dashboard({ venue }: { venue: Venue }) {
                     ))}
                   </div>
 
-                  <ReengageButton uniqueId={c.unique_id} name={c.name} daysSince={daysSince ?? 0} />
+                  <ReengageButton
+                    uniqueId={c.unique_id}
+                    name={c.name}
+                    daysSince={daysSince ?? 0}
+                    optedOut={Boolean(c.unsubscribed_marketing_at)}
+                  />
                   <DeleteButton uniqueId={c.unique_id} name={c.name} />
                 </div>
               )

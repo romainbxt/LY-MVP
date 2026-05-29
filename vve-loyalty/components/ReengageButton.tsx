@@ -8,10 +8,12 @@ export default function ReengageButton({
   uniqueId,
   name,
   daysSince,
+  optedOut = false,
 }: {
   uniqueId: string
   name: string
   daysSince: number
+  optedOut?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
   const boundAction = reengageCustomer.bind(null, uniqueId)
@@ -19,6 +21,18 @@ export default function ReengageButton({
 
   if (state?.success) {
     return <p className="text-green-400 text-xs font-semibold mt-2">Email sent to {name} ✓</p>
+  }
+
+  if (optedOut) {
+    return (
+      <button
+        disabled
+        title="This customer opted out of marketing emails."
+        className="mt-2 text-xs font-semibold text-stone-500 border border-stone-600 px-3 py-1.5 rounded-lg cursor-not-allowed"
+      >
+        Re-engagement disabled
+      </button>
+    )
   }
 
   if (!expanded) {

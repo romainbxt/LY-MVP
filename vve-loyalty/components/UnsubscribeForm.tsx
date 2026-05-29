@@ -32,8 +32,7 @@ export default function UnsubscribeForm({
   logoUrl,
 }: Props) {
   const [preference, setPreference] = useState<SubscriptionPreference>(currentPreference)
-  const [savedPreference, setSavedPreference] = useState<SubscriptionPreference>(currentPreference)
-  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+  const [confirmedPreference, setConfirmedPreference] = useState<SubscriptionPreference | null>(null)
   const [saveErr, setSaveErr] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
 
@@ -45,15 +44,13 @@ export default function UnsubscribeForm({
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    setSaveMsg(null)
     setSaveErr(null)
     const formData = new FormData()
     formData.set('preference', preference)
     startSaving(async () => {
       const res = await savePreferenceAction(uniqueId, signature, null, formData)
       if (res && 'success' in res && res.success) {
-        setSavedPreference(res.preference)
-        setSaveMsg('Your preferences have been saved.')
+        setConfirmedPreference(res.preference)
       } else if (res && 'error' in res) {
         setSaveErr(res.error ?? 'Something went wrong.')
       }
@@ -78,6 +75,7 @@ export default function UnsubscribeForm({
       <div style={pageStyle}>
         <div style={cardStyle}>
           <div style={{ textAlign: 'center' }}>
+            <div style={checkmarkStyle(brandColor)}>✓</div>
             <h1 style={titleStyle}>Your data has been deleted</h1>
             <p style={{ ...bodyText, marginTop: 12 }}>
               Your loyalty card and all associated data have been permanently removed from {venueName}.
@@ -85,6 +83,27 @@ export default function UnsubscribeForm({
             <p style={{ ...bodyText, marginTop: 8, color: '#888' }}>
               You will not receive any further emails.
             </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (confirmedPreference) {
+    const successCopy =
+      confirmedPreference === 'all'
+        ? `You'll keep getting stamp updates and special offers from ${venueName}.`
+        : confirmedPreference === 'transactional_only'
+          ? `You'll still hear from us when you earn a stamp. We'll miss sending you the offers.`
+          : `We won't email you again. Your loyalty card with ${stampCount} stamp${stampCount === 1 ? '' : 's'} still works at ${venueName} — just show it at the till as usual.`
+
+    return (
+      <div style={pageStyle}>
+        <div style={cardStyle}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={checkmarkStyle(brandColor)}>✓</div>
+            <h1 style={titleStyle}>Changes saved</h1>
+            <p style={{ ...bodyText, marginTop: 12, color: '#444' }}>{successCopy}</p>
           </div>
         </div>
       </div>
@@ -115,7 +134,7 @@ export default function UnsubscribeForm({
             onChange={setPreference}
             brandColor={brandColor}
             label="Everything"
-            description="Stamp updates when you earn a stamp, plus special offers and 'we miss you' emails."
+            description="Stamp updates when you earn a stamp, plus exclusive offers and surprise rewards."
           />
           <Choice
             value="transactional_only"
@@ -123,7 +142,7 @@ export default function UnsubscribeForm({
             onChange={setPreference}
             brandColor={brandColor}
             label="Stamp updates only"
-            description="Only emails when you earn a stamp. No promotional emails."
+            description="You'll still get emails when you earn a stamp, but you'll lose out on exclusive offers and surprise gifts."
           />
           <Choice
             value="none"
@@ -131,34 +150,31 @@ export default function UnsubscribeForm({
             onChange={setPreference}
             brandColor={brandColor}
             label="No emails (silent card)"
-            description="Your loyalty card still works at the till. We just won't email you."
+            description="Your loyalty card still works at the till. But you'll lose every stamp update, exclusive offers, and surprise gifts."
           />
 
-          {saveMsg && (
-            <p style={{ ...bodyText, color: '#16a34a', textAlign: 'center', margin: '16px 0 0' }}>{saveMsg}</p>
-          )}
           {saveErr && (
             <p style={{ ...bodyText, color: '#dc2626', textAlign: 'center', margin: '16px 0 0' }}>{saveErr}</p>
           )}
 
           <button
             type="submit"
-            disabled={isSaving || preference === savedPreference}
+            disabled={isSaving || preference === currentPreference}
             style={{
               width: '100%',
               marginTop: 20,
               padding: '14px 20px',
-              background: preference === savedPreference ? '#cccccc' : brandColor,
+              background: preference === currentPreference ? '#cccccc' : brandColor,
               color: '#ffffff',
               border: 'none',
               borderRadius: 12,
               fontSize: 15,
               fontWeight: 600,
-              cursor: preference === savedPreference || isSaving ? 'not-allowed' : 'pointer',
+              cursor: preference === currentPreference || isSaving ? 'not-allowed' : 'pointer',
               fontFamily: fontStack,
             }}
           >
-            {isSaving ? 'Saving...' : preference === savedPreference ? 'Saved' : 'Save preferences'}
+            {isSaving ? 'Saving...' : 'Save preferences'}
           </button>
         </form>
 
@@ -333,4 +349,19 @@ const bodyText: React.CSSProperties = {
   color: '#1a1a1a',
   margin: 0,
   lineHeight: 1.5,
+}
+
+function checkmarkStyle(brandColor: string): React.CSSProperties {
+  return {
+    width: 56,
+    height: 56,
+    lineHeight: '56px',
+    fontSize: 28,
+    fontWeight: 700,
+    color: '#ffffff',
+    background: brandColor,
+    borderRadius: '50%',
+    margin: '0 auto 16px',
+    textAlign: 'center',
+  }
 }
