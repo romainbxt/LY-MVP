@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { createVenueAction } from '@/app/admin/actions'
+import { WEEKDAY_LABELS } from '@/lib/supabase'
 import ColorPicker from '@/components/ColorPicker'
 import StampIconPicker from '@/components/StampIconPicker'
 import { Loader2 } from 'lucide-react'
@@ -12,6 +13,15 @@ export default function CreateVenueForm() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [rewardOnLastStamp, setRewardOnLastStamp] = useState(true)
   const [askBirthday, setAskBirthday] = useState(false)
+  const [closedDays, setClosedDays] = useState<Set<number>>(new Set())
+  const toggleClosedDay = (d: number) => {
+    setClosedDays(prev => {
+      const next = new Set(prev)
+      if (next.has(d)) next.delete(d)
+      else next.add(d)
+      return next
+    })
+  }
 
   if (!open) {
     return (
@@ -129,6 +139,36 @@ export default function CreateVenueForm() {
             </div>
             <input type="hidden" name="ask_birthday" value={String(askBirthday)} />
           </label>
+        </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-2.5">
+          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">
+            Operating Schedule
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {[1, 2, 3, 4, 5, 6, 0].map(d => {
+              const checked = closedDays.has(d)
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => toggleClosedDay(d)}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors"
+                  style={{
+                    background: checked ? '#f59e0b' : '#44403c',
+                    color: checked ? '#1c1917' : '#d6d3d1',
+                    borderColor: checked ? '#f59e0b' : '#57534e',
+                  }}
+                >
+                  {WEEKDAY_LABELS[d]}
+                </button>
+              )
+            })}
+          </div>
+          <p className="text-[10px] text-stone-400">
+            On closed days, daily recap and morning win-back emails are skipped. Stamp emails still fire normally.
+          </p>
+          <input type="hidden" name="closed_weekdays" value={JSON.stringify([...closedDays])} />
         </div>
 
         <div className="bg-stone-700/50 rounded-xl p-3 space-y-3">

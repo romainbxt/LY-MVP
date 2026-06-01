@@ -31,7 +31,15 @@ export type Venue = {
   register_court: string | null
   register_number: string | null
   owner_email: string | null
+  closed_weekdays: number[] | null
   created_at: string
+}
+
+export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
+export const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const
+
+export function isVenueClosedOnWeekday(venue: Pick<Venue, 'closed_weekdays'>, weekday: number): boolean {
+  return Array.isArray(venue.closed_weekdays) && venue.closed_weekdays.includes(weekday)
 }
 
 export type Customer = {
@@ -120,7 +128,7 @@ export async function getAllVenues(): Promise<Venue[]> {
 
 export async function updateVenue(
   id: string,
-  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email'>>
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email' | 'closed_weekdays'>>
 ): Promise<boolean> {
   const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
     method: 'PATCH',
@@ -149,6 +157,7 @@ export async function createVenue(input: {
   registerCourt?: string | null
   registerNumber?: string | null
   ownerEmail?: string | null
+  closedWeekdays?: number[]
 }): Promise<Venue | null> {
   const res = await fetch(`${BASE()}/venues`, {
     method: 'POST',
@@ -172,6 +181,7 @@ export async function createVenue(input: {
       register_court: input.registerCourt ?? null,
       register_number: input.registerNumber ?? null,
       owner_email: input.ownerEmail ?? null,
+      closed_weekdays: input.closedWeekdays ?? [],
     }),
   })
   const data = await res.json()
@@ -295,4 +305,33 @@ export async function clampWinBackLevels(venueId: string, maxLevel: number): Pro
     }
   )
   return res.ok
+}
+
+// ── Daily recap aggregation queries ───────────────────────────────────────────
+
+export async function getNewSignupsBetween(venueId: string, startIso: string, endIso: string): Promise<Customer[]> {
+  const res = await fetch(
+    `${BASE()}/stamps?venue_id=eq.${venueId}&created_at=gte.${startIso}&created_at=lt.${endIso}&order=created_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function getCustomersVisitedBetween(venueId: string, startIso: string, endIso: string): Promise<Customer[]> {
+  const res = await fetch(
+    `${BASE()}/stamps?venue_id=eq.${venueId}&last_visit_at=gte.${startIso}&last_visit_at=lt.${endIso}&order=last_visit_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function getWinBackSentBetween(venueId: string, startIso: string, endIso: string): Promise<Customer[]> {
+  const res = await fetch(
+    `${BASE()}/stamps?venue_id=eq.${venueId}&last_winback_sent_at=gte.${startIso}&last_winback_sent_at=lt.${endIso}&order=last_winback_sent_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
 }

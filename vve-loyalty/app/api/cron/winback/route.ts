@@ -1,14 +1,23 @@
-import { getAllVenues, getCustomersForWinBack, updateWinBackSent } from '@/lib/supabase'
+import { getAllVenues, getCustomersForWinBack, updateWinBackSent, isVenueClosedOnWeekday } from '@/lib/supabase'
 import { sendWinBackEmail, legalFromVenue } from '@/lib/email'
+import { berlinWeekday } from '@/lib/recap'
 
 const WINBACK_SECRET = process.env.WINBACK_SECRET || 'test_secret'
+const CRON_SECRET = process.env.CRON_SECRET
+
+function isAuthorized(request: Request): boolean {
+  const { searchParams } = new URL(request.url)
+  if (searchParams.get('secret') === WINBACK_SECRET) return true
+  if (CRON_SECRET) {
+    const auth = request.headers.get('authorization') ?? ''
+    if (auth === `Bearer ${CRON_SECRET}`) return true
+  }
+  return false
+}
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const secret = searchParams.get('secret')
-
-    if (secret !== WINBACK_SECRET) {
+    if (!isAuthorized(request)) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -27,8 +36,13 @@ export async function GET(request: Request) {
 
     let totalSent = 0
     const results = []
+    const todayWeekday = berlinWeekday(new Date())
 
     for (const venue of venues) {
+      if (isVenueClosedOnWeekday(venue, todayWeekday)) {
+        results.push({ venue: venue.slug, skipped: 'closed today' })
+        continue
+      }
       if (!venue.win_back_rules || venue.win_back_rules.length === 0) {
         results.push({ venue: venue.slug, rules: 0, sent: 0 })
         continue

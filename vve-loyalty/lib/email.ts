@@ -560,3 +560,230 @@ export async function sendWinBackEmail({
     html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal, unsubscribeUrl, offerExpiryDays }),
   })
 }
+
+// ── Daily recap emails ───────────────────────────────────────────────────────
+
+import type { VenueDayStats } from './recap'
+import { classifyDay, motivationalLines, yesterdayComparisonLines, formatBerlinDateHuman } from './recap'
+
+function totalStampsForVenue(venue: Venue): number {
+  return venue.rewards[venue.rewards.length - 1]?.stamp ?? 10
+}
+
+function buildOwnerRecapHtml(stats: VenueDayStats, dateHuman: string, dashboardUrl: string): string {
+  const venue = stats.venue
+  const safeVenue = escapeHtml(venue.name)
+  const brand = venue.brand_color || '#D97706'
+  const bg = venue.background_color || `${brand}10`
+  const logoUrl = venue.logo_url
+  const totalStamps = totalStampsForVenue(venue)
+  const klass = classifyDay(stats.today)
+  const motivational = motivationalLines(klass).email
+  const comparison = yesterdayComparisonLines(stats.today, stats.yesterday, stats.yesterdayWasClosed).email
+
+  const newCustomersBlock = stats.newCustomersToday.length === 0 ? '' : `
+    <tr><td style="padding-top:8px;">
+      <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888888;font-weight:600;">New customers today (${stats.newCustomersToday.length})</p>
+      <p style="margin:0;font-size:14px;color:#1a1a1a;line-height:1.6;">
+        ${stats.newCustomersToday.map(c => escapeHtml(c.name.split(' ')[0])).join(' &middot; ')}
+      </p>
+    </td></tr>
+  `
+
+  const visitedBlock = stats.customersVisitedToday.length === 0 ? '' : `
+    <tr><td style="padding-top:14px;">
+      <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888888;font-weight:600;">Customers visited today (${stats.customersVisitedToday.length})</p>
+      <p style="margin:0;font-size:14px;color:#1a1a1a;line-height:1.7;">
+        ${stats.customersVisitedToday.map(c => `${escapeHtml(c.name.split(' ')[0])} <span style="color:#888;">${c.stamp_count}/${totalStamps}</span>`).join(' &middot; ')}
+      </p>
+    </td></tr>
+  `
+
+  const winbackBlock = stats.winbackRecipientsToday.length === 0 ? '' : `
+    <tr><td style="padding-top:14px;">
+      <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888888;font-weight:600;">Win-back emails sent this morning (${stats.winbackRecipientsToday.length})</p>
+      ${stats.winbackRecipientsToday.map(r => `
+        <p style="margin:0 0 4px;font-size:14px;color:#1a1a1a;">
+          ✉️ ${escapeHtml(r.name.split(' ')[0])} <span style="color:#888;">— ${r.daysInactive} days inactive</span>
+        </p>
+      `).join('')}
+    </td></tr>
+  `
+
+  const comparisonHtml = comparison
+    ? `<tr><td align="center" style="padding-top:8px;"><p style="margin:0;font-size:13px;color:#888888;font-style:italic;">${escapeHtml(comparison)}</p></td></tr>`
+    : ''
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:${bg};font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${bg}">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="100%" style="max-width:520px;" cellpadding="0" cellspacing="0" border="0">
+
+      ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+          <tr><td align="center" style="background:#ffffff;border-radius:12px;padding:12px;">
+            <img src="${logoUrl}" alt="${safeVenue}" width="64" style="display:block;max-width:64px;height:auto;" />
+          </td></tr>
+        </table>
+      </td></tr>` : ''}
+
+      <tr><td align="center" style="padding-bottom:8px;">
+        <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888888;font-weight:600;">Your daily loyalty recap</p>
+        <h1 style="margin:8px 0 0;font-size:22px;font-weight:700;color:#1a1a1a;">${escapeHtml(dateHuman)}</h1>
+      </td></tr>
+
+      <tr><td style="padding:24px 0 8px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center" width="33%" style="background:#ffffff;border-radius:12px;padding:16px 8px;">
+              <p style="margin:0;font-size:28px;font-weight:700;color:${brand};">${stats.today.newSignups}</p>
+              <p style="margin:4px 0 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888888;font-weight:600;">New signups</p>
+            </td>
+            <td width="2%"></td>
+            <td align="center" width="33%" style="background:#ffffff;border-radius:12px;padding:16px 8px;">
+              <p style="margin:0;font-size:28px;font-weight:700;color:${brand};">${stats.today.visited}</p>
+              <p style="margin:4px 0 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888888;font-weight:600;">Customers visited</p>
+            </td>
+            <td width="2%"></td>
+            <td align="center" width="33%" style="background:#ffffff;border-radius:12px;padding:16px 8px;">
+              <p style="margin:0;font-size:28px;font-weight:700;color:${brand};">${stats.today.winbackSent}</p>
+              <p style="margin:4px 0 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#888888;font-weight:600;">Win-back emails</p>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      ${comparisonHtml}
+
+      <tr><td style="padding-top:24px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-radius:12px;padding:20px;">
+          ${newCustomersBlock}
+          ${visitedBlock}
+          ${winbackBlock}
+        </table>
+      </td></tr>
+
+      <tr><td align="center" style="padding:24px 0 8px;">
+        <p style="margin:0;font-size:14px;color:#444444;line-height:1.5;font-style:italic;">${escapeHtml(motivational)}</p>
+      </td></tr>
+
+      <tr><td align="center" style="padding:20px 0 24px;">
+        <a href="${dashboardUrl}" style="display:inline-block;padding:12px 24px;background:${brand};color:#ffffff;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">View your dashboard →</a>
+      </td></tr>
+
+      <tr><td align="center" style="padding-top:24px;border-top:1px solid #eeeeee;">
+        <p style="margin:0 0 4px;font-size:11px;color:#aaaaaa;line-height:1.5;">You're seeing this because you set up the ${safeVenue} loyalty program with LY Loyalty.</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`
+}
+
+export function buildWhatsappBlock(stats: VenueDayStats, dateHuman: string, dashboardUrl: string): string {
+  const venue = stats.venue
+  if (stats.isClosedToday) {
+    return `🎯 *${venue.name}* — closed today (${stats.closedWeekdayName}s). Recap skipped.`
+  }
+  const t = stats.today
+  const klass = classifyDay(t)
+  const motiv = motivationalLines(klass).whatsapp
+  const comparison = yesterdayComparisonLines(t, stats.yesterday, stats.yesterdayWasClosed).whatsapp
+
+  const newNames = stats.newCustomersToday.map(c => c.name.split(' ')[0]).join(', ')
+  const winbackNames = stats.winbackRecipientsToday
+    .map(r => `${r.name.split(' ')[0]} (${r.daysInactive}d)`)
+    .join(', ')
+
+  const lines: string[] = []
+  lines.push(`🎯 *${venue.name} — ${dateHuman}*`)
+  lines.push('')
+  lines.push('Today')
+  lines.push(`✅ ${t.newSignups} new signup${t.newSignups === 1 ? '' : 's'}`)
+  lines.push(`☕ ${t.visited} customer${t.visited === 1 ? '' : 's'} visited`)
+  lines.push(`✉️ ${t.winbackSent} win-back email${t.winbackSent === 1 ? '' : 's'} sent`)
+  lines.push('')
+  if (stats.yesterdayWasClosed) {
+    lines.push('Yesterday: closed')
+  } else {
+    lines.push(`Yesterday: ${stats.yesterday.newSignups} new · ${stats.yesterday.visited} visited · ${stats.yesterday.winbackSent} win-back`)
+  }
+  if (comparison) lines.push(comparison)
+  lines.push('')
+  if (newNames) lines.push(`🆕 ${newNames}`)
+  if (winbackNames) lines.push(`📣 Win-back sent: ${winbackNames}`)
+  if (newNames || winbackNames) lines.push('')
+  lines.push(motiv)
+  lines.push('')
+  lines.push(`🔗 ${dashboardUrl}`)
+  return lines.join('\n')
+}
+
+export async function sendOwnerRecap(args: {
+  ownerEmail: string
+  stats: VenueDayStats
+  dateHuman: string
+  dashboardUrl: string
+}) {
+  const html = buildOwnerRecapHtml(args.stats, args.dateHuman, args.dashboardUrl)
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: `${args.stats.venue.name} Loyalty <${process.env.GMAIL_USER}>`,
+    to: args.ownerEmail,
+    subject: `Your ${args.stats.venue.name} daily recap — ${args.dateHuman}`,
+    html,
+  })
+}
+
+export async function sendAdminDigest(args: {
+  toEmail: string
+  dateHuman: string
+  venues: Array<{
+    stats: VenueDayStats
+    whatsappBlock: string
+    ownerEmailStatus: 'sent' | 'skipped-no-email' | 'skipped-closed' | 'failed'
+    ownerEmail: string | null
+  }>
+  sentAtBerlin: string
+}) {
+  const totalReporting = args.venues.length
+  const blocks = args.venues.map((v, idx) => {
+    const venue = v.stats.venue
+    const number = idx + 1
+    const status =
+      v.ownerEmailStatus === 'sent'
+        ? `email: ${v.ownerEmail} — ✓ Sent`
+        : v.ownerEmailStatus === 'skipped-no-email'
+          ? `email: not set — ⚠ Email skipped`
+          : v.ownerEmailStatus === 'skipped-closed'
+            ? `email: skipped (closed today)`
+            : `email: ${v.ownerEmail ?? 'unknown'} — ✗ Failed`
+    const header = `═══════════════════════════════════════════════
+${number}.  ${venue.name.toUpperCase()}
+    ${status}
+═══════════════════════════════════════════════`
+    return `${header}\n\n${v.whatsappBlock}\n`
+  }).join('\n\n')
+
+  const text = `${totalReporting} venue${totalReporting === 1 ? '' : 's'} reported today. Copy each block below into WhatsApp.
+
+${blocks}
+
+═══════════════════════════════════════════════
+END OF DIGEST · sent at ${args.sentAtBerlin} Berlin
+═══════════════════════════════════════════════
+`
+
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: `LY Daily Digest <${process.env.GMAIL_USER}>`,
+    to: args.toEmail,
+    subject: `LY Daily Digest — ${args.dateHuman} · ${totalReporting} venue${totalReporting === 1 ? '' : 's'}`,
+    text,
+  })
+}

@@ -89,6 +89,15 @@ export async function createVenueAction(
   const registerNumber = (formData.get('register_number') as string)?.trim() || null
   const ownerEmail = (formData.get('owner_email') as string)?.trim().toLowerCase() || null
 
+  const closedWeekdaysRaw = (formData.get('closed_weekdays') as string)?.trim() || '[]'
+  let closedWeekdays: number[] = []
+  try {
+    const parsed = JSON.parse(closedWeekdaysRaw)
+    if (Array.isArray(parsed)) {
+      closedWeekdays = parsed.filter((n): n is number => typeof n === 'number' && n >= 0 && n <= 6)
+    }
+  } catch { /* ignore */ }
+
   const rewards = parseRewards(rewardsRaw ?? '') ?? [
     { stamp: 3, label: 'Free Cookie 🍪' },
     { stamp: 6, label: 'Free Drink ☕' },
@@ -114,6 +123,7 @@ export async function createVenueAction(
     registerCourt,
     registerNumber,
     ownerEmail,
+    closedWeekdays,
   })
   if (!venue) return { error: 'Failed to create venue. Slug may already be taken.' }
 
@@ -153,6 +163,7 @@ export async function updateVenueAction(
   const registerCourtRaw = formData.get('register_court') as string | null
   const registerNumberRaw = formData.get('register_number') as string | null
   const ownerEmailRaw = formData.get('owner_email') as string | null
+  const closedWeekdaysRaw = formData.get('closed_weekdays') as string | null
 
   const fields: Parameters<typeof updateVenue>[1] = {}
   if (name) fields.name = name
@@ -174,6 +185,15 @@ export async function updateVenueAction(
   if (registerCourtRaw !== null) fields.register_court = registerCourtRaw.trim() || null
   if (registerNumberRaw !== null) fields.register_number = registerNumberRaw.trim() || null
   if (ownerEmailRaw !== null) fields.owner_email = ownerEmailRaw.trim().toLowerCase() || null
+
+  if (closedWeekdaysRaw !== null) {
+    try {
+      const parsed = JSON.parse(closedWeekdaysRaw)
+      if (Array.isArray(parsed)) {
+        fields.closed_weekdays = parsed.filter((n): n is number => typeof n === 'number' && n >= 0 && n <= 6)
+      }
+    } catch { /* ignore */ }
+  }
 
   if (rewardsRaw) {
     const rewards = parseRewards(rewardsRaw)
