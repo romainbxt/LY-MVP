@@ -8,6 +8,7 @@ export type WinBackRule = {
 }
 
 export const WINBACK_MIN_INACTIVE_DAYS = 7
+export const WINBACK_MAX_RULES = 3
 
 export type Venue = {
   id: string

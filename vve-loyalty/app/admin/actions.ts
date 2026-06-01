@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createVenue, updateVenue, uploadLogo, clampWinBackLevels, WINBACK_MIN_INACTIVE_DAYS } from '@/lib/supabase'
+import { createVenue, updateVenue, uploadLogo, clampWinBackLevels, WINBACK_MIN_INACTIVE_DAYS, WINBACK_MAX_RULES } from '@/lib/supabase'
 import type { WinBackRule } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
@@ -191,6 +191,7 @@ export async function updateWinBackRules(
   venueId: string,
   rules: WinBackRule[]
 ): Promise<boolean> {
+  if (rules.length > WINBACK_MAX_RULES) return false
   if (rules.some(r => r.inactiveDays < WINBACK_MIN_INACTIVE_DAYS)) return false
   if (rules.some(r => (r.offerExpiryDays ?? 0) < 0)) return false
 

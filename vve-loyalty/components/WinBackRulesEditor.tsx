@@ -1,21 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { WinBackRule, WINBACK_MIN_INACTIVE_DAYS } from '@/lib/supabase'
+import { WinBackRule, WINBACK_MIN_INACTIVE_DAYS, WINBACK_MAX_RULES } from '@/lib/supabase'
 import { updateWinBackRules } from '@/app/admin/actions'
 
 const TEMPLATES: Omit<WinBackRule, 'id'>[] = [
   {
     inactiveDays: 14,
-    subject: 'We miss you!',
-    offer: 'A free extra shot of espresso or cookie on us!',
+    subject: 'We miss your morning order ☕',
+    offer: '10% off your next coffee — show this at the till',
     level: 1,
     offerExpiryDays: 14,
   },
   {
     inactiveDays: 30,
-    subject: 'Free coffee inside!',
-    offer: 'Your next flat white is on us.',
+    subject: "It's been a while — coffee's on us",
+    offer: 'Your next coffee is free',
     level: 2,
     offerExpiryDays: 7,
   },
@@ -37,7 +37,15 @@ export default function WinBackRulesEditor({
   const [showCustomForm, setShowCustomForm] = useState(false)
   const [customForm, setCustomForm] = useState({ inactiveDays: WINBACK_MIN_INACTIVE_DAYS, subject: '', offer: '', offerExpiryDays: 14 })
 
+  const atCap = rules.length >= WINBACK_MAX_RULES
+  const usedSubjects = new Set(rules.map(r => r.subject))
+  const availableTemplates = TEMPLATES.filter(t => !usedSubjects.has(t.subject))
+
   const handleUseTemplate = (template: Omit<WinBackRule, 'id'>) => {
+    if (atCap) {
+      alert(`Maximum ${WINBACK_MAX_RULES} win-back rules per venue. Customers who don't return after ${WINBACK_MAX_RULES} emails are unlikely to return.`)
+      return
+    }
     const newRule: WinBackRule = {
       id: `rule-${Date.now()}`,
       ...template,
@@ -47,6 +55,10 @@ export default function WinBackRulesEditor({
   }
 
   const handleCreateCustom = () => {
+    if (atCap) {
+      alert(`Maximum ${WINBACK_MAX_RULES} win-back rules per venue. Customers who don't return after ${WINBACK_MAX_RULES} emails are unlikely to return.`)
+      return
+    }
     if (!customForm.subject.trim() || !customForm.offer.trim()) {
       alert('Please fill in all fields.')
       return
@@ -123,116 +135,19 @@ export default function WinBackRulesEditor({
 
   return (
     <div className="bg-white text-gray-900 rounded-lg shadow-sm border border-gray-200 p-6 mt-4">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Win-Back Rules</h2>
+      <div className="flex items-baseline justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Win-Back Rules</h2>
+        <span className="text-xs text-gray-500">{rules.length} / {WINBACK_MAX_RULES} rules</span>
+      </div>
 
-      {rules.length === 0 ? (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Proposed Strategies</h3>
-            <div className="grid gap-4">
-              {TEMPLATES.map((template, idx) => (
-                <div
-                  key={idx}
-                  className="border border-gray-300 rounded-lg p-4 hover:bg-gray-50 transition"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-semibold">After {template.inactiveDays} days inactive</p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        <strong>Subject:</strong> {template.subject}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <strong>Offer:</strong> {template.offer}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleUseTemplate(template)}
-                      style={{ backgroundColor: brandColor }}
-                      className="px-4 py-2 text-white rounded text-sm whitespace-nowrap ml-4 hover:opacity-90"
-                    >
-                      Use Template
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {rules.length === 0 && (
+        <p className="text-sm text-gray-600 mb-4">
+          No rules yet. Get started with a template below, or create your own.
+        </p>
+      )}
 
-          <button
-            onClick={() => setShowCustomForm(!showCustomForm)}
-            className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
-          >
-            + Create Custom Rule
-          </button>
-
-          {showCustomForm && (
-            <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-              <h4 className="font-semibold mb-3">Custom Rule</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Days Inactive</label>
-                  <input
-                    type="number"
-                    min={WINBACK_MIN_INACTIVE_DAYS}
-                    value={customForm.inactiveDays}
-                    onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || WINBACK_MIN_INACTIVE_DAYS })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Minimum {WINBACK_MIN_INACTIVE_DAYS} days.</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email Subject</label>
-                  <input
-                    type="text"
-                    value={customForm.subject}
-                    onChange={e => setCustomForm({ ...customForm, subject: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                    placeholder="e.g., Come back soon!"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Offer Text</label>
-                  <textarea
-                    value={customForm.offer}
-                    onChange={e => setCustomForm({ ...customForm, offer: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                    placeholder="e.g., Your next coffee is 50% off!"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Offer expires in (days)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={customForm.offerExpiryDays}
-                    onChange={e => setCustomForm({ ...customForm, offerExpiryDays: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Adds "Valid until DATE" to the email. Set 0 to hide.</p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCreateCustom}
-                    style={{ backgroundColor: brandColor }}
-                    className="px-4 py-2 text-white rounded text-sm hover:opacity-90"
-                  >
-                    Add Rule
-                  </button>
-                  <button
-                    onClick={() => setShowCustomForm(false)}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded text-sm hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {rules.map(rule => (
+      <div className="space-y-4">
+        {rules.map(rule => (
             <div key={rule.id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
               {editingRuleId === rule.id ? (
                 <div className="space-y-3">
@@ -329,88 +244,131 @@ export default function WinBackRulesEditor({
             </div>
           ))}
 
+        {availableTemplates.length > 0 && !atCap && (
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              {rules.length === 0 ? 'Proposed Strategies' : "Templates you haven't used yet"}
+            </h3>
+            <div className="grid gap-3">
+              {availableTemplates.map((template, idx) => (
+                <div
+                  key={idx}
+                  className="border border-gray-300 rounded-lg p-4 hover:bg-gray-50 transition"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-semibold">After {template.inactiveDays} days inactive</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        <strong>Subject:</strong> {template.subject}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Offer:</strong> {template.offer}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        <strong>Offer expires in:</strong> {template.offerExpiryDays} days
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleUseTemplate(template)}
+                      style={{ backgroundColor: brandColor }}
+                      className="px-4 py-2 text-white rounded text-sm whitespace-nowrap ml-4 hover:opacity-90"
+                    >
+                      + Add this template
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {atCap ? (
+          <p className="text-sm text-gray-500 italic mt-4">
+            Maximum {WINBACK_MAX_RULES} rules reached. Delete a rule to add another.
+          </p>
+        ) : (
           <button
             onClick={() => setShowCustomForm(!showCustomForm)}
             className="text-blue-600 hover:text-blue-700 font-semibold text-sm mt-4"
           >
-            + Add Another Rule
+            + Create Custom Rule
           </button>
+        )}
 
-          {showCustomForm && (
-            <div className="border border-gray-300 rounded-lg p-4 bg-white">
-              <h4 className="font-semibold mb-3">Custom Rule</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Days Inactive</label>
-                  <input
-                    type="number"
-                    min={WINBACK_MIN_INACTIVE_DAYS}
-                    value={customForm.inactiveDays}
-                    onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || WINBACK_MIN_INACTIVE_DAYS })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Minimum {WINBACK_MIN_INACTIVE_DAYS} days.</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email Subject</label>
-                  <input
-                    type="text"
-                    value={customForm.subject}
-                    onChange={e => setCustomForm({ ...customForm, subject: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                    placeholder="e.g., Come back soon!"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Offer Text</label>
-                  <textarea
-                    value={customForm.offer}
-                    onChange={e => setCustomForm({ ...customForm, offer: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                    placeholder="e.g., Your next coffee is 50% off!"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Offer expires in (days)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={customForm.offerExpiryDays}
-                    onChange={e => setCustomForm({ ...customForm, offerExpiryDays: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Adds "Valid until DATE" to the email. Set 0 to hide.</p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCreateCustom}
-                    style={{ backgroundColor: brandColor }}
-                    className="px-4 py-2 text-white rounded text-sm hover:opacity-90"
-                  >
-                    Add Rule
-                  </button>
-                  <button
-                    onClick={() => setShowCustomForm(false)}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded text-sm hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                </div>
+        {showCustomForm && !atCap && (
+          <div className="border border-gray-300 rounded-lg p-4 bg-white mt-2">
+            <h4 className="font-semibold mb-3">Custom Rule</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Days Inactive</label>
+                <input
+                  type="number"
+                  min={WINBACK_MIN_INACTIVE_DAYS}
+                  value={customForm.inactiveDays}
+                  onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || WINBACK_MIN_INACTIVE_DAYS })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded"
+                />
+                <p className="text-xs text-gray-500 mt-1">Minimum {WINBACK_MIN_INACTIVE_DAYS} days.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Email Subject</label>
+                <input
+                  type="text"
+                  value={customForm.subject}
+                  onChange={e => setCustomForm({ ...customForm, subject: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded"
+                  placeholder="e.g., Come back soon!"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Offer Text</label>
+                <textarea
+                  value={customForm.offer}
+                  onChange={e => setCustomForm({ ...customForm, offer: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded"
+                  placeholder="e.g., Your next coffee is 50% off!"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Offer expires in (days)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={customForm.offerExpiryDays}
+                  onChange={e => setCustomForm({ ...customForm, offerExpiryDays: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded"
+                />
+                <p className="text-xs text-gray-500 mt-1">Adds "Valid until DATE" to the email. Set 0 to hide.</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCreateCustom}
+                  style={{ backgroundColor: brandColor }}
+                  className="px-4 py-2 text-white rounded text-sm hover:opacity-90"
+                >
+                  Add Rule
+                </button>
+                <button
+                  onClick={() => setShowCustomForm(false)}
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded text-sm hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          <button
-            onClick={handleSaveRules}
-            disabled={saving}
-            style={{ backgroundColor: saving ? '#ccc' : brandColor }}
-            className="w-full px-4 py-2 text-white rounded font-semibold hover:opacity-90 mt-6"
-          >
-            {saving ? 'Saving...' : 'Save Rules'}
-          </button>
-        </div>
-      )}
+        <button
+          onClick={handleSaveRules}
+          disabled={saving}
+          style={{ backgroundColor: saving ? '#ccc' : brandColor }}
+          className="w-full px-4 py-2 text-white rounded font-semibold hover:opacity-90 mt-6"
+        >
+          {saving ? 'Saving...' : 'Save Rules'}
+        </button>
+      </div>
     </div>
   )
 }
