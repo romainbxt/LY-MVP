@@ -4,7 +4,10 @@ export type WinBackRule = {
   subject: string
   offer: string
   level: number
+  offerExpiryDays?: number
 }
+
+export const WINBACK_MIN_INACTIVE_DAYS = 7
 
 export type Venue = {
   id: string
@@ -278,5 +281,17 @@ export async function updateWinBackSent(uniqueId: string, level: number): Promis
     headers: supabaseAdminHeaders(),
     body: JSON.stringify({ last_winback_sent_at: new Date().toISOString(), winback_level_sent: level }),
   })
+  return res.ok
+}
+
+export async function clampWinBackLevels(venueId: string, maxLevel: number): Promise<boolean> {
+  const res = await fetch(
+    `${BASE()}/stamps?venue_id=eq.${venueId}&winback_level_sent=gt.${maxLevel}`,
+    {
+      method: 'PATCH',
+      headers: supabaseAdminHeaders(),
+      body: JSON.stringify({ winback_level_sent: maxLevel }),
+    }
+  )
   return res.ok
 }

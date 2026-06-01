@@ -440,6 +440,7 @@ function buildWinBackHtml({
   scanUrl,
   legal,
   unsubscribeUrl,
+  offerExpiryDays,
 }: {
   name: string
   subject: string
@@ -451,11 +452,21 @@ function buildWinBackHtml({
   scanUrl: string
   legal: LegalInfo
   unsubscribeUrl?: string
+  offerExpiryDays?: number
 }): string {
   const safeName = escapeHtml(name)
   const safeVenue = escapeHtml(venueName)
   const safeOffer = escapeHtml(offer)
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
+
+  const expiryLine = (offerExpiryDays && offerExpiryDays > 0)
+    ? (() => {
+        const expiryDate = new Date()
+        expiryDate.setDate(expiryDate.getDate() + offerExpiryDays)
+        const formatted = expiryDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+        return `<p style="margin:8px 0 0;font-size:12px;color:rgba(255,255,255,0.9);font-weight:500;">Valid until <strong>${escapeHtml(formatted)}</strong></p>`
+      })()
+    : ''
 
   return `<!DOCTYPE html>
 <html>
@@ -482,6 +493,7 @@ function buildWinBackHtml({
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${brandColor};border-radius:16px;padding:24px 20px;">
           <tr><td align="center">
             <p style="margin:0;font-size:18px;font-weight:700;color:#ffffff;">${safeOffer}</p>
+            ${expiryLine}
           </td></tr>
         </table>
       </td></tr>
@@ -518,6 +530,7 @@ export async function sendWinBackEmail({
   ownerEmail,
   baseUrl,
   uniqueId,
+  offerExpiryDays,
 }: {
   name: string
   email: string
@@ -532,6 +545,7 @@ export async function sendWinBackEmail({
   ownerEmail?: string | null
   baseUrl?: string
   uniqueId?: string
+  offerExpiryDays?: number
 }) {
   const transporter = createTransporter()
   const bgColor = backgroundColor || `${brandColor}18`
@@ -543,6 +557,6 @@ export async function sendWinBackEmail({
     to: email,
     subject,
     headers: buildListUnsubscribeHeaders(baseUrl, uniqueId),
-    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal, unsubscribeUrl }),
+    html: buildWinBackHtml({ name, subject, offer, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal, unsubscribeUrl, offerExpiryDays }),
   })
 }

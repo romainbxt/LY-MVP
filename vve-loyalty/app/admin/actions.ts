@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createVenue, updateVenue, uploadLogo } from '@/lib/supabase'
+import { createVenue, updateVenue, uploadLogo, clampWinBackLevels, WINBACK_MIN_INACTIVE_DAYS } from '@/lib/supabase'
 import type { WinBackRule } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
@@ -191,7 +191,22 @@ export async function updateWinBackRules(
   venueId: string,
   rules: WinBackRule[]
 ): Promise<boolean> {
-  const ok = await updateVenue(venueId, { win_back_rules: rules })
-  if (ok) revalidatePath('/admin')
-  return ok
+  if (rules.some(r => r.inactiveDays < WINBACK_MIN_INACTIVE_DAYS)) return false
+  if (rules.some(r => (r.offerExpiryDays ?? 0) < 0)) return false
+
+  // Defensive renumber on the server too, so the on-disk levels are always sequential
+  const sanitized = [...rules]
+    .sort((a, b) => a.inactiveDays - b.inactiveDays)
+    .map((r, i) => ({ ...r, level: i + 1 }))
+
+  const ok = await updateVenue(venueId, { win_back_rules: sanitized })
+  if (!ok) return false
+
+  // Clamp any customer whose winback_level_sent now exceeds the new max level.
+  // Without this, a customer at level 3 could be stranded if the owner deleted rule 3.
+  const maxLevel = sanitized.length
+  await clampWinBackLevels(venueId, maxLevel)
+
+  revalidatePath('/admin')
+  return true
 }

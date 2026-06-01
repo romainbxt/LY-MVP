@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { WinBackRule } from '@/lib/supabase'
+import { WinBackRule, WINBACK_MIN_INACTIVE_DAYS } from '@/lib/supabase'
 import { updateWinBackRules } from '@/app/admin/actions'
 
 const TEMPLATES: Omit<WinBackRule, 'id'>[] = [
@@ -10,12 +10,14 @@ const TEMPLATES: Omit<WinBackRule, 'id'>[] = [
     subject: 'We miss you!',
     offer: 'A free extra shot of espresso or cookie on us!',
     level: 1,
+    offerExpiryDays: 14,
   },
   {
     inactiveDays: 30,
     subject: 'Free coffee inside!',
     offer: 'Your next flat white is on us.',
     level: 2,
+    offerExpiryDays: 7,
   },
 ]
 
@@ -33,7 +35,7 @@ export default function WinBackRulesEditor({
   const [editForm, setEditForm] = useState<Partial<WinBackRule>>({})
   const [saving, setSaving] = useState(false)
   const [showCustomForm, setShowCustomForm] = useState(false)
-  const [customForm, setCustomForm] = useState({ inactiveDays: 7, subject: '', offer: '' })
+  const [customForm, setCustomForm] = useState({ inactiveDays: WINBACK_MIN_INACTIVE_DAYS, subject: '', offer: '', offerExpiryDays: 14 })
 
   const handleUseTemplate = (template: Omit<WinBackRule, 'id'>) => {
     const newRule: WinBackRule = {
@@ -45,8 +47,16 @@ export default function WinBackRulesEditor({
   }
 
   const handleCreateCustom = () => {
-    if (!customForm.subject.trim() || !customForm.offer.trim() || customForm.inactiveDays < 1) {
-      alert('Please fill in all fields with valid values.')
+    if (!customForm.subject.trim() || !customForm.offer.trim()) {
+      alert('Please fill in all fields.')
+      return
+    }
+    if (customForm.inactiveDays < WINBACK_MIN_INACTIVE_DAYS) {
+      alert(`Win-back rules must wait at least ${WINBACK_MIN_INACTIVE_DAYS} days of inactivity. Sending sooner annoys customers.`)
+      return
+    }
+    if (customForm.offerExpiryDays < 0) {
+      alert('Offer expiry must be 0 or more days.')
       return
     }
     const newRule: WinBackRule = {
@@ -55,20 +65,29 @@ export default function WinBackRulesEditor({
       subject: customForm.subject,
       offer: customForm.offer,
       level: Math.max(...rules.map(r => r.level), 0) + 1,
+      offerExpiryDays: customForm.offerExpiryDays,
     }
     setRules([...rules, newRule])
-    setCustomForm({ inactiveDays: 7, subject: '', offer: '' })
+    setCustomForm({ inactiveDays: WINBACK_MIN_INACTIVE_DAYS, subject: '', offer: '', offerExpiryDays: 14 })
     setShowCustomForm(false)
   }
 
   const handleEditRule = (rule: WinBackRule) => {
     setEditingRuleId(rule.id)
-    setEditForm(rule)
+    setEditForm({ ...rule, offerExpiryDays: rule.offerExpiryDays ?? 14 })
   }
 
   const handleUpdateRule = () => {
     if (!editingRuleId || !editForm.subject?.trim() || !editForm.offer?.trim()) {
       alert('Please fill in all fields.')
+      return
+    }
+    if ((editForm.inactiveDays ?? 0) < WINBACK_MIN_INACTIVE_DAYS) {
+      alert(`Win-back rules must wait at least ${WINBACK_MIN_INACTIVE_DAYS} days of inactivity. Sending sooner annoys customers.`)
+      return
+    }
+    if ((editForm.offerExpiryDays ?? 0) < 0) {
+      alert('Offer expiry must be 0 or more days.')
       return
     }
     setRules(rules.map(r => (r.id === editingRuleId ? (editForm as WinBackRule) : r)))
@@ -83,8 +102,13 @@ export default function WinBackRulesEditor({
   const handleSaveRules = async () => {
     setSaving(true)
     try {
-      const success = await updateWinBackRules(venueId, rules)
+      // Sort by inactiveDays then renumber levels sequentially so the funnel is always 1, 2, 3, ...
+      const renumbered = [...rules]
+        .sort((a, b) => a.inactiveDays - b.inactiveDays)
+        .map((r, i) => ({ ...r, level: i + 1 }))
+      const success = await updateWinBackRules(venueId, renumbered)
       if (success) {
+        setRules(renumbered)
         alert('Win-back rules saved successfully!')
       } else {
         alert('Failed to save rules.')
@@ -149,11 +173,12 @@ export default function WinBackRulesEditor({
                   <label className="block text-sm font-medium mb-1">Days Inactive</label>
                   <input
                     type="number"
-                    min="1"
+                    min={WINBACK_MIN_INACTIVE_DAYS}
                     value={customForm.inactiveDays}
-                    onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || 1 })}
+                    onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || WINBACK_MIN_INACTIVE_DAYS })}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Minimum {WINBACK_MIN_INACTIVE_DAYS} days.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Email Subject</label>
@@ -174,6 +199,17 @@ export default function WinBackRulesEditor({
                     placeholder="e.g., Your next coffee is 50% off!"
                     rows={3}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Offer expires in (days)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={customForm.offerExpiryDays}
+                    onChange={e => setCustomForm({ ...customForm, offerExpiryDays: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Adds "Valid until DATE" to the email. Set 0 to hide.</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -204,11 +240,12 @@ export default function WinBackRulesEditor({
                     <label className="block text-sm font-medium mb-1">Days Inactive</label>
                     <input
                       type="number"
-                      min="1"
+                      min={WINBACK_MIN_INACTIVE_DAYS}
                       value={editForm.inactiveDays || 0}
                       onChange={e => setEditForm({ ...editForm, inactiveDays: parseInt(e.target.value) || 0 })}
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Minimum {WINBACK_MIN_INACTIVE_DAYS} days.</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Email Subject</label>
@@ -227,6 +264,17 @@ export default function WinBackRulesEditor({
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                       rows={3}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Offer expires in (days)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={editForm.offerExpiryDays ?? 14}
+                      onChange={e => setEditForm({ ...editForm, offerExpiryDays: parseInt(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Adds "Valid until DATE" to the email. Set 0 to hide.</p>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -254,6 +302,13 @@ export default function WinBackRulesEditor({
                     <p className="text-sm text-gray-600">
                       <strong>Offer:</strong> {rule.offer}
                     </p>
+                    {(rule.offerExpiryDays ?? 0) > 0 ? (
+                      <p className="text-sm text-gray-600">
+                        <strong>Offer expires in:</strong> {rule.offerExpiryDays} days
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">No expiry shown on offer</p>
+                    )}
                   </div>
                   <div className="flex gap-2 ml-4">
                     <button
@@ -289,11 +344,12 @@ export default function WinBackRulesEditor({
                   <label className="block text-sm font-medium mb-1">Days Inactive</label>
                   <input
                     type="number"
-                    min="1"
+                    min={WINBACK_MIN_INACTIVE_DAYS}
                     value={customForm.inactiveDays}
-                    onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || 1 })}
+                    onChange={e => setCustomForm({ ...customForm, inactiveDays: parseInt(e.target.value) || WINBACK_MIN_INACTIVE_DAYS })}
                     className="w-full px-3 py-2 border border-gray-300 rounded"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Minimum {WINBACK_MIN_INACTIVE_DAYS} days.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Email Subject</label>
@@ -314,6 +370,17 @@ export default function WinBackRulesEditor({
                     placeholder="e.g., Your next coffee is 50% off!"
                     rows={3}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Offer expires in (days)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={customForm.offerExpiryDays}
+                    onChange={e => setCustomForm({ ...customForm, offerExpiryDays: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Adds "Valid until DATE" to the email. Set 0 to hide.</p>
                 </div>
                 <div className="flex gap-2">
                   <button

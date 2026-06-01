@@ -35,12 +35,19 @@ export async function GET(request: Request) {
       }
 
       let venueSent = 0
+      // Each customer can receive AT MOST one win-back email per cron run, even if
+      // they're eligible for multiple rules (e.g. an old customer at level 0 hitting
+      // a 14d and 30d threshold simultaneously). The cron walks rules in ascending
+      // level order, so the lowest matching rule wins.
+      const sentThisRun = new Set<string>()
+      const rulesInOrder = [...venue.win_back_rules].sort((a, b) => a.level - b.level)
 
-      for (const rule of venue.win_back_rules) {
+      for (const rule of rulesInOrder) {
         const customers = await getCustomersForWinBack(venue.id, rule.inactiveDays, rule.level)
 
         for (const customer of customers) {
           if (!customer.email) continue
+          if (sentThisRun.has(customer.unique_id)) continue
 
           try {
             await sendWinBackEmail({
@@ -56,13 +63,14 @@ export async function GET(request: Request) {
               ownerEmail: venue.owner_email,
               baseUrl,
               uniqueId: customer.unique_id,
+              offerExpiryDays: rule.offerExpiryDays,
             })
 
             await updateWinBackSent(customer.unique_id, rule.level)
+            sentThisRun.add(customer.unique_id)
             venueSent++
             totalSent++
 
-            // Log to console for manual testing
             console.log(`[WinBack] Sent ${rule.subject} to ${customer.email} (${venue.slug})`)
           } catch (error) {
             console.error(`[WinBack Error] Failed to send to ${customer.email}:`, error)
