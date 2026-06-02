@@ -746,7 +746,7 @@ export async function sendAdminDigest(args: {
   venues: Array<{
     stats: VenueDayStats
     whatsappBlock: string
-    ownerEmailStatus: 'sent' | 'skipped-no-email' | 'skipped-closed' | 'failed'
+    ownerEmailStatus: 'sent' | 'skipped-no-email' | 'skipped-closed' | 'skipped-opted-out' | 'failed'
     ownerEmail: string | null
   }>
   sentAtBerlin: string
@@ -762,7 +762,9 @@ export async function sendAdminDigest(args: {
           ? `email: not set — ⚠ Email skipped`
           : v.ownerEmailStatus === 'skipped-closed'
             ? `email: skipped (closed today)`
-            : `email: ${v.ownerEmail ?? 'unknown'} — ✗ Failed`
+            : v.ownerEmailStatus === 'skipped-opted-out'
+              ? `email: opted out — ⚠ Owner not enrolled in daily recap`
+              : `email: ${v.ownerEmail ?? 'unknown'} — ✗ Failed`
     const header = `═══════════════════════════════════════════════
 ${number}.  ${venue.name.toUpperCase()}
     ${status}

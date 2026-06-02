@@ -32,6 +32,7 @@ export type Venue = {
   register_number: string | null
   owner_email: string | null
   closed_weekdays: number[] | null
+  daily_recap_enabled: boolean | null
   created_at: string
 }
 
@@ -128,7 +129,7 @@ export async function getAllVenues(): Promise<Venue[]> {
 
 export async function updateVenue(
   id: string,
-  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email' | 'closed_weekdays'>>
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email' | 'closed_weekdays' | 'daily_recap_enabled'>>
 ): Promise<boolean> {
   const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
     method: 'PATCH',
@@ -158,6 +159,7 @@ export async function createVenue(input: {
   registerNumber?: string | null
   ownerEmail?: string | null
   closedWeekdays?: number[]
+  dailyRecapEnabled?: boolean
 }): Promise<Venue | null> {
   const res = await fetch(`${BASE()}/venues`, {
     method: 'POST',
@@ -182,6 +184,7 @@ export async function createVenue(input: {
       register_number: input.registerNumber ?? null,
       owner_email: input.ownerEmail ?? null,
       closed_weekdays: input.closedWeekdays ?? [],
+      daily_recap_enabled: input.dailyRecapEnabled ?? false,
     }),
   })
   const data = await res.json()

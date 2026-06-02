@@ -13,6 +13,7 @@ export default function CreateVenueForm() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [rewardOnLastStamp, setRewardOnLastStamp] = useState(true)
   const [askBirthday, setAskBirthday] = useState(false)
+  const [dailyRecapEnabled, setDailyRecapEnabled] = useState(false)
   const [closedDays, setClosedDays] = useState<Set<number>>(new Set())
   const toggleClosedDay = (d: number) => {
     setClosedDays(prev => {
@@ -169,6 +170,26 @@ export default function CreateVenueForm() {
             On closed days, daily recap and morning win-back emails are skipped. Stamp emails still fire normally.
           </p>
           <input type="hidden" name="closed_weekdays" value={JSON.stringify([...closedDays])} />
+        </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-2.5">
+          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">
+            Daily Recap Email
+          </p>
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex-1 pr-3">
+              <p className="text-sm text-white font-medium">Send daily recap to owner at 8pm Berlin</p>
+              <p className="text-[10px] text-stone-400 mt-0.5">Only turn on if the owner has explicitly agreed to receive operational emails.</p>
+            </div>
+            <div
+              onClick={() => setDailyRecapEnabled(!dailyRecapEnabled)}
+              className="w-11 h-6 rounded-full relative transition-colors cursor-pointer shrink-0"
+              style={{ background: dailyRecapEnabled ? '#f59e0b' : '#57534e' }}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${dailyRecapEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <input type="hidden" name="daily_recap_enabled" value={String(dailyRecapEnabled)} />
+          </label>
         </div>
 
         <div className="bg-stone-700/50 rounded-xl p-3 space-y-3">

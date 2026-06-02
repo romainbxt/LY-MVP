@@ -17,7 +17,7 @@ const SECRET = process.env.WINBACK_SECRET || 'test_secret'
 const CRON_SECRET = process.env.CRON_SECRET
 const ADMIN_DIGEST_EMAIL = process.env.ADMIN_DIGEST_EMAIL || 'gzelenitsas@gmail.com'
 
-type OwnerEmailStatus = 'sent' | 'skipped-no-email' | 'skipped-closed' | 'failed'
+type OwnerEmailStatus = 'sent' | 'skipped-no-email' | 'skipped-closed' | 'skipped-opted-out' | 'failed'
 
 function isAuthorized(request: Request): boolean {
   const { searchParams } = new URL(request.url)
@@ -114,6 +114,8 @@ export async function GET(request: Request) {
       let ownerEmailStatus: OwnerEmailStatus
       if (isClosedToday) {
         ownerEmailStatus = 'skipped-closed'
+      } else if (!venue.daily_recap_enabled) {
+        ownerEmailStatus = 'skipped-opted-out'
       } else if (!venue.owner_email) {
         ownerEmailStatus = 'skipped-no-email'
       } else {
