@@ -2,16 +2,19 @@
 
 import { useActionState } from 'react'
 import { stampCustomer, redeemAndReset } from '@/app/actions'
-import type { Customer, Venue } from '@/lib/supabase'
+import type { Customer, Venue, Voucher } from '@/lib/supabase'
+import VoucherBanner from '@/components/VoucherBanner'
 
 export default function CashierView({
   customer,
   uniqueId,
   venue,
+  activeVouchers = [],
 }: {
   customer: Customer
   uniqueId: string
   venue: Venue | null
+  activeVouchers?: Voucher[]
 }) {
   const brand = venue?.brand_color ?? '#D97706'
   const rewards = venue?.rewards ?? [{ stamp: 10, label: 'Reward 🎁' }]
@@ -100,6 +103,14 @@ export default function CashierView({
           </p>
         )}
       </div>
+
+      {activeVouchers.length > 0 && (
+        <div className="w-full max-w-xs mb-6">
+          {activeVouchers.map(v => (
+            <VoucherBanner key={v.id} voucher={v} customerName={customer.name} />
+          ))}
+        </div>
+      )}
 
       {(stampState?.error || redeemState?.error) && (
         <p className="text-red-400 text-sm mb-6 text-center">{stampState?.error ?? redeemState?.error}</p>

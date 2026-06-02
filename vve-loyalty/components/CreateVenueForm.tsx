@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react'
 import { createVenueAction } from '@/app/admin/actions'
-import { WEEKDAY_LABELS } from '@/lib/supabase'
+import { WEEKDAY_LABELS, BIRTHDAY_DEFAULT_OFFER, BIRTHDAY_DEFAULT_EXPIRY_DAYS, BIRTHDAY_DEFAULT_QUIET_DAYS } from '@/lib/supabase'
 import ColorPicker from '@/components/ColorPicker'
 import StampIconPicker from '@/components/StampIconPicker'
 import { Loader2 } from 'lucide-react'
@@ -14,6 +14,7 @@ export default function CreateVenueForm() {
   const [rewardOnLastStamp, setRewardOnLastStamp] = useState(true)
   const [askBirthday, setAskBirthday] = useState(false)
   const [dailyRecapEnabled, setDailyRecapEnabled] = useState(false)
+  const [birthdayEnabled, setBirthdayEnabled] = useState(false)
   const [closedDays, setClosedDays] = useState<Set<number>>(new Set())
   const toggleClosedDay = (d: number) => {
     setClosedDays(prev => {
@@ -190,6 +191,65 @@ export default function CreateVenueForm() {
             </div>
             <input type="hidden" name="daily_recap_enabled" value={String(dailyRecapEnabled)} />
           </label>
+        </div>
+
+        <div className="bg-stone-700/50 rounded-xl p-3 space-y-2.5">
+          <p className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">
+            Birthday Emails
+          </p>
+          <label className="flex items-center justify-between cursor-pointer">
+            <div className="flex-1 pr-3">
+              <p className="text-sm text-white font-medium">Send birthday email at 8am Berlin on customer's birthday</p>
+              <p className="text-[10px] text-stone-400 mt-0.5">Only effective for customers who provided a birthday at registration. Off by default.</p>
+            </div>
+            <div
+              onClick={() => setBirthdayEnabled(!birthdayEnabled)}
+              className="w-11 h-6 rounded-full relative transition-colors cursor-pointer shrink-0"
+              style={{ background: birthdayEnabled ? '#f59e0b' : '#57534e' }}
+            >
+              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${birthdayEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <input type="hidden" name="birthday_email_enabled" value={String(birthdayEnabled)} />
+          </label>
+          <div className="space-y-2 pt-1">
+            <div>
+              <label className="block text-[10px] text-stone-400 mb-1">Birthday offer text</label>
+              <input
+                name="birthday_offer"
+                type="text"
+                defaultValue={BIRTHDAY_DEFAULT_OFFER}
+                placeholder={BIRTHDAY_DEFAULT_OFFER}
+                className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="block text-[10px] text-stone-400 mb-1">Offer valid for (days)</label>
+                <input
+                  name="birthday_offer_expiry_days"
+                  type="number"
+                  min="1"
+                  max="365"
+                  defaultValue={BIRTHDAY_DEFAULT_EXPIRY_DAYS}
+                  className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[10px] text-stone-400 mb-1">Birthday quiet days</label>
+                <input
+                  name="birthday_quiet_days"
+                  type="number"
+                  min="0"
+                  max="30"
+                  defaultValue={BIRTHDAY_DEFAULT_QUIET_DAYS}
+                  className="w-full px-4 py-3 rounded-xl bg-stone-700 border border-stone-600 text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-stone-400">
+              Win-back emails pause for "quiet days" before AND after the birthday. Set quiet days to 0 to disable the pre-birthday pause.
+            </p>
+          </div>
         </div>
 
         <div className="bg-stone-700/50 rounded-xl p-3 space-y-3">

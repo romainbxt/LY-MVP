@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { getCustomerByUniqueId, getVenueById } from '@/lib/supabase'
+import { getCustomerByUniqueId, getVenueById, getActiveVouchersForCustomer } from '@/lib/supabase'
 import CashierView from '@/components/CashierView'
 import CustomerCardView from '@/components/CustomerCardView'
 
@@ -21,7 +21,8 @@ export default async function ScanPage({
   const isCashier = cookieStore.get(`cashier_${slug}`)?.value === 'true'
 
   if (isCashier) {
-    return <CashierView customer={customer} uniqueId={unique_id} venue={venue} />
+    const activeVouchers = await getActiveVouchersForCustomer(customer.id)
+    return <CashierView customer={customer} uniqueId={unique_id} venue={venue} activeVouchers={activeVouchers} />
   }
 
   return <CustomerCardView customer={customer} uniqueId={unique_id} venue={venue} />

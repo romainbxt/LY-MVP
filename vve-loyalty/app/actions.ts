@@ -8,6 +8,7 @@ import {
   getCustomerByUniqueId,
   updateStampCount,
   deleteCustomer,
+  redeemVoucher,
 } from '@/lib/supabase'
 import { sendStampCardEmail, sendReengagementEmail, legalFromVenue } from '@/lib/email'
 import { cookies, headers } from 'next/headers'
@@ -304,4 +305,19 @@ export async function cashierLogout(slug: string): Promise<never> {
   const cookieStore = await cookies()
   cookieStore.delete(`cashier_${slug}`)
   redirect(`/cashier/${slug}`)
+}
+
+// ── Redeem voucher ────────────────────────────────────────────────────────────
+
+export type RedeemVoucherState = { success?: boolean; error?: string } | null
+
+export async function redeemVoucherAction(
+  voucherId: string,
+  prevState: RedeemVoucherState,
+  formData: FormData
+): Promise<RedeemVoucherState> {
+  const ok = await redeemVoucher(voucherId)
+  if (!ok) return { error: 'Failed to mark voucher as given. Try again.' }
+  revalidatePath('/scan/[unique_id]', 'page')
+  return { success: true }
 }

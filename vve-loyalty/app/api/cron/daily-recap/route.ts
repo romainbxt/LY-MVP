@@ -3,6 +3,9 @@ import {
   getNewSignupsBetween,
   getCustomersVisitedBetween,
   getWinBackSentBetween,
+  getVouchersCreatedBetween,
+  getVouchersRedeemedBetween,
+  getPendingVouchers,
   isVenueClosedOnWeekday,
 } from '@/lib/supabase'
 import { sendOwnerRecap, sendAdminDigest, buildWhatsappBlock } from '@/lib/email'
@@ -72,14 +75,22 @@ export async function GET(request: Request) {
       const yesterdayWasClosed = isVenueClosedOnWeekday(venue, yesterdayWeekday)
       const isClosedToday = isVenueClosedOnWeekday(venue, todayWeekday)
 
-      const [newSignupsToday, visitedToday, winbackToday, newSignupsYesterday, visitedYesterday, winbackYesterday] = await Promise.all([
+      const [newSignupsToday, visitedToday, winbackToday, newSignupsYesterday, visitedYesterday, winbackYesterday, vouchersCreatedRaw, vouchersRedeemedToday, vouchersPendingRaw] = await Promise.all([
         getNewSignupsBetween(venue.id, today.startIso, today.endIso),
         getCustomersVisitedBetween(venue.id, today.startIso, today.endIso),
         getWinBackSentBetween(venue.id, today.startIso, today.endIso),
         getNewSignupsBetween(venue.id, yesterday.startIso, yesterday.endIso),
         getCustomersVisitedBetween(venue.id, yesterday.startIso, yesterday.endIso),
         getWinBackSentBetween(venue.id, yesterday.startIso, yesterday.endIso),
+        getVouchersCreatedBetween(venue.id, today.startIso, today.endIso),
+        getVouchersRedeemedBetween(venue.id, today.startIso, today.endIso),
+        getPendingVouchers(venue.id),
       ])
+
+      const vouchersCreatedToday = {
+        birthday: vouchersCreatedRaw.filter(v => v.type === 'birthday').length,
+        winback: vouchersCreatedRaw.filter(v => v.type === 'winback').length,
+      }
 
       const winbackRecipientsToday = winbackToday.map(c => {
         const days = c.last_visit_at
@@ -104,6 +115,9 @@ export async function GET(request: Request) {
         newCustomersToday: newSignupsToday,
         customersVisitedToday: visitedToday,
         winbackRecipientsToday,
+        vouchersCreatedToday,
+        vouchersRedeemedToday,
+        vouchersPending: vouchersPendingRaw.length,
         todayWeekday,
         yesterdayWeekday,
       })

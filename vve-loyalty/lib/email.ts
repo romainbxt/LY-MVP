@@ -561,6 +561,128 @@ export async function sendWinBackEmail({
   })
 }
 
+// ── Birthday emails ──────────────────────────────────────────────────────────
+
+function buildBirthdayHtml({
+  name,
+  offer,
+  expiryDateHuman,
+  logoUrl,
+  venueName,
+  brandColor,
+  backgroundColor,
+  scanUrl,
+  legal,
+  unsubscribeUrl,
+}: {
+  name: string
+  offer: string
+  expiryDateHuman: string
+  logoUrl: string
+  venueName: string
+  brandColor: string
+  backgroundColor: string
+  scanUrl: string
+  legal: LegalInfo
+  unsubscribeUrl?: string
+}): string {
+  const safeName = escapeHtml(name)
+  const safeVenue = escapeHtml(venueName)
+  const safeOffer = escapeHtml(offer)
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${encodeURIComponent(scanUrl)}`
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:${backgroundColor};font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${backgroundColor}">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table width="100%" style="max-width:480px;" cellpadding="0" cellspacing="0" border="0">
+
+      ${logoUrl ? `<tr><td align="center" style="padding-bottom:20px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+          <tr><td align="center" style="background:#ffffff;border-radius:12px;padding:12px;">
+            <img src="${logoUrl}" alt="${safeVenue}" width="80" style="display:block;max-width:80px;height:auto;" />
+          </td></tr>
+        </table>
+      </td></tr>` : ''}
+
+      <tr><td align="center" style="padding-bottom:24px;">
+        <p style="margin:0;font-size:48px;line-height:1;">🎂</p>
+        <h1 style="margin:14px 0 8px;font-size:28px;font-weight:700;color:#1a1a1a;">Happy birthday, ${safeName}!</h1>
+        <p style="margin:0;font-size:15px;color:#666666;line-height:1.5;">Your gift from ${safeVenue} to celebrate your day:</p>
+      </td></tr>
+
+      <tr><td align="center" style="padding-bottom:28px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${brandColor};border-radius:16px;padding:24px 20px;">
+          <tr><td align="center">
+            <p style="margin:0;font-size:20px;font-weight:700;color:#ffffff;">${safeOffer}</p>
+            <p style="margin:8px 0 0;font-size:12px;color:rgba(255,255,255,0.9);font-weight:500;">Valid until <strong>${escapeHtml(expiryDateHuman)}</strong></p>
+          </td></tr>
+        </table>
+      </td></tr>
+
+      <tr><td align="center" style="padding-bottom:32px;">
+        <table cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border-radius:16px;padding:24px;">
+          <tr><td align="center">
+            <img src="${qrImageUrl}" alt="Your QR Code" width="180" height="180" style="display:block;margin:0 auto 12px;" />
+            <p style="margin:0;font-size:13px;color:#888888;font-weight:500;">Show this at the till at ${safeVenue}</p>
+          </td></tr>
+        </table>
+      </td></tr>
+
+      ${buildLegalFooter(legal, unsubscribeUrl)}
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`
+}
+
+export async function sendBirthdayEmail({
+  name,
+  email,
+  offer,
+  expiryDateHuman,
+  venueName,
+  brandColor,
+  backgroundColor,
+  logoUrl,
+  scanUrl,
+  legal,
+  ownerEmail,
+  baseUrl,
+  uniqueId,
+}: {
+  name: string
+  email: string
+  offer: string
+  expiryDateHuman: string
+  venueName: string
+  brandColor: string
+  backgroundColor?: string
+  logoUrl: string
+  scanUrl: string
+  legal: LegalInfo
+  ownerEmail?: string | null
+  baseUrl?: string
+  uniqueId?: string
+}) {
+  const transporter = createTransporter()
+  const bgColor = backgroundColor || `${brandColor}18`
+  const unsubscribeUrl = baseUrl && uniqueId ? buildUnsubscribeUrl(baseUrl, uniqueId) : undefined
+
+  await transporter.sendMail({
+    from: `${venueName} Loyalty <${process.env.GMAIL_USER}>`,
+    replyTo: ownerEmail ?? undefined,
+    to: email,
+    subject: `🎂 Happy birthday from ${venueName}!`,
+    headers: buildListUnsubscribeHeaders(baseUrl, uniqueId),
+    html: buildBirthdayHtml({ name, offer, expiryDateHuman, logoUrl, venueName, brandColor, backgroundColor: bgColor, scanUrl, legal, unsubscribeUrl }),
+  })
+}
+
 // ── Daily recap emails ───────────────────────────────────────────────────────
 
 import type { VenueDayStats } from './recap'
@@ -700,6 +822,10 @@ export function buildWhatsappBlock(stats: VenueDayStats, dateHuman: string, dash
     .map(r => `${r.name.split(' ')[0]} (${r.daysInactive}d)`)
     .join(', ')
 
+  const birthdayCount = stats.vouchersCreatedToday.birthday
+  const redeemedCount = stats.vouchersRedeemedToday.length
+  const pendingCount = stats.vouchersPending
+
   const lines: string[] = []
   lines.push(`🎯 *${venue.name} — ${dateHuman}*`)
   lines.push('')
@@ -707,6 +833,9 @@ export function buildWhatsappBlock(stats: VenueDayStats, dateHuman: string, dash
   lines.push(`✅ ${t.newSignups} new signup${t.newSignups === 1 ? '' : 's'}`)
   lines.push(`☕ ${t.visited} customer${t.visited === 1 ? '' : 's'} visited`)
   lines.push(`✉️ ${t.winbackSent} win-back email${t.winbackSent === 1 ? '' : 's'} sent`)
+  if (birthdayCount > 0) lines.push(`🎂 ${birthdayCount} birthday email${birthdayCount === 1 ? '' : 's'} sent`)
+  if (redeemedCount > 0) lines.push(`🎁 ${redeemedCount} voucher${redeemedCount === 1 ? '' : 's'} redeemed at the till`)
+  if (pendingCount > 0) lines.push(`🎫 ${pendingCount} voucher${pendingCount === 1 ? '' : 's'} pending (not yet used)`)
   lines.push('')
   if (stats.yesterdayWasClosed) {
     lines.push('Yesterday: closed')

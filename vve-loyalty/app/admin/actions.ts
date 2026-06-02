@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createVenue, updateVenue, uploadLogo, clampWinBackLevels, WINBACK_MIN_INACTIVE_DAYS, WINBACK_MAX_RULES } from '@/lib/supabase'
+import { createVenue, updateVenue, uploadLogo, clampWinBackLevels, WINBACK_MIN_INACTIVE_DAYS, WINBACK_MAX_RULES, BIRTHDAY_DEFAULT_OFFER, BIRTHDAY_DEFAULT_EXPIRY_DAYS, BIRTHDAY_DEFAULT_QUIET_DAYS } from '@/lib/supabase'
 import type { WinBackRule } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
@@ -99,6 +99,10 @@ export async function createVenueAction(
   } catch { /* ignore */ }
 
   const dailyRecapEnabled = formData.get('daily_recap_enabled') === 'true'
+  const birthdayEmailEnabled = formData.get('birthday_email_enabled') === 'true'
+  const birthdayOffer = (formData.get('birthday_offer') as string)?.trim() || BIRTHDAY_DEFAULT_OFFER
+  const birthdayOfferExpiryDays = parseInt((formData.get('birthday_offer_expiry_days') as string) || `${BIRTHDAY_DEFAULT_EXPIRY_DAYS}`, 10) || BIRTHDAY_DEFAULT_EXPIRY_DAYS
+  const birthdayQuietDays = parseInt((formData.get('birthday_quiet_days') as string) || `${BIRTHDAY_DEFAULT_QUIET_DAYS}`, 10)
 
   const rewards = parseRewards(rewardsRaw ?? '') ?? [
     { stamp: 3, label: 'Free Cookie 🍪' },
@@ -127,6 +131,10 @@ export async function createVenueAction(
     ownerEmail,
     closedWeekdays,
     dailyRecapEnabled,
+    birthdayEmailEnabled,
+    birthdayOffer,
+    birthdayOfferExpiryDays,
+    birthdayQuietDays: isNaN(birthdayQuietDays) ? BIRTHDAY_DEFAULT_QUIET_DAYS : birthdayQuietDays,
   })
   if (!venue) return { error: 'Failed to create venue. Slug may already be taken.' }
 
@@ -168,6 +176,10 @@ export async function updateVenueAction(
   const ownerEmailRaw = formData.get('owner_email') as string | null
   const closedWeekdaysRaw = formData.get('closed_weekdays') as string | null
   const dailyRecapEnabledRaw = formData.get('daily_recap_enabled') as string | null
+  const birthdayEnabledRaw = formData.get('birthday_email_enabled') as string | null
+  const birthdayOfferRaw = formData.get('birthday_offer') as string | null
+  const birthdayExpiryDaysRaw = formData.get('birthday_offer_expiry_days') as string | null
+  const birthdayQuietDaysRaw = formData.get('birthday_quiet_days') as string | null
 
   const fields: Parameters<typeof updateVenue>[1] = {}
   if (name) fields.name = name
@@ -201,6 +213,21 @@ export async function updateVenueAction(
 
   if (dailyRecapEnabledRaw !== null) {
     fields.daily_recap_enabled = dailyRecapEnabledRaw === 'true'
+  }
+
+  if (birthdayEnabledRaw !== null) {
+    fields.birthday_email_enabled = birthdayEnabledRaw === 'true'
+  }
+  if (birthdayOfferRaw !== null) {
+    fields.birthday_offer = birthdayOfferRaw.trim() || BIRTHDAY_DEFAULT_OFFER
+  }
+  if (birthdayExpiryDaysRaw !== null) {
+    const n = parseInt(birthdayExpiryDaysRaw, 10)
+    fields.birthday_offer_expiry_days = isNaN(n) || n < 1 ? BIRTHDAY_DEFAULT_EXPIRY_DAYS : n
+  }
+  if (birthdayQuietDaysRaw !== null) {
+    const n = parseInt(birthdayQuietDaysRaw, 10)
+    fields.birthday_quiet_days = isNaN(n) || n < 0 ? BIRTHDAY_DEFAULT_QUIET_DAYS : n
   }
 
   if (rewardsRaw) {

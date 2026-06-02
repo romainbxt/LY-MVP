@@ -1,6 +1,14 @@
-import { getAllVenues, getCustomersForWinBack, updateWinBackSent, isVenueClosedOnWeekday } from '@/lib/supabase'
+import {
+  getAllVenues,
+  getCustomersForWinBack,
+  updateWinBackSent,
+  isVenueClosedOnWeekday,
+  createVoucher,
+  getRecentVoucherByType,
+  BIRTHDAY_DEFAULT_QUIET_DAYS,
+} from '@/lib/supabase'
 import { sendWinBackEmail, legalFromVenue } from '@/lib/email'
-import { berlinWeekday } from '@/lib/recap'
+import { berlinWeekday, daysUntilNextBirthday } from '@/lib/recap'
 
 const WINBACK_SECRET = process.env.WINBACK_SECRET || 'test_secret'
 const CRON_SECRET = process.env.CRON_SECRET
@@ -34,9 +42,10 @@ export async function GET(request: Request) {
       })
     }
 
+    const now = new Date()
+    const todayWeekday = berlinWeekday(now)
     let totalSent = 0
     const results = []
-    const todayWeekday = berlinWeekday(new Date())
 
     for (const venue of venues) {
       if (isVenueClosedOnWeekday(venue, todayWeekday)) {
@@ -49,50 +58,102 @@ export async function GET(request: Request) {
       }
 
       let venueSent = 0
-      // Each customer can receive AT MOST one win-back email per cron run, even if
-      // they're eligible for multiple rules (e.g. an old customer at level 0 hitting
-      // a 14d and 30d threshold simultaneously). The cron walks rules in ascending
-      // level order, so the lowest matching rule wins.
+      let skippedBirthday = 0
+      let skippedGap = 0
       const sentThisRun = new Set<string>()
       const rulesInOrder = [...venue.win_back_rules].sort((a, b) => a.level - b.level)
+      const quietDays = venue.birthday_quiet_days ?? BIRTHDAY_DEFAULT_QUIET_DAYS
 
-      for (const rule of rulesInOrder) {
+      for (let i = 0; i < rulesInOrder.length; i++) {
+        const rule = rulesInOrder[i]
+        const previousRule = i > 0 ? rulesInOrder[i - 1] : null
+        const requiredGapDays = previousRule ? Math.max(0, rule.inactiveDays - previousRule.inactiveDays) : 0
+
         const customers = await getCustomersForWinBack(venue.id, rule.inactiveDays, rule.level)
 
         for (const customer of customers) {
           if (!customer.email) continue
           if (sentThisRun.has(customer.unique_id)) continue
 
+          // CHECK 1: Birthday post-window — any active birthday voucher means skip
+          const recentBirthdayVoucher = await getRecentVoucherByType(
+            customer.id,
+            'birthday',
+            new Date(now.getTime() - 14 * 86_400_000).toISOString()
+          )
+          if (recentBirthdayVoucher && (!recentBirthdayVoucher.redeemed_at || new Date(recentBirthdayVoucher.expires_at) > now)) {
+            skippedBirthday++
+            continue
+          }
+
+          // CHECK 2: Birthday look-ahead (pre-window quiet days)
+          if (venue.birthday_email_enabled && customer.birthday && quietDays > 0) {
+            const days = daysUntilNextBirthday(customer.birthday, now)
+            if (days !== null && days <= quietDays) {
+              skippedBirthday++
+              continue
+            }
+          }
+
+          // CHECK 3: Gap spacing — minimum days since last win-back email
+          if (requiredGapDays > 0 && customer.last_winback_sent_at) {
+            const lastSent = new Date(customer.last_winback_sent_at)
+            const daysSinceLast = Math.floor((now.getTime() - lastSent.getTime()) / 86_400_000)
+            if (daysSinceLast < requiredGapDays) {
+              skippedGap++
+              continue
+            }
+          }
+
           try {
-            await sendWinBackEmail({
-              name: customer.name,
-              email: customer.email,
-              subject: rule.subject,
-              offer: rule.offer,
-              venueName: venue.name,
-              brandColor: venue.brand_color,
-              logoUrl: venue.logo_url || `${baseUrl}/vve-logo.png`,
-              scanUrl: `${baseUrl}/scan/${customer.unique_id}`,
-              legal: legalFromVenue(venue, venue.name),
-              ownerEmail: venue.owner_email,
-              baseUrl,
-              uniqueId: customer.unique_id,
-              offerExpiryDays: rule.offerExpiryDays,
+            // Always create the voucher (cashier sees it even for opted-out customers)
+            const offerExpiryDays = rule.offerExpiryDays && rule.offerExpiryDays > 0 ? rule.offerExpiryDays : 14
+            const expiresAt = new Date(now.getTime() + offerExpiryDays * 86_400_000)
+            await createVoucher({
+              customerId: customer.id,
+              venueId: venue.id,
+              type: 'winback',
+              offerText: rule.offer,
+              expiresAt: expiresAt.toISOString(),
             })
+
+            // Send the email only if customer hasn't opted out of marketing
+            if (!customer.unsubscribed_marketing_at) {
+              await sendWinBackEmail({
+                name: customer.name,
+                email: customer.email,
+                subject: rule.subject,
+                offer: rule.offer,
+                venueName: venue.name,
+                brandColor: venue.brand_color,
+                logoUrl: venue.logo_url || `${baseUrl}/vve-logo.png`,
+                scanUrl: `${baseUrl}/scan/${customer.unique_id}`,
+                legal: legalFromVenue(venue, venue.name),
+                ownerEmail: venue.owner_email,
+                baseUrl,
+                uniqueId: customer.unique_id,
+                offerExpiryDays: rule.offerExpiryDays,
+              })
+              venueSent++
+              totalSent++
+              console.log(`[WinBack] Sent ${rule.subject} to ${customer.email} (${venue.slug})`)
+            }
 
             await updateWinBackSent(customer.unique_id, rule.level)
             sentThisRun.add(customer.unique_id)
-            venueSent++
-            totalSent++
-
-            console.log(`[WinBack] Sent ${rule.subject} to ${customer.email} (${venue.slug})`)
           } catch (error) {
             console.error(`[WinBack Error] Failed to send to ${customer.email}:`, error)
           }
         }
       }
 
-      results.push({ venue: venue.slug, rules: venue.win_back_rules.length, sent: venueSent })
+      results.push({
+        venue: venue.slug,
+        rules: venue.win_back_rules.length,
+        sent: venueSent,
+        skippedBirthday,
+        skippedGap,
+      })
     }
 
     return new Response(

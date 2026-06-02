@@ -33,8 +33,27 @@ export type Venue = {
   owner_email: string | null
   closed_weekdays: number[] | null
   daily_recap_enabled: boolean | null
+  birthday_email_enabled: boolean | null
+  birthday_offer: string | null
+  birthday_offer_expiry_days: number | null
+  birthday_quiet_days: number | null
   created_at: string
 }
+
+export type Voucher = {
+  id: string
+  customer_id: string
+  venue_id: string
+  type: 'birthday' | 'winback'
+  offer_text: string
+  expires_at: string
+  redeemed_at: string | null
+  created_at: string
+}
+
+export const BIRTHDAY_DEFAULT_OFFER = 'A free coffee on your birthday'
+export const BIRTHDAY_DEFAULT_EXPIRY_DAYS = 7
+export const BIRTHDAY_DEFAULT_QUIET_DAYS = 7
 
 export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 export const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const
@@ -129,7 +148,7 @@ export async function getAllVenues(): Promise<Venue[]> {
 
 export async function updateVenue(
   id: string,
-  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email' | 'closed_weekdays' | 'daily_recap_enabled'>>
+  fields: Partial<Pick<Venue, 'name' | 'logo_url' | 'brand_color' | 'background_color' | 'cashier_password' | 'rewards' | 'stamp_icon' | 'stamp_overrides' | 'reward_on_last_stamp' | 'ask_birthday' | 'win_back_rules' | 'legal_name' | 'address_street' | 'address_postcode' | 'address_city' | 'register_court' | 'register_number' | 'owner_email' | 'closed_weekdays' | 'daily_recap_enabled' | 'birthday_email_enabled' | 'birthday_offer' | 'birthday_offer_expiry_days' | 'birthday_quiet_days'>>
 ): Promise<boolean> {
   const res = await fetch(`${BASE()}/venues?id=eq.${id}`, {
     method: 'PATCH',
@@ -160,6 +179,10 @@ export async function createVenue(input: {
   ownerEmail?: string | null
   closedWeekdays?: number[]
   dailyRecapEnabled?: boolean
+  birthdayEmailEnabled?: boolean
+  birthdayOffer?: string | null
+  birthdayOfferExpiryDays?: number | null
+  birthdayQuietDays?: number | null
 }): Promise<Venue | null> {
   const res = await fetch(`${BASE()}/venues`, {
     method: 'POST',
@@ -185,6 +208,10 @@ export async function createVenue(input: {
       owner_email: input.ownerEmail ?? null,
       closed_weekdays: input.closedWeekdays ?? [],
       daily_recap_enabled: input.dailyRecapEnabled ?? false,
+      birthday_email_enabled: input.birthdayEmailEnabled ?? false,
+      birthday_offer: input.birthdayOffer ?? BIRTHDAY_DEFAULT_OFFER,
+      birthday_offer_expiry_days: input.birthdayOfferExpiryDays ?? BIRTHDAY_DEFAULT_EXPIRY_DAYS,
+      birthday_quiet_days: input.birthdayQuietDays ?? BIRTHDAY_DEFAULT_QUIET_DAYS,
     }),
   })
   const data = await res.json()
@@ -333,6 +360,101 @@ export async function getCustomersVisitedBetween(venueId: string, startIso: stri
 export async function getWinBackSentBetween(venueId: string, startIso: string, endIso: string): Promise<Customer[]> {
   const res = await fetch(
     `${BASE()}/stamps?venue_id=eq.${venueId}&last_winback_sent_at=gte.${startIso}&last_winback_sent_at=lt.${endIso}&order=last_winback_sent_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+// ── Birthday customer lookup ──────────────────────────────────────────────────
+
+export async function getCustomersWithBirthday(venueId: string, monthDay: string): Promise<Customer[]> {
+  // monthDay format: "MM-DD" (e.g. "06-02"). Matches any birthday string ending in -MM-DD.
+  const res = await fetch(
+    `${BASE()}/stamps?venue_id=eq.${venueId}&birthday=like.*-${monthDay}`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+// ── Voucher helpers ───────────────────────────────────────────────────────────
+
+export async function createVoucher(input: {
+  customerId: string
+  venueId: string
+  type: 'birthday' | 'winback'
+  offerText: string
+  expiresAt: string
+}): Promise<Voucher | null> {
+  const res = await fetch(`${BASE()}/vouchers`, {
+    method: 'POST',
+    headers: supabaseAdminHeaders(),
+    body: JSON.stringify({
+      customer_id: input.customerId,
+      venue_id: input.venueId,
+      type: input.type,
+      offer_text: input.offerText,
+      expires_at: input.expiresAt,
+    }),
+  })
+  const data = await res.json()
+  return Array.isArray(data) ? (data[0] ?? null) : (data ?? null)
+}
+
+export async function getActiveVouchersForCustomer(customerId: string): Promise<Voucher[]> {
+  const nowIso = new Date().toISOString()
+  const res = await fetch(
+    `${BASE()}/vouchers?customer_id=eq.${customerId}&redeemed_at=is.null&expires_at=gt.${nowIso}&order=created_at.desc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function redeemVoucher(voucherId: string): Promise<boolean> {
+  const res = await fetch(
+    `${BASE()}/vouchers?id=eq.${voucherId}&redeemed_at=is.null`,
+    {
+      method: 'PATCH',
+      headers: supabaseAdminHeaders(),
+      body: JSON.stringify({ redeemed_at: new Date().toISOString() }),
+    }
+  )
+  return res.ok
+}
+
+export async function getRecentVoucherByType(customerId: string, type: 'birthday' | 'winback', sinceIso: string): Promise<Voucher | null> {
+  const res = await fetch(
+    `${BASE()}/vouchers?customer_id=eq.${customerId}&type=eq.${type}&created_at=gte.${sinceIso}&order=created_at.desc&limit=1`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) && data.length > 0 ? data[0] : null
+}
+
+export async function getVouchersCreatedBetween(venueId: string, startIso: string, endIso: string): Promise<Voucher[]> {
+  const res = await fetch(
+    `${BASE()}/vouchers?venue_id=eq.${venueId}&created_at=gte.${startIso}&created_at=lt.${endIso}&order=created_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function getVouchersRedeemedBetween(venueId: string, startIso: string, endIso: string): Promise<Voucher[]> {
+  const res = await fetch(
+    `${BASE()}/vouchers?venue_id=eq.${venueId}&redeemed_at=gte.${startIso}&redeemed_at=lt.${endIso}&order=redeemed_at.asc`,
+    { headers: supabaseAdminHeaders(), cache: 'no-store' }
+  )
+  const data = await res.json()
+  return Array.isArray(data) ? data : []
+}
+
+export async function getPendingVouchers(venueId: string): Promise<Voucher[]> {
+  const nowIso = new Date().toISOString()
+  const res = await fetch(
+    `${BASE()}/vouchers?venue_id=eq.${venueId}&redeemed_at=is.null&expires_at=gt.${nowIso}&order=expires_at.asc`,
     { headers: supabaseAdminHeaders(), cache: 'no-store' }
   )
   const data = await res.json()

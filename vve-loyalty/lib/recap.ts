@@ -1,4 +1,4 @@
-import type { Customer, Venue } from './supabase'
+import type { Customer, Venue, Voucher } from './supabase'
 import { WEEKDAY_NAMES, isVenueClosedOnWeekday } from './supabase'
 
 const BERLIN_TZ = 'Europe/Berlin'
@@ -48,6 +48,45 @@ export function formatBerlinDateHuman(date: Date = new Date()): string {
     day: 'numeric',
     month: 'long',
   }).format(date)
+}
+
+export function formatBerlinDateShort(date: Date = new Date()): string {
+  // "Tuesday 9 June" without the year — matches the win-back email expiry format
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: BERLIN_TZ,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(date)
+}
+
+export function berlinMonthDay(date: Date = new Date()): string {
+  // "MM-DD" e.g. "06-02"
+  const dateStr = berlinDateString(date)
+  return dateStr.slice(5) // "YYYY-MM-DD" → "MM-DD"
+}
+
+export function daysUntilNextBirthday(birthdayStr: string, today: Date = new Date()): number | null {
+  // birthdayStr format: "YYYY-MM-DD". Returns number of days until next occurrence of MM-DD.
+  if (!birthdayStr || birthdayStr.length < 10) return null
+  const mmdd = birthdayStr.slice(5)
+  const todayBerlin = berlinDateString(today)
+  const year = parseInt(todayBerlin.slice(0, 4), 10)
+
+  const candidates = [
+    new Date(`${year}-${mmdd}T00:00:00Z`),
+    new Date(`${year + 1}-${mmdd}T00:00:00Z`),
+  ]
+  for (const c of candidates) {
+    if (isNaN(c.getTime())) return null
+  }
+
+  const todayMidnight = new Date(`${todayBerlin}T00:00:00Z`)
+  for (const c of candidates) {
+    const days = Math.floor((c.getTime() - todayMidnight.getTime()) / 86_400_000)
+    if (days >= 0) return days
+  }
+  return null
 }
 
 // ── Day classification + lines ───────────────────────────────────────────────
@@ -147,6 +186,9 @@ export type VenueDayStats = {
   newCustomersToday: Customer[]
   customersVisitedToday: Customer[]
   winbackRecipientsToday: WinBackRecipient[]
+  vouchersCreatedToday: { birthday: number; winback: number }
+  vouchersRedeemedToday: Voucher[]
+  vouchersPending: number
 }
 
 export function buildVenueDayStats(args: {
@@ -157,6 +199,9 @@ export function buildVenueDayStats(args: {
   newCustomersToday: Customer[]
   customersVisitedToday: Customer[]
   winbackRecipientsToday: WinBackRecipient[]
+  vouchersCreatedToday: { birthday: number; winback: number }
+  vouchersRedeemedToday: Voucher[]
+  vouchersPending: number
   todayWeekday: number
   yesterdayWeekday: number
 }): VenueDayStats {
@@ -171,5 +216,8 @@ export function buildVenueDayStats(args: {
     newCustomersToday: args.newCustomersToday,
     customersVisitedToday: args.customersVisitedToday,
     winbackRecipientsToday: args.winbackRecipientsToday,
+    vouchersCreatedToday: args.vouchersCreatedToday,
+    vouchersRedeemedToday: args.vouchersRedeemedToday,
+    vouchersPending: args.vouchersPending,
   }
 }
