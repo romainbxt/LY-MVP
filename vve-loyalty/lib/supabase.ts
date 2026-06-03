@@ -51,7 +51,7 @@ export type Voucher = {
   created_at: string
 }
 
-export const BIRTHDAY_DEFAULT_OFFER = 'A free coffee on your birthday'
+export const BIRTHDAY_DEFAULT_OFFER = 'A free coffee'
 export const BIRTHDAY_DEFAULT_EXPIRY_DAYS = 7
 export const BIRTHDAY_DEFAULT_QUIET_DAYS = 7
 
