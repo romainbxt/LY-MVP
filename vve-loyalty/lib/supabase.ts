@@ -369,13 +369,17 @@ export async function getWinBackSentBetween(venueId: string, startIso: string, e
 // ── Birthday customer lookup ──────────────────────────────────────────────────
 
 export async function getCustomersWithBirthday(venueId: string, monthDay: string): Promise<Customer[]> {
-  // monthDay format: "MM-DD" (e.g. "06-02"). Matches any birthday string ending in -MM-DD.
+  // monthDay format: "MM-DD" (e.g. "06-02").
+  // Fetch all customers with a non-null birthday and filter client-side. This
+  // works whether `birthday` is stored as DATE or TEXT — both serialize as
+  // "YYYY-MM-DD" via PostgREST, and slice(-5) extracts MM-DD reliably.
   const res = await fetch(
-    `${BASE()}/stamps?venue_id=eq.${venueId}&birthday=like.*-${monthDay}`,
+    `${BASE()}/stamps?venue_id=eq.${venueId}&birthday=not.is.null`,
     { headers: supabaseAdminHeaders(), cache: 'no-store' }
   )
   const data = await res.json()
-  return Array.isArray(data) ? data : []
+  if (!Array.isArray(data)) return []
+  return data.filter((c: Customer) => typeof c.birthday === 'string' && c.birthday.slice(-5) === monthDay)
 }
 
 // ── Voucher helpers ───────────────────────────────────────────────────────────
