@@ -24,11 +24,6 @@ export default function LandingForm() {
             <p className="font-serif text-2xl text-ink leading-tight">Thanks — we'll be in touch.</p>
             <p className="mt-2 text-muted text-sm leading-relaxed">
               We'll call you within 24 hours to arrange a visit and set everything up at your place.
-              In the meantime, feel free to email{' '}
-              <a href="mailto:gzelenitsas@gmail.com" className="text-honey hover:text-honey-deep underline underline-offset-2">
-                gzelenitsas@gmail.com
-              </a>{' '}
-              for anything urgent.
             </p>
           </div>
         </div>
