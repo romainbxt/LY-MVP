@@ -918,3 +918,47 @@ END OF DIGEST · sent at ${args.sentAtBerlin} Berlin
     text,
   })
 }
+
+// ── Landing page lead notifications ──────────────────────────────────────────
+
+export async function sendLandingLeadEmail(args: {
+  toEmail: string
+  cafeName: string
+  email: string
+  phone: string
+  message?: string
+}) {
+  const text = `New lead from lyloyalty.com
+
+Café / restaurant: ${args.cafeName}
+Email:             ${args.email}
+Phone:             ${args.phone}
+${args.message ? `\nMessage:\n${args.message}` : ''}
+
+Submitted: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Berlin' })} Berlin
+`
+
+  const html = `<!DOCTYPE html>
+<html><body style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;padding:32px;background:#FDFCFA;color:#1B1815;">
+  <div style="border-bottom:1px solid #E8E2D8;padding-bottom:16px;margin-bottom:24px;">
+    <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#6B645B;font-weight:600;">New lead · lyloyalty.com</p>
+    <h1 style="margin:8px 0 0;font-size:22px;font-weight:600;">${escapeHtml(args.cafeName)}</h1>
+  </div>
+  <table cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.6;width:100%;">
+    <tr><td style="color:#6B645B;width:90px;padding:6px 0;">Email</td><td style="padding:6px 0;"><a href="mailto:${escapeHtml(args.email)}" style="color:#C08C4D;">${escapeHtml(args.email)}</a></td></tr>
+    <tr><td style="color:#6B645B;padding:6px 0;">Phone</td><td style="padding:6px 0;"><a href="tel:${escapeHtml(args.phone)}" style="color:#C08C4D;">${escapeHtml(args.phone)}</a></td></tr>
+    ${args.message ? `<tr><td style="color:#6B645B;padding:6px 0;vertical-align:top;">Message</td><td style="padding:6px 0;white-space:pre-wrap;">${escapeHtml(args.message)}</td></tr>` : ''}
+  </table>
+  <p style="margin:24px 0 0;font-size:11px;color:#6B645B;">Submitted ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/Berlin' })} Berlin time.</p>
+</body></html>`
+
+  const transporter = createTransporter()
+  await transporter.sendMail({
+    from: `LY Loyalty <${process.env.GMAIL_USER}>`,
+    to: args.toEmail,
+    replyTo: args.email,
+    subject: `New lead: ${args.cafeName}`,
+    text,
+    html,
+  })
+}
