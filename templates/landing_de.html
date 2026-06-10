@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LY - Smart loyalty for independent businesses</title>
+    <title>LY - Smartes Treueprogramm für unabhängige Betriebe</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         /* ─── Landing Page ─── */
@@ -219,13 +219,13 @@
     <nav class="landing-nav">
         <span class="logo">LY</span>
         <div>
-            <a href="#how-it-works">How it works</a>
-            <a href="#features">Features</a>
-            <a href="{{ url_for('login') }}">Log in</a>
+            <a href="#wie-es-funktioniert">So funktioniert's</a>
+            <a href="#funktionen">Funktionen</a>
+            <a href="{{ url_for('login') }}">Anmelden</a>
             <span class="lang-toggle">
-                <span class="active">EN</span>
+                <a href="{{ url_for('index') }}">EN</a>
                 <span class="lang-sep">·</span>
-                <a href="{{ url_for('landing_de') }}">DE</a>
+                <span class="active">DE</span>
             </span>
         </div>
     </nav>
@@ -234,100 +234,100 @@
     <section class="hero">
         <h1>LY</h1>
         <p class="tagline">
-            Your customers are leaving. You just don't see it yet.<br>
-            LY gives independent businesses the eyes to spot it and the tools to act.
+            Deine Kunden kommen nicht wieder. Du merkst es nur noch nicht.<br>
+            LY gibt unabhängigen Betrieben die Augen, um es zu erkennen — und die Werkzeuge, um zu handeln.
         </p>
         <div class="cta-buttons">
-            <a href="{{ url_for('register') }}" class="btn-white">Get started free</a>
-            <a href="#how-it-works" class="btn-outline">See how it works</a>
+            <a href="{{ url_for('register') }}" class="btn-white">Kostenlos starten</a>
+            <a href="#wie-es-funktioniert" class="btn-outline">So funktioniert's</a>
         </div>
     </section>
 
     <!-- Problem -->
     <section class="problem-section">
         <div class="section">
-            <h2>The silent revenue killer</h2>
+            <h2>Der stille Umsatzkiller</h2>
             <p class="subtitle">
-                Acquiring a new customer costs 5-7x more than keeping an existing one.
-                Yet most independent businesses have no idea when regulars stop coming.
+                Einen neuen Kunden zu gewinnen kostet 5–7× mehr als einen bestehenden zu halten.
+                Trotzdem wissen die meisten Betriebe nicht, wann Stammkunden ausbleiben.
             </p>
             <div class="problem-grid">
                 <div class="problem-card">
                     <div class="icon">&#128566;</div>
-                    <h3>Invisible churn</h3>
-                    <p>Your regular Marco hasn't been here in 12 days. By the time you notice, he's already someone else's regular.</p>
+                    <h3>Unsichtbarer Kundenverlust</h3>
+                    <p>Dein Stammgast Marco war seit 12 Tagen nicht mehr hier. Wenn du es merkst, ist er längst Stammgast woanders.</p>
                 </div>
                 <div class="problem-card">
                     <div class="icon">&#128176;</div>
-                    <h3>Enterprise tools, enterprise prices</h3>
-                    <p>CRMs like HubSpot and Salesforce cost thousands and require a marketing team. You're the barista, the accountant, and the manager.</p>
+                    <h3>Enterprise-Tools, Enterprise-Preise</h3>
+                    <p>CRM-Systeme wie HubSpot oder Salesforce kosten Tausende und brauchen ein Marketing-Team. Du bist gleichzeitig Barista, Buchhalter und Chef.</p>
                 </div>
                 <div class="problem-card">
                     <div class="icon">&#127915;</div>
-                    <h3>Stamp cards don't work</h3>
-                    <p>"Buy 10, get 1 free" treats every customer the same. No intelligence. No personalization. No insight into who's leaving.</p>
+                    <h3>Stempelkarten funktionieren nicht</h3>
+                    <p>„10 kaufen, 1 gratis" behandelt jeden Kunden gleich. Keine Intelligenz. Keine Personalisierung. Kein Einblick, wer geht.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- How It Works -->
-    <section class="section" id="how-it-works">
-        <h2>How LY works</h2>
-        <p class="subtitle">Set up in 2 minutes. No app download for your customers.</p>
+    <section class="section" id="wie-es-funktioniert">
+        <h2>So funktioniert LY</h2>
+        <p class="subtitle">In 2 Minuten eingerichtet. Deine Kunden müssen nichts herunterladen.</p>
         <div class="steps">
             <div class="step">
                 <div class="number">1</div>
-                <h3>Display your QR code</h3>
-                <p>Print the QR code LY generates for you and put it at your counter.</p>
+                <h3>QR-Code aufstellen</h3>
+                <p>Drucke den QR-Code, den LY für dich erstellt, und stell ihn an die Kasse.</p>
             </div>
             <div class="step">
                 <div class="number">2</div>
-                <h3>Customers sign up</h3>
-                <p>They scan the QR code, enter their first name and phone number, and get their personal loyalty QR code.</p>
+                <h3>Kunden registrieren sich</h3>
+                <p>Sie scannen den QR-Code, geben Vorname und Handynummer ein — und erhalten ihren persönlichen Treue-QR-Code.</p>
             </div>
             <div class="step">
                 <div class="number">3</div>
-                <h3>Scan on every visit</h3>
-                <p>Your customer shows their QR code, you scan it. That's it. Every visit is tracked automatically.</p>
+                <h3>Bei jedem Besuch scannen</h3>
+                <p>Der Kunde zeigt seinen QR-Code, du scannst ihn. Das war's. Jeder Besuch wird automatisch erfasst.</p>
             </div>
             <div class="step">
                 <div class="number">4</div>
-                <h3>Get smart alerts</h3>
-                <p>LY watches the patterns you can't see and tells you when a regular is slipping away, before it's too late.</p>
+                <h3>Smarte Benachrichtigungen</h3>
+                <p>LY erkennt Muster, die du nicht siehst, und sagt dir, wann ein Stammgast abwandert — bevor es zu spät ist.</p>
             </div>
         </div>
     </section>
 
     <!-- Features -->
-    <section class="features-section" id="features">
+    <section class="features-section" id="funktionen">
         <div class="section">
-            <h2>Built for businesses like yours</h2>
-            <p class="subtitle">No marketing team needed. No complex setup. Just results.</p>
+            <h2>Gemacht für Betriebe wie deinen</h2>
+            <p class="subtitle">Kein Marketing-Team nötig. Kein kompliziertes Setup. Nur Ergebnisse.</p>
             <div class="feature-grid">
                 <div class="feature-item">
-                    <h3>Churn detection</h3>
-                    <p>Our algorithm identifies customers whose visit frequency is dropping. You get an alert before they're gone for good.</p>
+                    <h3>Kundenverlust erkennen</h3>
+                    <p>Unser Algorithmus erkennt Kunden, deren Besuchshäufigkeit sinkt. Du bekommst eine Meldung, bevor sie weg sind.</p>
                 </div>
                 <div class="feature-item">
-                    <h3>Zero friction for customers</h3>
-                    <p>No app to download. No account to create. Just a QR code on their phone browser. Takes 15 seconds.</p>
+                    <h3>Null Aufwand für Kunden</h3>
+                    <p>Keine App nötig. Kein Konto erstellen. Nur ein QR-Code im Browser. Dauert 15 Sekunden.</p>
                 </div>
                 <div class="feature-item">
-                    <h3>Simple dashboard</h3>
-                    <p>See all your customers, their visit history, and who's at risk. One screen. No complexity.</p>
+                    <h3>Einfaches Dashboard</h3>
+                    <p>Alle Kunden, ihre Besuchshistorie und wer gefährdet ist — auf einem Bildschirm. Kein Overload.</p>
                 </div>
                 <div class="feature-item">
-                    <h3>Works with any POS</h3>
-                    <p>LY is independent from your payment system. Whether you use SumUp, Zettle, Square, or cash, it just works.</p>
+                    <h3>Funktioniert mit jedem Kassensystem</h3>
+                    <p>LY ist unabhängig von deinem Kassensystem. Ob SumUp, Zettle, Square oder Bargeld — es funktioniert einfach.</p>
                 </div>
                 <div class="feature-item">
-                    <h3>GDPR compliant</h3>
-                    <p>Built in Europe, for Europe. Customer data stays yours. No third-party sharing. Full data control.</p>
+                    <h3>DSGVO-konform</h3>
+                    <p>In Europa gebaut, für Europa. Deine Kundendaten bleiben dein Eigentum. Keine Weitergabe. Volle Kontrolle.</p>
                 </div>
                 <div class="feature-item">
-                    <h3>Affordable</h3>
-                    <p>Designed for independent businesses, not enterprise budgets. Smart retention shouldn't cost a fortune.</p>
+                    <h3>Erschwinglich</h3>
+                    <p>Gemacht für unabhängige Betriebe, nicht für Konzernbudgets. Kundenbindung muss kein Vermögen kosten.</p>
                 </div>
             </div>
         </div>
@@ -336,32 +336,32 @@
     <!-- Story -->
     <section class="story">
         <blockquote>
-            "Monday morning. 7:15. Francesca opens her coffee shop in Kreuzberg.
-            Marco should be here by now. Double espresso, no sugar. Every Monday for three years.
-            But Marco didn't come last Monday either. Or the one before.
-            She remembers his birthday. She remembers his dog's name.
-            But she had no way of knowing he was leaving."
+            „Montagmorgen. 7:15 Uhr. Francesca öffnet ihr Café in Kreuzberg.
+            Marco müsste eigentlich schon hier sein. Doppelter Espresso, ohne Zucker. Jeden Montag seit drei Jahren.
+            Aber Marco kam letzten Montag auch nicht. Und den davor auch nicht.
+            Sie kennt seinen Geburtstag. Sie kennt den Namen seines Hundes.
+            Aber sie hatte keine Möglichkeit zu wissen, dass er geht."
         </blockquote>
-        <p class="author">The story behind LY</p>
+        <p class="author">Die Geschichte hinter LY</p>
     </section>
 
     <!-- CTA -->
     <section class="cta-section">
-        <h2>Ready to keep your regulars?</h2>
-        <p>Set up your smart loyalty program in under 2 minutes.</p>
+        <h2>Bereit, deine Stammgäste zu halten?</h2>
+        <p>Richte dein smartes Treueprogramm in unter 2 Minuten ein.</p>
         <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding:16px 40px; font-size:1.1rem">
-            Get started free
+            Kostenlos starten
         </a>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <p>LY &mdash; Smart loyalty for independent businesses</p>
+        <p>LY &mdash; Smartes Treueprogramm für unabhängige Betriebe</p>
         <p style="margin-top:8px">
-            <a href="{{ url_for('login') }}">Log in</a> &middot;
-            <a href="{{ url_for('register') }}">Sign up</a>
+            <a href="{{ url_for('login') }}">Anmelden</a> &middot;
+            <a href="{{ url_for('register') }}">Registrieren</a>
         </p>
-        <p style="margin-top:16px; opacity:0.6">&copy; 2026 LY. All rights reserved.</p>
+        <p style="margin-top:16px; opacity:0.6">&copy; 2026 LY. Alle Rechte vorbehalten.</p>
     </footer>
 
 </body>

@@ -179,6 +179,11 @@ def index():
     return render_template('landing.html')
 
 
+@app.route('/de')
+def landing_de():
+    return render_template('landing_de.html')
+
+
 @app.route('/register', methods=['GET', 'POST'])
 @limiter.limit("10 per hour", methods=["POST"])
 def register():
