@@ -66,7 +66,7 @@ export default function HomePageDE() {
           <div className="flex flex-col items-center">
             <PhoneMockup />
             <p className="mt-10 text-center text-muted text-sm sm:text-base max-w-md">
-              Alles in 5 Minuten eingerichtet — Farben, Stempel, Angebote, Rückgewinnungsaktionen.
+              Alles in 5 Minuten eingerichtet — Farben, Stempel, Angebote, Kundenbindungs-Aktionen.
             </p>
           </div>
         </div>
@@ -81,7 +81,7 @@ export default function HomePageDE() {
           <div className="grid sm:grid-cols-3 gap-12 sm:gap-16">
             <Step number="01" title="Wir kommen vorbei" body="Ein persönlicher Termin bei dir im Café oder Restaurant. Etwa 30 Minuten." />
             <Step number="02" title="Wir richten alles ein" body="Dein Logo, deine Farben, deine Angebote — aufgebaut nach deiner Marke, während du zuschaust." />
-            <Step number="03" title="Wir kümmern uns um den Rest" body="Rückgewinnungs-Mails, Geburtstagsgeschenke, tägliche Berichte — alles läuft automatisch." />
+            <Step number="03" title="Wir kümmern uns um den Rest" body="Kundenbindungs-Mails, Geburtstagsgeschenke, tägliche Berichte — alles läuft automatisch." />
           </div>
         </div>
       </section>
@@ -100,18 +100,18 @@ export default function HomePageDE() {
             />
             <Feature
               icon="✉️"
-              title="Automatische Rückgewinnungs-Mails"
-              body="Inaktive Gäste bekommen eine persönliche Nachricht von dir. Auch an deinen freien Tagen."
+              title="Automatische Kundenbindungs-Mails"
+              body="Inaktive Gäste bekommen eine persönliche Nachricht von dir. Ganz automatisch, du musst nichts machen."
             />
             <Feature
               icon="🎂"
               title="Geburtstagsgeschenke"
-              body="Überrasch deine Stammgäste zum Geburtstag. Du wählst das Angebot — ein Kaffee, ein Gebäck, was auch immer."
+              body="Überrasch deine Stammgäste zum Geburtstag mit einem Geschenk. Du wählst das Angebot — ein Kaffee, ein Gebäck, was auch immer."
             />
             <Feature
               icon="⚙️"
               title="Dein Laden, deine Regeln"
-              body="Logo, Farben, Angebote, Rückgewinnungs-Timing, Geburtstagsangebote — alles kannst du jederzeit selbst einstellen."
+              body="Logo, Farben, Angebote, Kundenbindungs-Timing, Geburtstagsangebote — alles kannst du jederzeit selbst einstellen."
             />
           </div>
         </div>
